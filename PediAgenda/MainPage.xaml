@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MauiAppMinhasCompras.MainPage"
+    Title="PediAgenda">
+
+
+    <Grid Padding="32,42,32,32"
+          RowDefinitions="Auto,Auto,Auto,*,Auto"
+          RowSpacing="0">
+
+        <VerticalStackLayout Grid.Row="0"
+                             Spacing="0"
+                             HorizontalOptions="Center">
+            
+            <Image Source="pediagenda_logo.png"
+                   WidthRequest="155"
+                   HeightRequest="155"
+                   Aspect="AspectFit" />
+            
+            <Label Text="PediAgenda"
+                   TextColor="{StaticResource TextDark}"
+                   FontSize="36"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,4,0,0" />
+            
+            <Label Text="Cuidando de quem&#10;importa."
+                   TextColor="{StaticResource TextDark}"
+                   FontSize="22"
+                   HorizontalTextAlignment="Center"
+                   LineHeight="1.0"
+                   Margin="0,8,0,0" />
+            
+        </VerticalStackLayout>
+
+        <Label Grid.Row="1"
+               Text="Como você deseja&#10;acessar?"
+               TextColor="{StaticResource EmployeeText}"
+               FontSize="25"
+               FontAttributes="Bold"
+               HorizontalTextAlignment="Center"
+               Margin="0,92,0,30" />
+
+        <VerticalStackLayout Grid.Row="2"
+                             Spacing="28"
+                             HorizontalOptions="Fill">
+            <Button Text="Sou Responsável"
+                    HeightRequest="78"
+                    CornerRadius="39"
+                    FontSize="21"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource ResponsibleText}"
+                    BackgroundColor="{StaticResource ResponsibleButton}"
+                    Clicked="OnResponsavelClicked" />
+
+            <Button Text="Sou Funcionário"
+                HeightRequest="78"
+                CornerRadius="39"
+                FontSize="21"
+                FontAttributes="Bold"
+                TextColor="{StaticResource EmployeeText}"
+                BackgroundColor="{StaticResource EmployeeButton}"
+                Clicked="OnFuncionarioClicked" />
+        </VerticalStackLayout>
+
+    </Grid>
+
+</ContentPage>

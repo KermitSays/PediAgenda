@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Color x:Key="PageBlue">#F6F9FB</Color>
+    <Color x:Key="TextDark">#233746</Color>
+    <Color x:Key="PrimaryBlue">#105A7E</Color>
+    <Color x:Key="InputBlue">#ABCCDC</Color>
+    <Color x:Key="InputPlaceholder">#5899BA</Color>
+    <Color x:Key="ResponsibleButton">#FCCE74</Color>
+    <Color x:Key="ResponsibleText">#BB8311</Color>
+    <Color x:Key="EmployeeButton">#9EDBF8</Color>
+    <Color x:Key="EmployeeText">#225F7E</Color>
+    <Color x:Key="White">#FFFFFF</Color>
+</ResourceDictionary>

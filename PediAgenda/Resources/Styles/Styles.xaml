@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Style x:Key="PrimaryButton" TargetType="Button">
+        <Setter Property="HeightRequest" Value="78" />
+        <Setter Property="CornerRadius" Value="39" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="Padding" Value="18,0" />
+        <Setter Property="TextColor" Value="{StaticResource White}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryBlue}" />
+    </Style>
+
+    <Style x:Key="LoginEntry" TargetType="Entry">
+        <Setter Property="HeightRequest" Value="74" />
+        <Setter Property="FontSize" Value="19" />
+        <Setter Property="TextColor" Value="{StaticResource TextDark}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource InputPlaceholder}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource InputBlue}" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+</ResourceDictionary>
