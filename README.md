@@ -1,4 +1,4 @@
-# 🚀 PediAgenda: Sistema de Agendamento e Atendimento Pediátrico
+# PediAgenda: Sistema de Agendamento e Atendimento Pediátrico
 
 > Sistema digital voltado para o agendamento e gerenciamento de consultas pediátricas, alinhado ao Objetivo de Desenvolvimento Sustentável ODS-3 (Saúde e Bem-estar) da ONU.
 
@@ -28,7 +28,7 @@ A evolução do projeto foi dividida em blocos de entrega de valor:
 * **Sprint 3:** Gerenciamento de Agenda Médica e Mecanismo de Notificações *(Responsáveis: Sara, Lara, Gustavo)*.
 * **Sprint 4:** Relatórios de Atendimento, Estabilização e Homologação *(Responsáveis: Sara, Lara, Equipe)*.
 
-## 🚀 Como Executar o Projeto
+## Como Executar o Projeto
 
 ### Pré-requisitos
 Antes de começar, você vai precisar ter instalado em sua máquina:
