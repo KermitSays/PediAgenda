@@ -12,14 +12,18 @@ namespace PediAgenda
             InitializeComponent();
         }
 
-        private async void OnResponsavelClicked(object sender, EventArgs e)
+        private async void OnResponsavelClicked(
+            object sender, 
+            EventArgs e)
         {
-            await Navigation.PushAsync(new LoginResponsavel(false));
+            await Shell.Current.GoToAsync(
+            nameof(LoginResponsavel));
         }
 
         private async void OnFuncionarioClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new LoginFuncionario(true));
+            await Shell.Current.GoToAsync(
+            nameof(LoginFuncionario));
         }
     }
 }
