@@ -4,9 +4,35 @@ namespace PediAgenda.Views.Cadastro;
 
 public partial class CadastroCampo : ContentPage
 {
+    private bool senhaVisivel = false;
+
     public CadastroCampo()
     {
         InitializeComponent();
+    }
+
+    // Botão para mostrar ou ocultar a senha
+    private void MostrarSenhaButton_Clicked(object sender, EventArgs e)
+    {
+        senhaVisivel = !senhaVisivel;
+
+        SenhaEntry.IsPassword = !senhaVisivel;
+
+        MostrarSenhaButton.Source = SenhaEntry.IsPassword
+        ? "olho_fechado.png"
+        : "olho_aberto.png";
+    }
+
+    // Botão para mostrar ou ocultar a confirmação da senha
+    private void MostrarConfirmarSenhaButton_Clicked(object sender, EventArgs e)
+    {
+        senhaVisivel = !senhaVisivel;
+
+        ConfirmarSenhaEntry.IsPassword = !senhaVisivel;
+
+        MostrarConfirmarSenhaButton.Source = ConfirmarSenhaEntry.IsPassword
+        ? "olho_fechado.png"
+        : "olho_aberto.png";
     }
 
     // Botão "Continuar"

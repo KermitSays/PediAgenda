@@ -14,9 +14,9 @@
             Padding="35,40,35,30"
             Spacing="0">
 
-            <!-- Logo -->
+            <!-- Imagem - Funcionario -->
             <Image
-                Source="logo.png"
+                Source="user.png"
                 HeightRequest="100"
                 WidthRequest="100"
                 Aspect="AspectFit"
@@ -88,6 +88,7 @@
                         IsPassword="True"
                         Style="{StaticResource LoginEntry}" />
 
+                    <!-- Botão de mostrar senha-->
                     <ImageButton
                         x:Name="MostrarSenhaButton"
                         Source="olho_fechado.png"
@@ -95,7 +96,10 @@
                         WidthRequest="40"
                         HeightRequest="40"
                         Clicked="MostrarSenhaButton_Clicked"
-                        Padding="5" />
+                        Padding="5" 
+                        Margin="0,0,10,0"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center"/>
 
                 </Grid>
 

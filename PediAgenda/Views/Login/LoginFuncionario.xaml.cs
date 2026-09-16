@@ -9,6 +9,7 @@ public partial class LoginFuncionario : ContentPage
         InitializeComponent();
     }
 
+    // Botão para mostrar ou ocultar a senha
     private void MostrarSenhaButton_Clicked(object sender, EventArgs e)
     {
         senhaVisivel = !senhaVisivel;
@@ -32,6 +33,7 @@ public partial class LoginFuncionario : ContentPage
     //Botão de login, Precisa da validação dos campos e exibição de mensagens de erro
     private async void EntrarButton_Clicked(object sender, EventArgs e)
     {
+        //Alerta Provisorio
         await DisplayAlertAsync(
             "Botão de Entrar",
             "Botão ainda será implementado.",

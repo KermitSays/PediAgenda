@@ -40,6 +40,7 @@ public partial class LoginResponsavel : ContentPage
     //Botão de login, Precisa das validação dos campos e exibição de mensagens de erro
     private async void EntrarButton_Clicked(object sender, EventArgs e)
     {
+        //Alerta Provisorio
         await DisplayAlertAsync(
             "Botão de Entrar",
             "Funções do botão de entrar ainda serão implementadas.",

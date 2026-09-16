@@ -14,25 +14,13 @@
             VerticalOptions="Center"
             HorizontalOptions="Center"
             Spacing="25">
-
-            <!-- Ícone de confirmação -->
-            <Border
-                WidthRequest="110"
-                HeightRequest="110"
-                StrokeThickness="0"
-                BackgroundColor="{StaticResource PrimaryBlue}"
-                StrokeShape="RoundRectangle 55"
-                HorizontalOptions="Center">
-
-                <Label
-                    Text="✓"
-                    FontSize="65"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource White}"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center" />
-
-            </Border>
+            
+            <!-- Imagem - Cadastro Concluido -->
+            <Image
+                Source="cad_concluido.png"
+                HeightRequest="280"                
+                Aspect="AspectFit"
+                HorizontalOptions="Center" />
 
             <!-- Título -->
             <Label

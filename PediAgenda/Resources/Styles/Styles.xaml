@@ -17,8 +17,14 @@
         <Setter Property="HeightRequest" Value="74" />
         <Setter Property="FontSize" Value="19" />
         <Setter Property="TextColor" Value="{StaticResource TextDark}" />
-        <Setter Property="PlaceholderColor" Value="{StaticResource InputPlaceholder}" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <Style x:Key="LoginBorder" TargetType="Border">
+        <Setter Property="HeightRequest" Value="74" />
         <Setter Property="BackgroundColor" Value="{StaticResource InputBlue}" />
         <Setter Property="Margin" Value="0" />
+        <Setter Property="StrokeShape" Value="10"/>
+        <Setter Property="Padding" Value="15"/>
     </Style>
 </ResourceDictionary>

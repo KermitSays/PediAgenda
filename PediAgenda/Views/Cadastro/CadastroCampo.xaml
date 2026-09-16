@@ -26,11 +26,13 @@
                 Text="Nome"
                 FontSize="16"
                 TextColor="{StaticResource TextDark}" />
-
-            <Entry
-                x:Name="NomeEntry"
-                Style="{StaticResource LoginEntry}"
-                Placeholder="Insira seu nome aqui" />
+            
+            <Border Style="{StaticResource LoginBorder}">       
+                <Entry
+                    x:Name="NomeEntry"
+                    Style="{StaticResource LoginEntry}"
+                    Placeholder="Insira seu nome aqui"/>                
+            </Border>
 
             <!-- CPF -->
             <Label
@@ -38,12 +40,14 @@
                 FontSize="16"
                 TextColor="{StaticResource TextDark}" />
 
-            <Entry
-                x:Name="CpfEntry"
-                Style="{StaticResource LoginEntry}"
-                Placeholder="Insira seu CPF aqui"
-                Keyboard="Numeric"
-                MaxLength="14" />
+            <Border Style="{StaticResource LoginBorder}">
+                <Entry
+                    x:Name="CpfEntry"
+                    Style="{StaticResource LoginEntry}"
+                    Placeholder="Insira seu CPF aqui"
+                    Keyboard="Numeric"
+                    MaxLength="14" />
+            </Border>
 
             <!-- E-mail -->
             <Label
@@ -51,11 +55,13 @@
                 FontSize="16"
                 TextColor="{StaticResource TextDark}" />
 
-            <Entry
-                x:Name="EmailEntry"
-                Style="{StaticResource LoginEntry}"
-                Placeholder="Insira seu e-mail aqui"
-                Keyboard="Email" />
+            <Border Style="{StaticResource LoginBorder}">
+                <Entry
+                    x:Name="EmailEntry"
+                    Style="{StaticResource LoginEntry}"
+                    Placeholder="Insira seu e-mail aqui"
+                    Keyboard="Email" />
+            </Border>
 
             <!-- Senha -->
             <Label
@@ -63,11 +69,28 @@
                 FontSize="16"
                 TextColor="{StaticResource TextDark}" />
 
-            <Entry
-                x:Name="SenhaEntry"
-                Style="{StaticResource LoginEntry}"
-                Placeholder="Insira sua senha aqui"
-                IsPassword="True" />
+            <Border Style="{StaticResource LoginBorder}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Entry
+                        x:Name="SenhaEntry"
+                        Style="{StaticResource LoginEntry}"
+                        Placeholder="Insira sua senha aqui"
+                        IsPassword="True" />
+                    
+                    <!-- Botão de mostrar senha-->
+                    <ImageButton
+                        x:Name="MostrarSenhaButton"
+                        Source="olho_fechado.png"
+                        BackgroundColor="Transparent"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        Clicked="MostrarSenhaButton_Clicked"
+                        Padding="5" 
+                        Margin="0,0,10,0"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center"/>
+                </Grid>
+            </Border>
 
             <!-- Confirmar senha -->
             <Label
@@ -75,11 +98,28 @@
                 FontSize="16"
                 TextColor="{StaticResource TextDark}" />
 
-            <Entry
-                x:Name="ConfirmarSenhaEntry"
-                Style="{StaticResource LoginEntry}"
-                Placeholder="Confirme sua senha"
-                IsPassword="True" />
+            <Border Style="{StaticResource LoginBorder}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Entry
+                        x:Name="ConfirmarSenhaEntry"
+                        Style="{StaticResource LoginEntry}"
+                        Placeholder="Confirme sua senha"
+                        IsPassword="True" />
+
+                    <!-- Botão de mostrar senha-->
+                    <ImageButton
+                        x:Name="MostrarConfirmarSenhaButton"
+                        Source="olho_fechado.png"
+                        BackgroundColor="Transparent"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        Clicked="MostrarConfirmarSenhaButton_Clicked"
+                        Padding="5" 
+                        Margin="0,0,10,0"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center"/>  
+                </Grid>
+            </Border>
 
             <!-- Termos de uso -->
             <HorizontalStackLayout
