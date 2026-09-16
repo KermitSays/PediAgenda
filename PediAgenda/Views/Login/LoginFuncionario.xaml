@@ -1,12 +1,135 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="PediAgenda.Views.LoginFuncionario"
-             Title="LoginFuncionario">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Login.LoginFuncionario"
+    Title="Login"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="35,40,35,30"
+            Spacing="0">
+
+            <!-- Logo -->
+            <Image
+                Source="logo.png"
+                HeightRequest="100"
+                WidthRequest="100"
+                Aspect="AspectFit"
+                HorizontalOptions="Center"
+                Margin="0,0,0,20" />
+
+            <!-- Título -->
+            <Label
+                Text="Bem-vindo!"
+                FontSize="30"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}"
+                HorizontalTextAlignment="Center"
+                HorizontalOptions="Center" />
+
+            <!-- Texto de apresentação -->
+            <Label
+                Text="Entre na sua conta para continuar no PediAgenda"
+                FontSize="16"
+                TextColor="{StaticResource TextDark}"
+                HorizontalTextAlignment="Center"
+                HorizontalOptions="Center"
+                Margin="20,8,20,35" />
+
+            <!-- E-mail -->
+            <Label
+                Text="E-mail"
+                FontSize="16"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}"
+                Margin="0,0,0,7" />
+
+            <Border
+                BackgroundColor="{StaticResource InputBlue}"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 12"
+                HeightRequest="60">
+
+                <Entry
+                    x:Name="EmailEntry"
+                    Placeholder="Insira seu E-mail aqui"
+                    Keyboard="Email"
+                    ClearButtonVisibility="WhileEditing"
+                    Style="{StaticResource LoginEntry}" />
+
+            </Border>
+
+            <!-- Senha -->
+            <Label
+                Text="Senha"
+                FontSize="16"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}"
+                Margin="0,22,0,7" />
+
+            <Border
+                BackgroundColor="{StaticResource InputBlue}"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 12"
+                HeightRequest="60">
+
+                <Grid
+                    ColumnDefinitions="*,Auto">
+
+                    <Entry
+                        x:Name="SenhaEntry"
+                        Grid.Column="0"
+                        Placeholder="Insira sua senha aqui"
+                        IsPassword="True"
+                        Style="{StaticResource LoginEntry}" />
+
+                    <ImageButton
+                        x:Name="MostrarSenhaButton"
+                        Source="olho_fechado.png"
+                        BackgroundColor="Transparent"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        Clicked="MostrarSenhaButton_Clicked"
+                        Padding="5" />
+
+                </Grid>
+
+            </Border>
+
+            <!-- Esqueci minha senha -->
+            <Button
+                Text="Esqueci minha senha"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontSize="14"
+                HorizontalOptions="End"
+                Padding="0"
+                Margin="0,8,0,25"
+                Clicked="EsqueciSenhaButton_Clicked" />
+
+            <!-- Mensagem de erro -->
+            <Label
+                x:Name="MensagemErroLabel"
+                IsVisible="False"
+                TextColor="#C62828"
+                FontSize="14"
+                HorizontalTextAlignment="Center"
+                Margin="0,0,0,12" />
+
+            <!-- Entrar -->
+            <Button
+                x:Name="EntrarButton"
+                Text="Entrar"
+                Style="{StaticResource PrimaryButton}"
+                Clicked="EntrarButton_Clicked" />
+           
+        </VerticalStackLayout>
+
+    </ScrollView>
+
 </ContentPage>

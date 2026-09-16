@@ -1,12 +1,65 @@
 <?xml version="1.0" encoding="utf-8" ?>
+
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PediAgenda.Views.Cadastro.CadastroConcluido"
-             Title="CadastroConcluido">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             Title="Cadastro Concluído"
+             BackgroundColor="{StaticResource PageBlue}"
+             NavigationPage.HasNavigationBar="False">
+
+    <Grid
+        Padding="30">
+
+        <VerticalStackLayout
+            VerticalOptions="Center"
+            HorizontalOptions="Center"
+            Spacing="25">
+
+            <!-- Ícone de confirmação -->
+            <Border
+                WidthRequest="110"
+                HeightRequest="110"
+                StrokeThickness="0"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                StrokeShape="RoundRectangle 55"
+                HorizontalOptions="Center">
+
+                <Label
+                    Text="✓"
+                    FontSize="65"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+
+            </Border>
+
+            <!-- Título -->
+            <Label
+                Text="Cadastro Concluído"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}"
+                HorizontalTextAlignment="Center" />
+
+            <!-- Mensagem -->
+            <Label
+                Text="Verifique seu e-mail para ativar sua conta e fazer login."
+                FontSize="18"
+                TextColor="{StaticResource TextDark}"
+                HorizontalTextAlignment="Center"
+                MaximumWidthRequest="350" />
+
+            <!-- Botão voltar ao login -->
+            <Button
+                x:Name="VoltarLoginButton"
+                Text="Voltar ao login"
+                Style="{StaticResource PrimaryButton}"
+                Clicked="VoltarLoginButton_Clicked"
+                Margin="0,20,0,0" />
+
+        </VerticalStackLayout>
+
+    </Grid>
+
 </ContentPage>

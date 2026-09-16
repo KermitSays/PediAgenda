@@ -16,6 +16,7 @@
                              Spacing="0"
                              HorizontalOptions="Center">
             
+            <!-- Logo -->
             <Image Source="pediagenda_logo.png"
                    WidthRequest="155"
                    HeightRequest="155"
@@ -37,6 +38,7 @@
             
         </VerticalStackLayout>
 
+        <!-- Escolher Login -->
         <Label Grid.Row="1"
                Text="Como você deseja&#10;acessar?"
                TextColor="{StaticResource EmployeeText}"
@@ -45,9 +47,12 @@
                HorizontalTextAlignment="Center"
                Margin="0,92,0,30" />
 
+        <!-- Botões -->
         <VerticalStackLayout Grid.Row="2"
                              Spacing="28"
                              HorizontalOptions="Fill">
+            
+            <!-- Botão - Responsavél -->
             <Button Text="Sou Responsável"
                     HeightRequest="78"
                     CornerRadius="39"
@@ -57,6 +62,7 @@
                     BackgroundColor="{StaticResource ResponsibleButton}"
                     Clicked="OnResponsavelClicked" />
 
+            <!-- Botão - Funcionário -->
             <Button Text="Sou Funcionário"
                 HeightRequest="78"
                 CornerRadius="39"

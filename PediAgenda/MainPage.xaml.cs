@@ -17,13 +17,13 @@ namespace PediAgenda
             EventArgs e)
         {
             await Shell.Current.GoToAsync(
-            nameof(LoginResponsavel));
+            nameof(Views.Login.LoginResponsavel));
         }
 
         private async void OnFuncionarioClicked(object sender, EventArgs e)
         {
             await Shell.Current.GoToAsync(
-            nameof(LoginFuncionario));
+            nameof(Views.Login.LoginFuncionario));
         }
     }
 }
