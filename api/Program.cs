@@ -19,6 +19,7 @@ if (!Configuracao.TemBanco)
 builder.Services.AddSingleton<IUsuarioRepositorio>(
     _ => new UsuarioRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<AutenticacaoService>();
+builder.Services.AddScoped<CadastroService>();
 
 var app = builder.Build();
 
@@ -38,6 +39,32 @@ app.MapPost("/api/auth/login", (LoginRequisicao req, AutenticacaoService auth) =
     var u = resultado.Usuario!;
     return Results.Ok(new UsuarioLogado(u.Id, u.Nome, u.Email,
                                         u.Perfil.ToString().ToUpperInvariant()));
+});
+
+// RF01 — cadastro do responsável. Médico e recepcionista são criados pela
+// clínica, não por aqui.
+app.MapPost("/api/cadastro/responsavel", (CadastroRequisicao req, CadastroService cadastro) =>
+{
+    var resultado = cadastro.Cadastrar(new DadosResponsavel(
+        req.Nome, req.Cpf, req.Email, req.Telefone, req.Senha, req.AceiteTermos));
+
+    if (resultado.Sucesso)
+    {
+        var novo = resultado.Usuario!;
+        return Results.Json(new UsuarioLogado(novo.Id, novo.Nome, novo.Email,
+                                              novo.Perfil.ToString().ToUpperInvariant()),
+                            statusCode: StatusCodes.Status201Created);
+    }
+
+    if (resultado.Motivo == MotivoRecusa.DadosInvalidos)
+        return Results.Json(new ErroValidacao("DADOS_INVALIDOS", resultado.Mensagem, resultado.Campos!),
+                            statusCode: StatusCodes.Status400BadRequest);
+
+    var codigo = resultado.Motivo == MotivoRecusa.CpfJaCadastrado
+        ? "CPF_JA_CADASTRADO"
+        : "EMAIL_JA_CADASTRADO";
+    return Results.Json(new ErroApi(codigo, resultado.Mensagem),
+                        statusCode: StatusCodes.Status409Conflict);
 });
 
 app.Run();
@@ -63,5 +90,8 @@ static string Codigo(MotivoFalha motivo) => motivo switch
 
 // O que a tela manda e o que ela recebe. A senha só entra; nunca sai.
 record LoginRequisicao(string? Email, string? Senha);
+record CadastroRequisicao(string? Nome, string? Cpf, string? Email,
+                          string? Telefone, string? Senha, bool AceiteTermos);
 record UsuarioLogado(int Id, string Nome, string Email, string Perfil);
 record ErroApi(string Codigo, string Mensagem);
+record ErroValidacao(string Codigo, string Mensagem, IReadOnlyDictionary<string, string> Campos);

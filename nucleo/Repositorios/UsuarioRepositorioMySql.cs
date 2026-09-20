@@ -104,7 +104,7 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
 
     /// <summary>
     /// Cria um usuário já com a senha em hash e a especialização do perfil.
-    /// Serve para gerar massa de teste do login; o cadastro de verdade é a H1 (Sara/Talita).
+    /// É o que o cadastro de responsável usa, e também o comando de massa de teste.
     ///
     /// São dois INSERTs (usuario + especialização) dentro de uma transação:
     /// se o segundo falhar, o primeiro é desfeito e não sobra usuário sem perfil.
@@ -121,6 +121,23 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
 
         var (hash, salt, iteracoes) = HashSenha.Gerar(senha);
 
+        try
+        {
+            return InserirComTransacao(nome, cpf, email, hash, salt, iteracoes, perfil, telefone, crm);
+        }
+        catch (MySqlException e) when (e.ErrorCode == MySqlErrorCode.DuplicateKeyEntry)
+        {
+            // Entre conferir e gravar, outro cadastro pode ter usado o mesmo
+            // e-mail. Quem decide de verdade é a restrição UNIQUE do banco.
+            var campo = e.Message.Contains("cpf", StringComparison.OrdinalIgnoreCase) ? "CPF" : "e-mail";
+            throw new CadastroDuplicadoException(campo);
+        }
+    }
+
+    private int InserirComTransacao(string nome, string cpf, string email,
+                                    byte[] hash, byte[] salt, int iteracoes,
+                                    Perfil perfil, string? telefone, string? crm)
+    {
         using var con = Abrir();
         using var tx = con.BeginTransaction();
 
@@ -154,11 +171,17 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
         return idUsuario;
     }
 
-    public bool Existe(string email)
+    public bool ExisteEmail(string email) =>
+        Contar("SELECT COUNT(*) FROM usuario WHERE email = @valor", email);
+
+    public bool ExisteCpf(string cpf) =>
+        Contar("SELECT COUNT(*) FROM usuario WHERE cpf = @valor", cpf);
+
+    private bool Contar(string sql, string valor)
     {
         using var con = Abrir();
-        using var cmd = new MySqlCommand("SELECT COUNT(*) FROM usuario WHERE email = @email", con);
-        cmd.Parameters.AddWithValue("@email", email);
+        using var cmd = new MySqlCommand(sql, con);
+        cmd.Parameters.AddWithValue("@valor", valor);
         return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
     }
 

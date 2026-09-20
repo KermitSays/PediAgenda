@@ -146,7 +146,7 @@ void CriarUsuarioDeTeste()
     var banco = new UsuarioRepositorioMySql(Configuracao.StringDeConexao!);
     const string email = "teste@pediagenda.local";
 
-    if (banco.Existe(email))
+    if (banco.ExisteEmail(email))
     {
         Console.WriteLine($"Usuário {email} já existe. Nada a fazer.");
         return;

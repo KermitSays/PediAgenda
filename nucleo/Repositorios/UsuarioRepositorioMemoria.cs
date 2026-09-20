@@ -48,4 +48,19 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
     public void RegistrarTentativa(string emailInformado, int? usuarioId, bool sucesso, string? motivo) =>
         _auditoria.Add($"{DateTime.Now:HH:mm:ss}  {emailInformado,-34}  " +
                        $"{(sucesso ? "SUCESSO" : "FALHA  ")}  {motivo ?? ""}");
+
+    public bool ExisteEmail(string email) =>
+        _usuarios.Any(u => string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase));
+
+    public bool ExisteCpf(string cpf) => _usuarios.Any(u => u.Cpf == cpf);
+
+    public int Inserir(string nome, string cpf, string email, string senha, Perfil perfil,
+                       string? telefone = null, string? crm = null)
+    {
+        if (ExisteEmail(email)) throw new CadastroDuplicadoException("e-mail");
+        if (ExisteCpf(cpf)) throw new CadastroDuplicadoException("CPF");
+
+        Semear(nome, cpf, email, senha, perfil);
+        return _usuarios[^1].Id;
+    }
 }
