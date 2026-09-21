@@ -5,6 +5,7 @@ namespace PediAgenda.Views.Cadastro;
 public partial class CadastroCampo : ContentPage
 {
     private bool senhaVisivel = false;
+    private bool confirmarSenhaVisivel = false;
 
     public CadastroCampo()
     {
@@ -26,9 +27,9 @@ public partial class CadastroCampo : ContentPage
     // Botão para mostrar ou ocultar a confirmação da senha
     private void MostrarConfirmarSenhaButton_Clicked(object sender, EventArgs e)
     {
-        senhaVisivel = !senhaVisivel;
+        confirmarSenhaVisivel = !confirmarSenhaVisivel;
 
-        ConfirmarSenhaEntry.IsPassword = !senhaVisivel;
+        ConfirmarSenhaEntry.IsPassword = !confirmarSenhaVisivel;
 
         MostrarConfirmarSenhaButton.Source = ConfirmarSenhaEntry.IsPassword
         ? "olho_fechado.png"
@@ -48,6 +49,41 @@ public partial class CadastroCampo : ContentPage
         string senha = SenhaEntry.Text ?? string.Empty;
         string confirmarSenha = ConfirmarSenhaEntry.Text ?? string.Empty;
 
+        //Validação do nome
+        if (string.IsNullOrWhiteSpace(nome))
+        {
+            ExibirErro("Informe seu Nome.");
+            return;
+        }
+
+        //Validação do CPF
+        if (!ValidarCpf(cpf))
+        {
+            ExibirErro("Informe um CPF válido");
+            return;
+        }
+
+        //Validação do E-mail
+        if (!ValidarEmail(email))
+        {
+            ExibirErro("Informe um e-mail válido.");
+            return;
+        }
+
+        // Validação da Senha
+        if (senha.Length < 8)
+        {
+            ExibirErro("A senha deve possuir no mínimo 8 caracteres.");
+            return;
+        }
+
+        // Confirmação da senha
+        if (senha != confirmarSenha)
+            {
+                ExibirErro("As senhas não coincidem.");
+                return;
+            }
+
         // Cadastro validado com sucesso, exibe mensagem e navega para a próxima página
         await DisplayAlertAsync(
             "Excelente!",
@@ -55,6 +91,40 @@ public partial class CadastroCampo : ContentPage
             "OK");
 
         await Shell.Current.GoToAsync(nameof(CadastroConcluido));
+    }
+
+    //Método validação do CPF
+    private bool ValidarCpf(string cpf)
+    {
+        //Remove pontos, traços e outros caracteres que não sejam numeros
+        cpf = Regex.Replace(cpf, @"\D", "");
+
+        //Verificar se o CPF possui 11 numeros
+        if (cpf.Length !=11)
+        {
+            return false;
+        }
+
+        //Verifica se todos os numeros são iguais. Ex.: 111111111
+        if (cpf.All(c => c == cpf[0]))
+        {
+            return false;
+        }
+        //Se passou pelas validações acima, considera formato válido
+            return true;
+    }
+
+    //Método validação do E-mail
+    private bool ValidarEmail(string email)
+    {
+        //Verifica se o e-mail está vazio
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return false;
+        }
+
+        //Verifica se o e-mail possui um formato valido
+        return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
     }
 
     // Exibe uma mensagem de erro na tela
