@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.AgendamentoConcluido"
+    Title="Agendamento concluído"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,40,24,24"
+            Spacing="22">
+
+            <!-- SUCESSO -->
+
+            <VerticalStackLayout
+                Spacing="10"
+                HorizontalOptions="Center">
+
+                <Label
+                    Text="Consulta agendada!"
+                    FontSize="30"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    Text="Sua consulta foi agendada com sucesso."
+                    FontSize="16"
+                    TextColor="{StaticResource PrimaryBlue}"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+            <!-- RESUMO DA CONSULTA -->
+
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="35,20,35,25"
+                StrokeShape="RoundRectangle 20">
+
+                <VerticalStackLayout
+                    Spacing="18">
+
+                    <Label
+                        Text="Resumo da consulta"
+                        FontSize="21"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Image
+                        Source="{Binding FotoMedico}"
+                        WidthRequest="65"
+                        HeightRequest="65"/>
+
+                    <!-- MÉDICO -->                    
+                    <VerticalStackLayout  
+                        Spacing="3">
+
+                            <Label
+                                Text="{Binding Medico}"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+                            <Label
+                                Text="{Binding Especialidade}"
+                                FontSize="15"
+                                TextColor="{StaticResource PrimaryBlue}" />
+                        </VerticalStackLayout>                    
+
+                    <!-- DATA E HORÁRIO -->
+                    <VerticalStackLayout
+                            Spacing="3">
+
+                            <Label
+                                Text="Data"
+                                FontSize="13"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                            <Label
+                                Text="{Binding Data}"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+                        </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                            Spacing="3">
+
+                        <Label Text="Horário"
+                               FontSize="13"
+                               TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label Text="{Binding Horario}"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextDark}" />
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- MENSAGEM -->
+
+            <Label
+                Text="Verifique seu e-mail para confirmar a consulta."
+                FontSize="20"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}"
+                HorizontalTextAlignment="Center" />
+
+            <!-- BOTÕES -->
+
+            <Button
+                Text="VER MINHAS CONSULTAS"
+                HeightRequest="65"
+                CornerRadius="35"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="ConsultasButton_Clicked" />
+
+            <Button
+                Text="VOLTAR AO INÍCIO"
+                HeightRequest="48"
+                CornerRadius="14"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                Clicked="MenuButton_Clicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

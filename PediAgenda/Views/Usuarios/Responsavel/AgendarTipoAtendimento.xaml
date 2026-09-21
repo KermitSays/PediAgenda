@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.AgendarTipoAtendimento"
+    Title="Tipo de atendimento"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,30,24,24"
+            Spacing="22">
+
+            <!-- TÍTULO -->
+            <VerticalStackLayout Spacing="5">
+
+                <Label
+                    Text="Tipo de atendimento"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    Text="Escolha como deseja realizar o pagamento."
+                    FontSize="16"
+                    TextColor="{StaticResource PrimaryBlue}" />
+
+            </VerticalStackLayout>
+           
+            <!-- OPÇÕES -->
+            <VerticalStackLayout Spacing="12">
+
+                <Label
+                    Text="Forma de atendimento"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <!-- CONVÊNIO -->
+                <Border
+                    x:Name="ConvenioCard"
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="18"
+                    StrokeShape="RoundRectangle 16">
+
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Tapped="ConvenioCard_Tapped" />
+                    </Border.GestureRecognizers>
+
+                    <Grid ColumnDefinitions="*,Auto">
+
+                        <VerticalStackLayout
+                            Grid.Column="0"
+                            Spacing="3">
+
+                            <Label
+                                Text="Convênio"
+                                FontSize="17"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+                            <Label
+                                Text="Utilizar plano de saúde"
+                                FontSize="14"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                        </VerticalStackLayout>
+                    </Grid>
+
+                </Border>
+
+                <!-- CONVÊNIOS DISPONÍVEIS -->
+                <VerticalStackLayout
+                    x:Name="ConveniosContainer"
+                    Spacing="10"
+                    IsVisible="False">
+
+                    <Label
+                        Text="Selecione o convênio"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Picker
+                        x:Name="ConvenioPicker"
+                        Title="Escolha seu convênio"
+                        FontSize="16"
+                        TextColor="{StaticResource TextDark}"
+                        TitleColor="{StaticResource InputPlaceholder}"
+                        BackgroundColor="{StaticResource White}"
+                        SelectedIndexChanged="ConvenioPicker_SelectedIndexChanged">
+
+                        <Picker.Items>
+                            <x:String>GEAP</x:String>
+                            <x:String>Unimed</x:String>
+                        </Picker.Items>
+
+                    </Picker>
+
+                </VerticalStackLayout>
+
+                <!-- PARTICULAR -->
+                <Border
+                    x:Name="ParticularCard"
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="18"
+                    StrokeShape="RoundRectangle 16">
+
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Tapped="ParticularCard_Tapped" />
+                    </Border.GestureRecognizers>
+
+                    <Grid ColumnDefinitions="*,Auto">
+
+                        <VerticalStackLayout
+                            Grid.Column="0"
+                            Spacing="3">
+
+                            <Label
+                                Text="Particular"
+                                FontSize="17"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+                            <Label
+                                Text="R$ 200,00"
+                                FontSize="14"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                        </VerticalStackLayout>
+
+                    </Grid>
+
+                </Border>
+
+                <Label
+                    x:Name="ErroLabel"
+                    TextColor="Red"
+                    FontSize="14"
+                    IsVisible="False" />
+
+            </VerticalStackLayout>
+
+            <!-- CONTINUAR -->
+            <Button
+                Text="CONTINUAR"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="ContinuarButton_Clicked" />
+
+            <!-- VOLTAR -->
+            <Button
+                Text="VOLTAR"
+                HeightRequest="48"
+                CornerRadius="14"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

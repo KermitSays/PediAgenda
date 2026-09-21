@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.AgendarConsulta"
+    Title="Agendar consulta"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,35,24,24"
+            Spacing="24">
+
+            <!-- TÍTULO -->
+            <Label
+                Text="Agendar consulta"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}"
+                HorizontalOptions="Center" />
+
+            
+            <!-- ESPECIALIDADES -->
+            <VerticalStackLayout Spacing="8">
+
+                <Label
+                        Text="Especialidade"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />    
+
+                <Picker
+                        x:Name="EspecialidadePicker"
+                        Title="Escolha uma especialidade"
+                        FontSize="16"
+                        TextColor="{StaticResource TextDark}"
+                        TitleColor="{StaticResource InputPlaceholder}"
+                        BackgroundColor="{StaticResource White}"
+                        SelectedIndexChanged="EspecialidadePicker_SelectedIndexChanged">
+
+                    <!-- Mockup de especialidades - Substituído futuramente por uma chamada à API -->
+                    <Picker.Items>
+                        <x:String>Pediatria</x:String>
+                        <x:String>Neuropediatria</x:String>
+                        <x:String>Cardiologia</x:String>
+                        <x:String>Endocrinologia</x:String>
+                    </Picker.Items>
+
+                </Picker>
+
+            </VerticalStackLayout>
+
+            <!-- MENSAGEM DE ERRO -->
+            <Label
+                x:Name="ErroLabel"
+                Text=""
+                FontSize="14"
+                TextColor="Red"
+                HorizontalTextAlignment="Center"
+                IsVisible="False" />
+
+            <!-- CONTINUAR -->
+            <Button
+                Text="CONTINUAR"
+                FontSize="16"
+                FontAttributes="Bold"
+                HeightRequest="52"
+                CornerRadius="26"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                Clicked="ContinuarButton_Clicked" />
+
+            <!-- VOLTAR -->
+            <Button
+                Text="← Voltar"
+                FontSize="15"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.AgendarMedico"
+    Title="Escolher médico"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,30,24,24"
+            Spacing="22">
+
+            <!-- TÍTULO -->
+            <VerticalStackLayout Spacing="5">
+
+                <Label
+                    Text="Escolha um médico"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    x:Name="EspecialidadeLabel"
+                    FontSize="16"
+                    TextColor="{StaticResource PrimaryBlue}" />
+
+            </VerticalStackLayout>
+
+            <!-- LISTA DE MÉDICOS -->
+            <VerticalStackLayout Spacing="14">
+
+                <Label
+                    Text="Médicos disponíveis"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <CollectionView
+                    x:Name="MedicosCollectionView"
+                    SelectionMode="None">
+
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout
+                            Orientation="Vertical"
+                            ItemSpacing="14" />
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+
+                            <!-- CARD DO MÉDICO -->
+                            <Border
+                                BackgroundColor="{Binding CorFundo}"
+                                Stroke="{Binding CorBorda}"
+                                StrokeThickness="{Binding EspessuraBorda}"
+                                Padding="16"
+                                StrokeShape="RoundRectangle 18">
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="MedicoCard_Tapped" />
+                                </Border.GestureRecognizers>
+
+                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                      ColumnSpacing="14">
+
+                                    <Image
+                                        Grid.Column="0"
+                                        Source="{Binding Foto}"
+                                        WidthRequest="52"
+                                        HeightRequest="52"
+                                        Aspect="AspectFill" />
+
+                                    <VerticalStackLayout
+                                        Grid.Column="1"
+                                        VerticalOptions="Center"
+                                        Spacing="4">
+
+                                        <Label
+                                            Text="{Binding Nome}"
+                                            FontSize="16"
+                                            FontAttributes="Bold"
+                                            TextColor="{StaticResource TextDark}" />
+
+                                        <Label
+                                            Text="{Binding Rqe}"
+                                            FontSize="13"
+                                            TextColor="{StaticResource PrimaryBlue}" />
+
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+
+                </CollectionView>
+
+                <Label
+                    x:Name="ErroLabel"
+                    TextColor="Red"
+                    FontSize="14"
+                    IsVisible="False" />
+
+            </VerticalStackLayout>
+
+            <!-- CONTINUAR -->
+            <Button
+                Text="CONTINUAR"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="ContinuarButton_Clicked" />
+
+            <!-- VOLTAR -->
+            <Button
+                Text="VOLTAR"
+                HeightRequest="48"
+                CornerRadius="14"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

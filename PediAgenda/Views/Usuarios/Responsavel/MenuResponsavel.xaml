@@ -1,12 +1,275 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="PediAgenda.Views.Responsavel.MenuResponsavel"
-             Title="MenuResponsavel">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.MenuResponsavel"
+    Title="PediAgenda"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,30,24,24"
+            Spacing="22">
+
+            <!-- CABEÇALHO -->
+            <VerticalStackLayout Grid.Column="0"
+                                     Spacing="4">
+
+                <Label Text="Olá, Usuário!"
+                       FontFamily="Poppins"
+                       FontSize="32"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextDark}" />
+
+                <Label Text="Como podemos ajudar?"
+                       FontFamily="Poppins"
+                       FontSize="20"
+                       TextColor="{StaticResource PrimaryBlue}" />
+
+            </VerticalStackLayout>
+
+            <!-- Pacientes / Notificações / Minhas Consultas / Agendar -->
+            <Grid RowDefinitions="Auto,Auto"
+                  ColumnDefinitions="*,*"
+                  RowSpacing="20"
+                  ColumnSpacing="20">
+
+                <!-- Agendar -->
+                <VerticalStackLayout Grid.Row="0" Grid.Column="0" 
+                                     Spacing="6" 
+                                     HorizontalOptions="Center">
+
+                    <!-- VerticalStackLayout para o ícone -->
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="AgendarConsultaButton_Clicked"/>
+                    </VerticalStackLayout.GestureRecognizers>
+
+                    <Image Source="consulta_icon.png"
+                           WidthRequest="90"
+                           HeightRequest="90"
+                           Aspect="AspectFit" />        
+
+                    <Label Text="Agendar"
+                           TextColor="Black"
+                           FontSize="16"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <!-- Minhas Consultas -->
+                <VerticalStackLayout Grid.Row="0" Grid.Column="1" 
+                                     Spacing="6" 
+                                     HorizontalOptions="Center">
+
+                    <!-- VerticalStackLayout para o ícone -->
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="MinhasConsultasButton_Clicked" />
+                    </VerticalStackLayout.GestureRecognizers>
+
+                    <Image Source="consulta_icon.png"
+                           WidthRequest="90"
+                           HeightRequest="90"
+                           Aspect="AspectFit" />
+
+                    <Label Text="Minhas Consultas"
+                           TextColor="Black"
+                           FontSize="16"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <!-- Pacientes -->
+                <VerticalStackLayout Grid.Row="1" Grid.Column="0" 
+                                      Spacing="6" 
+                                      HorizontalOptions="Center">
+
+                    <!-- VerticalStackLayout para o ícone -->
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="PacientesButton_Clicked" />
+                    </VerticalStackLayout.GestureRecognizers>
+
+                    <Image Source="paciente_icon.png"
+                            WidthRequest="90"
+                            HeightRequest="90"
+                            Aspect="AspectFit" />
+
+                    <Label Text="Pacientes"
+                            TextColor="Black"
+                            FontSize="16"
+                            HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <!-- Notificações -->
+                <VerticalStackLayout Grid.Row="1" Grid.Column="1" 
+                                      Spacing="6" 
+                                      HorizontalOptions="Center">
+
+                    <!-- VerticalStackLayout para o ícone -->
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="NotificacoesButton_Clicked" />
+                    </VerticalStackLayout.GestureRecognizers>
+
+                    <Image Source="notificacao_icon.png"
+                           WidthRequest="90"
+                           HeightRequest="90"
+                           Aspect="AspectFit" />
+
+                    <Label Text="Notificações"
+                           TextColor="Black"
+                           FontSize="16"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+            </Grid>
+            
+
+            <!-- Próxima Consulta - Preview -->
+            <VerticalStackLayout Spacing="10">
+
+                <Label
+                    Text="Próxima consulta"
+                    FontSize="21"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    StrokeThickness="0"
+                    Padding="20"
+                    StrokeShape="RoundRectangle 20">
+
+                    <VerticalStackLayout Spacing="15">
+
+                        <!-- Médico -->
+                        <Grid ColumnDefinitions="Auto,*"
+                              ColumnSpacing="14">
+
+                            <!-- Ícone do médico -->
+                            <Border Grid.Column="0"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 28">
+
+                                <Image
+                                    Source="user.png"
+                                    WidthRequest="55"
+                                    HeightRequest="55"
+                                    Aspect="AspectFit"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
+                            </Border>
+
+                            <!-- Nome e especialidade do médico -->
+                            <VerticalStackLayout Grid.Column="1"
+                                                 VerticalOptions="Center"
+                                                 Spacing="2">
+
+                                <Label Text="Dra. Ana Oliveira"
+                                        FontSize="18"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource TextDark}" />
+
+                                <Label Text="Pediatria"
+                                        FontSize="15"
+                                        TextColor="{StaticResource PrimaryBlue}" />
+                            </VerticalStackLayout>
+
+                        </Grid>
+
+
+                        <!-- Informações da consulta-->
+                        <Grid ColumnDefinitions="*,*"
+                              RowDefinitions="Auto,Auto"
+                              ColumnSpacing="15"
+                              RowSpacing="12">
+
+                            <!-- Data -->
+                            <VerticalStackLayout
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Spacing="2">
+
+                                <Label Text="data"
+                                        FontSize="13"
+                                        TextColor="{StaticResource InputPlaceholder}" />
+
+                                <Label
+                                    Text="15/09/2026"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource TextDark}" />
+                            </VerticalStackLayout>
+
+                            <!-- Horário -->
+                            <VerticalStackLayout
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Spacing="2">
+
+                                <Label
+                                    Text="horário"
+                                    FontSize="13"
+                                    TextColor="{StaticResource InputPlaceholder}" />
+
+                                <Label
+                                    Text="14:30"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource TextDark}" />
+                            </VerticalStackLayout>
+
+                            <!-- Tipo de atendimento -->
+                            <VerticalStackLayout
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Spacing="2">
+
+                                <Label
+                                    Text="tipo de atendimento"
+                                    FontSize="13"
+                                    TextColor="{StaticResource InputPlaceholder}" />
+
+                                <Label
+                                    Text="Particular"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource TextDark}" />
+                            </VerticalStackLayout>
+                            
+                            <!-- Status -->
+                            <VerticalStackLayout
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Spacing="2">
+
+                                <Label
+                                    Text="status"
+                                    FontSize="13"
+                                    TextColor="{StaticResource InputPlaceholder}" />
+
+                                <Border
+                                    BackgroundColor="{StaticResource ResponsibleButton}"
+                                    StrokeThickness="0"
+                                    Padding="10,5"
+                                    StrokeShape="RoundRectangle 12"
+                                    HorizontalOptions="Start">
+
+                                    <Label
+                                        Text="Confirmado"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource ResponsibleText}" />
+                                </Border>
+                            </VerticalStackLayout>
+
+                        </Grid>
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
 </ContentPage>

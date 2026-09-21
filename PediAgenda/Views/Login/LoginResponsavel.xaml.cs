@@ -1,3 +1,5 @@
+using PediAgenda.Views.Usuarios.Responsavel;
+
 namespace PediAgenda.Views.Login;
 
 public partial class LoginResponsavel : ContentPage
@@ -40,11 +42,7 @@ public partial class LoginResponsavel : ContentPage
     //Botão de login, Precisa das validação dos campos e exibição de mensagens de erro
     private async void EntrarButton_Clicked(object sender, EventArgs e)
     {
-        //Alerta Provisorio
-        await DisplayAlertAsync(
-            "Botão de Entrar",
-            "Funções do botão de entrar ainda serão implementadas.",
-            "OK");
+        await Shell.Current.GoToAsync(nameof(Usuarios.Responsavel.MenuResponsavel));
     }
 
     // Método auxiliar para exibir mensagens de erro

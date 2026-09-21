@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.AgendarDataHorario"
+    Title="Data e horário"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,30,24,24"
+            Spacing="22">
+
+            <!-- TÍTULO -->
+            <VerticalStackLayout Spacing="5">
+
+                <Label
+                    Text="Escolha a data"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    Text="Selecione uma data e um horário disponível."
+                    FontSize="16"
+                    TextColor="{StaticResource PrimaryBlue}" />
+
+            </VerticalStackLayout>
+
+            <!-- Médico Selecionado -->
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="16"
+                StrokeShape="RoundRectangle 18">
+
+                <Grid
+                    ColumnDefinitions="Auto,*"
+                    ColumnSpacing="14">
+
+                    <!-- Avatar do Médico -->
+                    <Border Grid.Column="0"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 28">
+
+                        <Image
+                        Source="user.png"
+                        WidthRequest="50"
+                        HeightRequest="50"
+                        Aspect="AspectFit"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                    </Border>
+
+                    <!-- Informações do Médico -->
+                    <VerticalStackLayout
+                        Grid.Column="1"
+                        Spacing="3"
+                        VerticalOptions="Center">
+
+                        <Label
+                            x:Name="MedicoLabel"
+                            FontSize="17"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="EspecialidadeLabel"
+                            FontSize="14"
+                            TextColor="{StaticResource PrimaryBlue}" />
+
+                    </VerticalStackLayout>
+
+                </Grid>
+
+            </Border>
+
+            <!-- DATA -->
+            <VerticalStackLayout Spacing="8">
+
+                <Label
+                    Text="Data da consulta"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <DatePicker
+                    x:Name="DataPicker"
+                    Format="dd/MM/yyyy"
+                    FontSize="16"
+                    TextColor="{StaticResource TextDark}"
+                    BackgroundColor="{StaticResource White}"
+                    DateSelected="DataPicker_DateSelected" />
+
+            </VerticalStackLayout>
+
+            <!-- HORÁRIOS -->
+            <VerticalStackLayout Spacing="10">
+
+                <Label
+                    Text="Horários disponíveis"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <FlexLayout
+                    x:Name="HorariosContainer"
+                    Direction="Row"
+                    Wrap="Wrap"
+                    JustifyContent="Start"
+                    AlignItems="Start"
+                    BindableLayout.ItemsSource="{Binding .}" />
+
+                <Label
+                    x:Name="ErroHorarioLabel"
+                    TextColor="Red"
+                    FontSize="14"
+                    IsVisible="False" />
+
+            </VerticalStackLayout>
+
+            <!-- CONTINUAR -->
+            <Button
+                Text="CONTINUAR"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="ContinuarButton_Clicked" />
+
+            <!-- VOLTAR -->
+            <Button
+                Text="VOLTAR"
+                HeightRequest="48"
+                CornerRadius="14"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
