@@ -46,7 +46,7 @@
                         <TapGestureRecognizer Tapped="AgendarConsultaButton_Clicked"/>
                     </VerticalStackLayout.GestureRecognizers>
 
-                    <Image Source="consulta_icon.png"
+                    <Image Source="agendar_icon.png"
                            WidthRequest="90"
                            HeightRequest="90"
                            Aspect="AspectFit" />        
