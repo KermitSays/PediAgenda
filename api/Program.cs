@@ -47,6 +47,9 @@ builder.Services.AddScoped<ConsultaService>();
 builder.Services.AddSingleton<IAgendaRepositorio>(
     _ => new AgendaRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<AgendaService>();
+builder.Services.AddSingleton<IRelatorioRepositorio>(
+    _ => new RelatorioRepositorioMySql(Configuracao.StringDeConexao!));
+builder.Services.AddScoped<RelatorioService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<GeradorToken>();
 
@@ -289,6 +292,37 @@ app.MapPatch("/api/consultas/{id:int}/realizar", (int id, ClaimsPrincipal usuari
     return r.Sucesso ? Results.Ok(new StatusConsultaResposta(id, r.Valor!)) : FalhaClinica(r);
 }).RequireAuthorization(politica => politica.RequireRole("MEDICO"));
 
+// RF10 e RF11 — relatórios de atendimento. Cada relatório gerado fica no
+// histórico (tabela relatorio_atendimento) e pode ser reaberto ou exportado.
+clinica.MapPost("/relatorios", (RelatorioRequisicao req, ClaimsPrincipal usuario, RelatorioService servico) =>
+{
+    var r = servico.Gerar(AtorDe(usuario), req.Inicio, req.Fim, req.IdMedico);
+    return r.Sucesso
+        ? Results.Json(RelatorioResposta.De(r.Valor!), statusCode: StatusCodes.Status201Created)
+        : FalhaClinica(r);
+});
+
+clinica.MapGet("/relatorios", (ClaimsPrincipal usuario, RelatorioService servico) =>
+{
+    var r = servico.Historico(AtorDe(usuario));
+    return r.Sucesso ? Results.Ok(r.Valor!.Select(RelatorioNoHistorico.De)) : FalhaClinica(r);
+});
+
+clinica.MapGet("/relatorios/{id:int}", (int id, ClaimsPrincipal usuario, RelatorioService servico) =>
+{
+    var r = servico.Abrir(AtorDe(usuario), id);
+    return r.Sucesso ? Results.Ok(RelatorioResposta.De(r.Valor!)) : FalhaClinica(r);
+});
+
+clinica.MapGet("/relatorios/{id:int}/exportar", (int id, ClaimsPrincipal usuario, RelatorioService servico) =>
+{
+    var r = servico.Abrir(AtorDe(usuario), id);
+    return r.Sucesso
+        ? Results.File(ExportadorCsv.Gerar(r.Valor!), "text/csv; charset=utf-8",
+                       ExportadorCsv.NomeDoArquivo(r.Valor!.Cabecalho))
+        : FalhaClinica(r);
+});
+
 app.Run();
 return 0;
 
@@ -358,6 +392,28 @@ record ErroValidacao(string Codigo, string Mensagem, IReadOnlyDictionary<string,
 record HorariosDoDia(string Data, IReadOnlyList<MedicoComHorarios> Medicos);
 record MedicoComHorarios(int Id, string Nome, string Especialidade, IReadOnlyList<HorarioResposta> Horarios);
 record HorarioResposta(int Id, string Inicio, string Fim);
+
+record RelatorioRequisicao(string? Inicio, string? Fim, int? IdMedico);
+record RelatorioNoHistorico(int Id, MedicoResumo Medico, string Inicio, string Fim, string GeradoEm)
+{
+    public static RelatorioNoHistorico De(RelatorioGerado c) => new(
+        c.Id, new MedicoResumo(c.IdMedico, c.NomeMedico, c.Especialidade),
+        c.Inicio.ToString("yyyy-MM-dd"), c.Fim.ToString("yyyy-MM-dd"), c.GeradoEm.ToString("yyyy-MM-ddTHH:mm:ss"));
+}
+record RelatorioResposta(int Id, MedicoResumo Medico, string Inicio, string Fim, string GeradoEm,
+                         ResumoRelatorio Resumo, IReadOnlyList<LinhaRelatorioResposta> Consultas)
+{
+    public static RelatorioResposta De(RelatorioCompleto r)
+    {
+        var c = RelatorioNoHistorico.De(r.Cabecalho);
+        return new(c.Id, c.Medico, c.Inicio, c.Fim, c.GeradoEm, r.Resumo,
+                   r.Consultas.Select(l => new LinhaRelatorioResposta(
+                       l.Data.ToString("yyyy-MM-dd"), l.Inicio.ToString("HH:mm"), l.NomePaciente,
+                       l.IdadePaciente, l.TipoAtendimento, l.Status)).ToList());
+    }
+}
+record LinhaRelatorioResposta(string Data, string Inicio, string Paciente, int Idade,
+                              string TipoAtendimento, string Status);
 
 record AberturaRequisicao(int? IdMedico, string? Data, string? Inicio, string? Fim, int? Duracao);
 record HorariosAbertosResposta(int Criados, int Ignorados);

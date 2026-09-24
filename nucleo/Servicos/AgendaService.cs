@@ -1,4 +1,3 @@
-using System.Globalization;
 using PediAgenda.Nucleo.Modelos;
 using PediAgenda.Nucleo.Repositorios;
 
@@ -58,12 +57,12 @@ public class AgendaService(IAgendaRepositorio repositorio, TimeProvider? relogio
                                                           erroMedico.Value.Mensagem);
 
         var hoje = DateOnly.FromDateTime(Agora);
-        var data = LerData(dataInformada, "data", campos);
+        var data = Entrada.LerData(dataInformada, "data", campos);
         if (data is not null && data < hoje)
             campos["data"] = "Não dá para abrir horários em data que já passou.";
 
-        var inicio = LerHora(inicioInformado, "inicio", campos);
-        var fim = LerHora(fimInformado, "fim", campos);
+        var inicio = Entrada.LerHora(inicioInformado, "inicio", campos);
+        var fim = Entrada.LerHora(fimInformado, "fim", campos);
         if (inicio is not null && fim is not null && fim <= inicio)
             campos["fim"] = "O fim precisa ser depois do início.";
 
@@ -106,7 +105,7 @@ public class AgendaService(IAgendaRepositorio repositorio, TimeProvider? relogio
     public ResultadoClinica<IReadOnlyList<ItemAgenda>> AgendaDoDia(Ator ator, string? dataInformada, int? idMedicoInformado)
     {
         var campos = new Dictionary<string, string>();
-        var data = LerData(dataInformada, "data", campos);
+        var data = Entrada.LerData(dataInformada, "data", campos);
         if (campos.Count > 0)
             return ResultadoClinica<IReadOnlyList<ItemAgenda>>.Invalido(campos);
 
@@ -209,35 +208,5 @@ public class AgendaService(IAgendaRepositorio repositorio, TimeProvider? relogio
         if (idMedicoInformado is null or <= 0)
             campos["idMedico"] = "Informe o médico.";
         return (idMedicoInformado, null);
-    }
-
-    private static DateOnly? LerData(string? valor, string campo, Dictionary<string, string> campos)
-    {
-        if (string.IsNullOrWhiteSpace(valor))
-        {
-            campos[campo] = "Informe a data.";
-            return null;
-        }
-        if (DateOnly.TryParseExact(valor.Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture,
-                                   DateTimeStyles.None, out var data))
-            return data;
-
-        campos[campo] = "Data inválida. Use o formato AAAA-MM-DD.";
-        return null;
-    }
-
-    private static TimeOnly? LerHora(string? valor, string campo, Dictionary<string, string> campos)
-    {
-        if (string.IsNullOrWhiteSpace(valor))
-        {
-            campos[campo] = "Informe a hora.";
-            return null;
-        }
-        if (TimeOnly.TryParseExact(valor.Trim(), "HH:mm", CultureInfo.InvariantCulture,
-                                   DateTimeStyles.None, out var hora))
-            return hora;
-
-        campos[campo] = "Hora inválida. Use o formato HH:MM.";
-        return null;
     }
 }

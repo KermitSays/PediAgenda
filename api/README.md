@@ -276,6 +276,65 @@ já começou passa a `REALIZADA`. É o que os relatórios de atendimento contam.
 Erros das duas: 404 `CONSULTA_NAO_ENCONTRADA`, 403 (consulta de outro médico),
 409 `STATUS_NAO_PERMITE`, `CONSULTA_NAO_COMECOU` ou `CONSULTA_JA_COMECOU`.
 
+## Relatórios de atendimento
+
+Perfis MEDICO e RECEPCIONISTA, com a mesma regra da agenda: o médico vê só os
+próprios relatórios; a recepção vê os de todos e informa o médico ao gerar.
+
+### POST /api/relatorios
+
+Gera o relatório de um médico num período (RF10) e registra no histórico
+(tabela `relatorio_atendimento`):
+
+    { "inicio": "2026-09-01", "fim": "2026-09-30", "idMedico": 3 }
+
+O médico não manda `idMedico`. Período de até 366 dias.
+
+Sai (201):
+
+    {
+      "id": 1,
+      "medico": { "id": 3, "nome": "Dr. Pedro Alves", "especialidade": "Pediatria" },
+      "inicio": "2026-09-01", "fim": "2026-09-30", "geradoEm": "2026-09-24T14:05:00",
+      "resumo": {
+        "totalConsultas": 5, "agendadas": 2, "confirmadas": 1, "realizadas": 1, "canceladas": 1,
+        "convenio": 2, "particular": 3,
+        "horariosOfertados": 49, "horariosBloqueados": 2,
+        "taxaOcupacao": 8.5, "taxaCancelamento": 20.0
+      },
+      "consultas": [
+        { "data": "2026-09-25", "inicio": "08:00", "paciente": "Lucas Silva", "idade": 7,
+          "tipoAtendimento": "CONVENIO", "status": "AGENDADA" }
+      ]
+    }
+
+`taxaOcupacao` = consultas não canceladas ÷ horários não bloqueados, em %.
+`taxaCancelamento` = canceladas ÷ total, em %. Vêm `null` quando não há base
+para calcular.
+
+### GET /api/relatorios
+
+O histórico, do mais recente para o mais antigo: `id`, `medico`, `inicio`,
+`fim` e `geradoEm` de cada relatório gerado.
+
+### GET /api/relatorios/{id}
+
+Reabre um relatório do histórico. Os números são recalculados na hora, a partir
+do banco: é o período salvo com os dados de agora.
+
+### GET /api/relatorios/{id}/exportar
+
+Baixa o relatório em CSV (RF11), pronto para abrir no Excel em português:
+separador `;`, datas `dd/MM/aaaa` e UTF-8 com BOM, para os acentos aparecerem
+certos. Nome do arquivo: `relatorio-1-2026-09-01-a-2026-09-30.csv`.
+
+Nomes que começam com `=`, `+`, `-` ou `@` saem com um apóstrofo na frente,
+para o Excel não executar o texto como fórmula.
+
+Erros das rotas de relatório: 400 `DADOS_INVALIDOS` (datas, período invertido
+ou maior que 366 dias, recepção sem `idMedico`), 403 (relatório de outro
+médico), 404 `RELATORIO_NAO_ENCONTRADO` ou `MEDICO_NAO_ENCONTRADO`.
+
 ## POST /api/cadastro/responsavel
 
 Cria a conta do responsável. Médico e recepcionista são criados pela clínica.
