@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Medico.PacientesMedico"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Pacientes"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <Grid
+        RowDefinitions="Auto,*"
+        Padding="24,30,24,20">
+
+        <!-- CABEÇALHO -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Spacing="5"
+            Margin="0,0,0,22">
+
+            <Label
+                Text="Pacientes"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+        </VerticalStackLayout>
+
+        <!-- LISTA DE PACIENTES -->
+        <CollectionView
+            x:Name="PacientesCollectionView"
+            Grid.Row="1"
+            ItemsSource="{Binding PacientesLista}"
+            SelectionMode="None">
+
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout
+                    Orientation="Vertical"
+                    ItemSpacing="14" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+
+                <DataTemplate>
+
+                    <!-- CARD DO PACIENTE -->
+                    <Border
+                        BackgroundColor="{StaticResource White}"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        Padding="16"
+                        StrokeShape="RoundRectangle 18">
+
+                        <Grid
+                            ColumnDefinitions="80,*,Auto"
+                            ColumnSpacing="14">
+
+                            <!-- FOTO -->
+                            <Border
+                                Grid.Column="0"
+                                WidthRequest="70"
+                                HeightRequest="70"
+                                BackgroundColor="{StaticResource PageBlue}"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 35"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center">
+
+                                <Image
+                                    Source="{Binding Foto}"
+                                    WidthRequest="70"
+                                    HeightRequest="70"
+                                    Aspect="AspectFill" />
+
+                            </Border>
+
+                            <!-- DADOS -->
+                            <VerticalStackLayout
+                                Grid.Column="1"
+                                Spacing="4"
+                                VerticalOptions="Center">
+
+                                <Label
+                                    Text="{Binding Nome}"
+                                    FontSize="18"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource TextDark}" />
+
+                                <Label
+                                    Text="{Binding IdadeTexto}"
+                                    FontSize="14"
+                                    TextColor="{StaticResource PrimaryBlue}" />
+
+                                <Label
+                                    Text="{Binding DataNascimentoTexto}"
+                                    FontSize="13"
+                                    TextColor="{StaticResource InputPlaceholder}" />
+
+                            </VerticalStackLayout>
+
+                            <!-- INDICA QUE O CARD É TOCÁVEL -->
+                            <Label
+                                Grid.Column="2"
+                                Text="›"
+                                FontSize="28"
+                                TextColor="{StaticResource PrimaryBlue}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+
+                    </Border>
+
+                </DataTemplate>
+
+            </CollectionView.ItemTemplate>
+
+            <!-- NENHUM PACIENTE -->
+            <CollectionView.EmptyView>
+
+                <VerticalStackLayout
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Spacing="8">
+
+                    <Label
+                        Text="Nenhum paciente encontrado"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}"
+                        HorizontalTextAlignment="Center" />
+
+                    <Label
+                        Text="Não há pacientes cadastrados no momento."
+                        FontSize="14"
+                        TextColor="{StaticResource InputPlaceholder}"
+                        HorizontalTextAlignment="Center" />
+
+                </VerticalStackLayout>
+
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

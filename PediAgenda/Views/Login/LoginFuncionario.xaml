@@ -131,7 +131,23 @@
                 Text="Entrar"
                 Style="{StaticResource PrimaryButton}"
                 Clicked="EntrarButton_Clicked" />
-           
+
+            <!-- Provisorio - Médico -->
+            <Button
+                x:Name="EntrarMedicoButton"
+                Text="Entrar - Médico"
+                Style="{StaticResource PrimaryButton}"
+                Clicked="EntrarMedicoButton_Clicked"
+                Margin="0,16,0,8"/>
+
+            <!-- Provisorio - Recepcionista -->
+            <Button
+                x:Name="EntrarRecepcionistaButton"
+                Text="Entrar - Recepcionista"
+                Style="{StaticResource PrimaryButton}"
+                Clicked="EntrarRecepcionistaButton_Clicked"
+                Margin="0,8,0,8"/>
+
         </VerticalStackLayout>
 
     </ScrollView>

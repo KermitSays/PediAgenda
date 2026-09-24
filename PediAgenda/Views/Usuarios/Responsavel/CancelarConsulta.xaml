@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.CancelarConsulta"
+    Title="Cancelar consulta"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="24,35"
+            Spacing="18">
+
+            <!-- TÍTULO -->
+            <Label
+                Text="Cancelar consulta"
+                FontSize="26"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                Text="Deseja realmente cancelar esta consulta?"
+                FontSize="15"
+                TextColor="{StaticResource TextDark}" />
+
+            <!-- RESUMO DA CONSULTA -->
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 14">
+
+                <VerticalStackLayout Spacing="12">
+
+                    <Label
+                        Text="Resumo da consulta"
+                        FontSize="17"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <VerticalStackLayout Spacing="3">
+
+                        <Label
+                            Text="Médico"
+                            FontSize="12"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label
+                            x:Name="MedicoLabel"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="3">
+
+                        <Label
+                            Text="Especialidade"
+                            FontSize="12"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label
+                            x:Name="EspecialidadeLabel"
+                            FontSize="15"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="3">
+
+                        <Label
+                            Text="Paciente"
+                            FontSize="12"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label
+                            x:Name="PacienteLabel"
+                            FontSize="15"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="3">
+
+                        <Label
+                            Text="Data"
+                            FontSize="12"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label
+                            x:Name="DataLabel"
+                            FontSize="15"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="3">
+
+                        <Label
+                            Text="Horário"
+                            FontSize="12"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label
+                            x:Name="HorarioLabel"
+                            FontSize="15"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- BOTÃO CANCELAR -->
+            <Button
+                Text="CANCELAR CONSULTA"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="CancelarButton_Clicked" />
+
+            <!-- BOTÃO VOLTAR -->
+            <Button
+                Text="VOLTAR"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

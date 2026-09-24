@@ -56,6 +56,38 @@ public partial class AppShell : Shell
             nameof(Views.Usuarios.Responsavel.AgendamentoConcluido),
             typeof(Views.Usuarios.Responsavel.AgendamentoConcluido));
 
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Responsavel.MinhasConsultas),
+            typeof(Views.Usuarios.Responsavel.MinhasConsultas));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Responsavel.MinhasConsultasDetalhes),
+            typeof(Views.Usuarios.Responsavel.MinhasConsultasDetalhes));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Responsavel.ReagendarConsulta),
+            typeof(Views.Usuarios.Responsavel.ReagendarConsulta));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Responsavel.CancelarConsulta),
+            typeof(Views.Usuarios.Responsavel.CancelarConsulta));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Responsavel.PacientesResponsavel),
+            typeof(Views.Usuarios.Responsavel.PacientesResponsavel));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Responsavel.Notificacoes),
+            typeof(Views.Usuarios.Responsavel.Notificacoes));
+
+        //ROTAS MÉDICO
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Medico.MenuMedico),
+            typeof(Views.Usuarios.Medico.MenuMedico));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Medico.PacientesMedico),
+            typeof(Views.Usuarios.Medico.PacientesMedico));
 
     }
 }

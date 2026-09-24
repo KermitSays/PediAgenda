@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.Notificacoes"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Notificações"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <Grid
+        RowDefinitions="Auto,*"
+        Padding="24,30">
+
+        <!-- CABEÇALHO -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Spacing="4"
+            Margin="0,0,0,20">
+
+            <Label
+                Text="Notificações"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                Text="Avisos e atualizações das suas consultas"
+                FontSize="15"
+                TextColor="{StaticResource InputPlaceholder}" />
+
+        </VerticalStackLayout>
+
+        <!-- LISTA -->
+        <CollectionView
+            Grid.Row="1"
+            ItemsSource="{Binding NotificacoesLista}"
+            SelectionMode="None">
+
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout
+                    Orientation="Vertical"
+                    ItemSpacing="14" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+
+                    <!-- CARD DA NOTIFICAÇÃO -->
+                    <Border
+                        BackgroundColor="{StaticResource White}"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        Padding="18"
+                        StrokeShape="RoundRectangle 16">
+
+                        <VerticalStackLayout Spacing="8">
+
+                            <!-- TÍTULO -->
+                            <Label
+                                Text="{Binding Titulo}"
+                                FontSize="17"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+                            <!-- MENSAGEM -->
+                            <Label
+                                Text="{Binding Mensagem}"
+                                FontSize="15"
+                                LineBreakMode="WordWrap"
+                                TextColor="{StaticResource TextDark}" />
+
+                            <!-- DATA E HORA -->
+                            <Label
+                                Text="{Binding DataHoraFormatada}"
+                                FontSize="12"
+                                TextColor="{StaticResource InputPlaceholder}"
+                                Margin="0,4,0,0" />
+
+                        </VerticalStackLayout>
+
+                    </Border>
+
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <!-- MENSAGEM QUANDO NÃO HOUVER NOTIFICAÇÕES -->
+            <CollectionView.EmptyView>
+
+                <VerticalStackLayout
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Spacing="8">
+
+                    <Label
+                        Text="Nenhuma notificação"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}"
+                        HorizontalTextAlignment="Center" />
+
+                    <Label
+                        Text="Quando houver novos avisos, eles aparecerão aqui."
+                        FontSize="14"
+                        TextColor="{StaticResource InputPlaceholder}"
+                        HorizontalTextAlignment="Center" />
+
+                </VerticalStackLayout>
+
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

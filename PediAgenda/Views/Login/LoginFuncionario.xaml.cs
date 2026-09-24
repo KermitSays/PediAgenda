@@ -1,3 +1,5 @@
+using PediAgenda.Views.Usuarios.Medico;
+
 namespace PediAgenda.Views.Login;
 
 public partial class LoginFuncionario : ContentPage
@@ -32,6 +34,20 @@ public partial class LoginFuncionario : ContentPage
 
     //Botão de login, Precisa da validação dos campos e exibição de mensagens de erro
     private async void EntrarButton_Clicked(object sender, EventArgs e)
+    {
+        //Alerta Provisorio
+        await DisplayAlertAsync(
+            "Botão de Entrar",
+            "Botão ainda será implementado.",
+            "OK");
+    }
+
+    private async void EntrarMedicoButton_Clicked(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync(nameof(Usuarios.Medico.MenuMedico));
+    }
+
+    private async void EntrarRecepcionistaButton_Clicked(object sender, EventArgs e)
     {
         //Alerta Provisorio
         await DisplayAlertAsync(

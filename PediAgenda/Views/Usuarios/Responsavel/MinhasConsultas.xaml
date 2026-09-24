@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.MinhasConsultas"
+    Title="Minhas consultas"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <Grid
+        Padding="24,30,24,24"
+        RowDefinitions="Auto,*,Auto">
+
+        <!-- TÍTULO -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Spacing="5">
+
+            <Label
+                Text="Minhas consultas"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                Text="Selecione um paciente para visualizar suas consultas."
+                FontSize="15"
+                TextColor="{StaticResource TextDark}" />
+        </VerticalStackLayout>
+
+
+        <!-- LISTA DE PACIENTES -->
+        <CollectionView
+            Grid.Row="1"
+            x:Name="PacientesCollectionView"
+            Margin="0,24,0,15"
+            SelectionMode="None">
+
+            <CollectionView.ItemsSource>
+                <x:Array Type="{x:Type x:Object}">
+                </x:Array>
+            </CollectionView.ItemsSource>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+
+                    <VerticalStackLayout
+                        Spacing="10"
+                        Margin="0,0,0,14">
+
+                        <!-- CARD DO PACIENTE -->
+                        <Border
+                            x:Name="PacienteCard"
+                            BackgroundColor="{StaticResource White}"
+                            Stroke="{StaticResource InputBlue}"
+                            StrokeThickness="1"
+                            Padding="14"
+                            Margin="0,0,0,10"
+                            StrokeShape="RoundRectangle 14">
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="PacienteCard_Tapped" />
+                            </Border.GestureRecognizers>
+
+                            <HorizontalStackLayout Spacing="12">
+
+                                <!-- FOTO DO PACIENTE -->
+                                <Border
+                                    WidthRequest="52"
+                                    HeightRequest="52"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 26">
+
+                                    <Image
+                                        Source="{Binding Foto}"
+                                        Aspect="AspectFill" />
+                                </Border>
+
+                                <!-- NOME DO PACIENTE -->
+                                <VerticalStackLayout
+                                    VerticalOptions="Center"
+                                    Spacing="2">
+
+                                    <Label
+                                        Text="{Binding Nome}"
+                                        FontSize="17"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource TextDark}" />
+
+                                    <Label
+                                        Text="Toque para ver as consultas"
+                                        FontSize="12"
+                                        TextColor="{StaticResource InputPlaceholder}" />
+
+                                </VerticalStackLayout>
+
+                            </HorizontalStackLayout>
+
+                            <!-- ESTILO QUANDO ESTÁ ABERTO -->
+                            <Border.Triggers>
+
+                                <DataTrigger
+                                    TargetType="Border"
+                                    Binding="{Binding IsExpanded}"
+                                    Value="True">
+
+                                    <Setter
+                                        Property="BackgroundColor"
+                                        Value="#E8F3FF" />
+
+                                    <Setter
+                                        Property="Stroke"
+                                        Value="{StaticResource PrimaryBlue}" />
+
+                                    <Setter
+                                        Property="StrokeThickness"
+                                        Value="2" />
+
+                                </DataTrigger>
+
+                            </Border.Triggers>
+
+                        </Border>
+
+
+                        <!-- CONSULTAS DO PACIENTE -->
+                        <VerticalStackLayout
+                            BindableLayout.ItemsSource="{Binding Consultas}"
+                            IsVisible="{Binding IsExpanded}"
+                            Spacing="10"
+                            Padding="12,0,0,0">
+
+                            <BindableLayout.ItemTemplate>
+
+                                <DataTemplate>
+
+                                    <!-- CARD DA CONSULTA -->
+                                    <Border
+                                        BackgroundColor="{StaticResource White}"
+                                        Stroke="{StaticResource InputBlue}"
+                                        StrokeThickness="1"
+                                        Padding="14"
+                                        Margin="20,0,0,8"
+                                        StrokeShape="RoundRectangle 12">
+
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="ConsultaCard_Tapped" />
+                                        </Border.GestureRecognizers>
+
+                                        <VerticalStackLayout Spacing="4">
+
+                                            <Label
+                                                Text="{Binding Medico}"
+                                                FontSize="15"
+                                                FontAttributes="Bold"
+                                                TextColor="{StaticResource TextDark}" />
+
+                                            <Label
+                                                Text="{Binding Especialidade}"
+                                                FontSize="13"
+                                                TextColor="{StaticResource InputPlaceholder}" />
+
+                                            <Label
+                                                Text="{Binding DataHorario}"
+                                                FontSize="13"
+                                                TextColor="{StaticResource TextDark}" />
+
+                                        </VerticalStackLayout>
+                                    </Border>
+
+                                </DataTemplate>
+
+                            </BindableLayout.ItemTemplate>
+
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+
+
+        <!-- VOLTAR -->
+        <Button
+            Grid.Row="2"
+            Text="VOLTAR"
+            HeightRequest="52"
+            CornerRadius="14"
+            BackgroundColor="{StaticResource PrimaryBlue}"
+            TextColor="{StaticResource White}"
+            FontAttributes="Bold"
+            Clicked="VoltarButton_Clicked" />
+
+    </Grid>
+
+</ContentPage>

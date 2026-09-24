@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.PacientesResponsavel"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Pacientes"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,30"
+            Spacing="20">
+
+            <!-- TÍTULO -->
+            <VerticalStackLayout Spacing="4">
+
+                <Label
+                    Text="Meus pacientes"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    Text="Pacientes cadastrados"
+                    FontSize="15"
+                    TextColor="{StaticResource InputPlaceholder}" />
+
+            </VerticalStackLayout>
+
+            <!-- LISTA DE PACIENTES -->
+            <CollectionView
+                ItemsSource="{Binding PacientesLista}"
+                SelectionMode="None">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout
+                        Orientation="Vertical"
+                        ItemSpacing="14" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+
+                        <!-- CARD DO PACIENTE -->
+                        <Border
+                            BackgroundColor="{StaticResource White}"
+                            Stroke="{StaticResource InputBlue}"
+                            StrokeThickness="1"
+                            Padding="16"
+                            StrokeShape="RoundRectangle 16">
+
+                            <Grid
+                                ColumnDefinitions="70,*"
+                                ColumnSpacing="16">
+
+                                <!-- FOTO -->
+                                <Border
+                                    Grid.Column="0"
+                                    WidthRequest="64"
+                                    HeightRequest="64"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 32"
+                                    HorizontalOptions="Start"
+                                    VerticalOptions="Center">
+
+                                    <Image
+                                        Source="{Binding Foto}"
+                                        Aspect="AspectFill"
+                                        WidthRequest="64"
+                                        HeightRequest="64" />
+
+                                </Border>
+
+                                <!-- INFORMAÇÕES -->
+                                <VerticalStackLayout
+                                    Grid.Column="1"
+                                    Spacing="3"
+                                    VerticalOptions="Center">
+
+                                    <!-- NOME -->
+                                    <Label
+                                        Text="{Binding Nome}"
+                                        FontSize="18"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource TextDark}" />
+
+                                    <!-- IDADE -->
+                                    <Label
+                                        Text="{Binding Idade, StringFormat='{0} anos'}"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource PrimaryBlue}" />
+
+                                    <!-- DATA DE NASCIMENTO -->
+                                    <Label
+                                        Text="{Binding DataNascimento, StringFormat='Nascimento: {0:dd/MM/yyyy}'}"
+                                        FontSize="14"
+                                        TextColor="{StaticResource InputPlaceholder}" />
+
+                                </VerticalStackLayout>
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -9,26 +9,17 @@ public partial class MenuResponsavel : ContentPage
 
     private async void PacientesButton_Clicked(object sender, EventArgs e)
     {
-        await DisplayAlertAsync(
-            "Pacientes",
-            "A tela de pacientes ainda será implementada.",
-            "OK");
+        await Shell.Current.GoToAsync(nameof(PacientesResponsavel));
     }
 
     private async void NotificacoesButton_Clicked(object sender, EventArgs e)
     {
-        await DisplayAlertAsync(
-            "Notificações",
-            "A tela de notificações ainda será implementada.",
-            "OK");
+        await Shell.Current.GoToAsync(nameof(Notificacoes));
     }
 
     private async void MinhasConsultasButton_Clicked(object sender, EventArgs e)
     {
-        await DisplayAlertAsync(
-            "Minhas Consultas",
-            "A tela de consultas ainda será implementada.",
-            "OK");
+        await Shell.Current.GoToAsync(nameof(MinhasConsultas));
     }
 
     private async void AgendarConsultaButton_Clicked(object sender, EventArgs e)

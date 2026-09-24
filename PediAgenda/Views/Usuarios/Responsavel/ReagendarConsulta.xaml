@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.ReagendarConsulta"
+    Title="Reagendar consulta"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="24,30,24,24"
+            Spacing="20">
+
+            <!-- TÍTULO -->
+            <VerticalStackLayout Spacing="5">
+
+                <Label
+                    Text="Reagendar consulta"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    Text="Escolha uma nova data e horário para sua consulta."
+                    FontSize="15"
+                    TextColor="{StaticResource TextDark}" />
+
+            </VerticalStackLayout>
+
+
+            <!-- RESUMO DA CONSULTA -->
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="8">
+
+                    <Label
+                        Text="Consulta atual"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource PrimaryBlue}" />
+
+                    <Label
+                        x:Name="MedicoLabel"
+                        FontSize="17"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        x:Name="EspecialidadeLabel"
+                        FontSize="15"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        x:Name="PacienteLabel"
+                        FontSize="15"
+                        TextColor="{StaticResource TextDark}" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+
+            <!-- DATA -->
+            <VerticalStackLayout Spacing="8">
+
+                <Label
+                    Text="Nova data"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <DatePicker
+                    x:Name="DataPicker"
+                    Format="dd/MM/yyyy"
+                    MinimumDate="{x:Static sys:DateTime.Today}"
+                    DateSelected="DataPicker_DateSelected" />
+
+            </VerticalStackLayout>
+
+
+            <!-- HORÁRIOS -->
+            <VerticalStackLayout Spacing="10">
+
+                <Label
+                    Text="Novo horário"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <FlexLayout
+                    x:Name="HorariosContainer"
+                    Wrap="Wrap"
+                    Direction="Row"
+                    JustifyContent="Start" />
+
+                <Label
+                    x:Name="ErroHorarioLabel"
+                    TextColor="Red"
+                    FontSize="14"
+                    IsVisible="False" />
+
+            </VerticalStackLayout>
+
+
+            <!-- CONFIRMAR -->
+            <Button
+                Text="CONFIRMAR REAGENDAMENTO"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="ConfirmarButton_Clicked" />
+
+
+            <!-- VOLTAR -->
+            <Button
+                Text="VOLTAR"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>
