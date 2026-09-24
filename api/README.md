@@ -145,6 +145,62 @@ Data vazia, em outro formato ou no passado: 400 `DADOS_INVALIDOS`.
 
 Para ter horários para testar, rode `banco/dados_de_teste.sql`.
 
+## Consultas
+
+Agendar, listar e cancelar, pelo responsável (perfil RESPONSAVEL). Como em
+pacientes, o responsável vem do token: uma família só vê e mexe nas consultas
+dos próprios filhos.
+
+### POST /api/consultas
+
+Entra — o `idHorario` vem da lista de `GET /api/horarios`:
+
+    { "idPaciente": 4, "idHorario": 41, "tipoAtendimento": "CONVENIO" }
+
+`tipoAtendimento` é `CONVENIO` ou `PARTICULAR`.
+
+Sai (201):
+
+    {
+      "id": 12,
+      "status": "AGENDADA",
+      "tipoAtendimento": "CONVENIO",
+      "data": "2026-09-25",
+      "inicio": "08:00",
+      "fim": "08:30",
+      "medico": { "id": 3, "nome": "Dr. Pedro Alves", "especialidade": "Pediatria" },
+      "paciente": { "id": 4, "nome": "Lucas Silva" }
+    }
+
+Erros:
+
+| HTTP | `codigo` | Quando |
+|---|---|---|
+| 400 | `DADOS_INVALIDOS` | faltou paciente ou horário, ou tipo diferente de CONVENIO/PARTICULAR |
+| 404 | `PACIENTE_NAO_ENCONTRADO` | o paciente não existe ou é de outra família |
+| 404 | `HORARIO_NAO_ENCONTRADO` | o horário não existe |
+| 409 | `HORARIO_INDISPONIVEL` | já passou, está bloqueado, ou alguém acabou de reservar |
+| 409 | `PACIENTE_OCUPADO_NO_HORARIO` | a criança já tem consulta nesse mesmo horário com outro médico |
+
+No 409, a tela mostra a `mensagem` e recarrega a lista de horários.
+
+**Dois pedidos no mesmo horário:** a reserva trava o horário no banco
+(`SELECT ... FOR UPDATE`) até terminar. Se dez pessoas pedirem o mesmo horário
+no mesmo instante, uma consegue e as outras nove recebem 409 — testado assim.
+
+### GET /api/consultas
+
+As consultas de todos os filhos do responsável, em ordem de data e hora,
+incluindo as canceladas (o `status` diz qual é qual). Mesmo formato do POST.
+
+### PATCH /api/consultas/{id}/cancelar
+
+Sem corpo. Sai (200) a consulta com `status` `CANCELADA`, e o horário volta a
+aparecer em `GET /api/horarios`.
+
+Erros: 404 `CONSULTA_NAO_ENCONTRADA` (não existe ou é de outra família) e
+409 `CONSULTA_NAO_CANCELAVEL` (já cancelada, já realizada, ou já começou).
+
 ## POST /api/cadastro/responsavel
 
 Cria a conta do responsável. Médico e recepcionista são criados pela clínica.

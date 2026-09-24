@@ -41,6 +41,9 @@ builder.Services.AddScoped<PacienteService>();
 builder.Services.AddSingleton<IHorarioRepositorio>(
     _ => new HorarioRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<HorarioService>();
+builder.Services.AddSingleton<IConsultaRepositorio>(
+    _ => new ConsultaRepositorioMySql(Configuracao.StringDeConexao!));
+builder.Services.AddScoped<ConsultaService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<GeradorToken>();
 
@@ -192,8 +195,54 @@ app.MapGet("/api/horarios", (string? data, string? especialidade, int? medico, H
     return Results.Ok(new HorariosDoDia(resultado.Data.ToString("yyyy-MM-dd"), medicos));
 }).RequireAuthorization();
 
+// RF05 e RF07 — consultas do responsável: agendar, listar, cancelar.
+var consultas = app.MapGroup("/api/consultas")
+                   .RequireAuthorization(politica => politica.RequireRole("RESPONSAVEL"));
+
+consultas.MapGet("", (ClaimsPrincipal usuario, ConsultaService servico) =>
+{
+    var lista = servico.Listar(IdUsuario(usuario));
+    if (lista is null)
+        return Results.Json(new ErroApi("SEM_PERMISSAO", "Só o responsável pode ver consultas."),
+                            statusCode: StatusCodes.Status403Forbidden);
+
+    return Results.Ok(lista.Select(ConsultaResposta.De));
+});
+
+consultas.MapPost("", (AgendamentoRequisicao req, ClaimsPrincipal usuario, ConsultaService servico) =>
+{
+    var resultado = servico.Agendar(IdUsuario(usuario), req.IdPaciente, req.IdHorario, req.TipoAtendimento);
+    return resultado.Sucesso
+        ? Results.Json(ConsultaResposta.De(resultado.Consulta!), statusCode: StatusCodes.Status201Created)
+        : ErroDeConsulta(resultado);
+});
+
+consultas.MapPatch("/{id:int}/cancelar", (int id, ClaimsPrincipal usuario, ConsultaService servico) =>
+{
+    var resultado = servico.Cancelar(IdUsuario(usuario), id);
+    return resultado.Sucesso
+        ? Results.Ok(ConsultaResposta.De(resultado.Consulta!))
+        : ErroDeConsulta(resultado);
+});
+
 app.Run();
 return 0;
+
+static IResult ErroDeConsulta(ResultadoConsulta r) => r.Motivo switch
+{
+    MotivoConsulta.DadosInvalidos => Results.Json(
+        new ErroValidacao("DADOS_INVALIDOS", r.Mensagem, r.Campos!), statusCode: StatusCodes.Status400BadRequest),
+    MotivoConsulta.PacienteNaoEncontrado => Erro("PACIENTE_NAO_ENCONTRADO", r.Mensagem, StatusCodes.Status404NotFound),
+    MotivoConsulta.HorarioNaoEncontrado => Erro("HORARIO_NAO_ENCONTRADO", r.Mensagem, StatusCodes.Status404NotFound),
+    MotivoConsulta.ConsultaNaoEncontrada => Erro("CONSULTA_NAO_ENCONTRADA", r.Mensagem, StatusCodes.Status404NotFound),
+    MotivoConsulta.HorarioIndisponivel => Erro("HORARIO_INDISPONIVEL", r.Mensagem, StatusCodes.Status409Conflict),
+    MotivoConsulta.PacienteOcupadoNoHorario => Erro("PACIENTE_OCUPADO_NO_HORARIO", r.Mensagem, StatusCodes.Status409Conflict),
+    MotivoConsulta.NaoCancelavel => Erro("CONSULTA_NAO_CANCELAVEL", r.Mensagem, StatusCodes.Status409Conflict),
+    _ => Erro("SEM_PERMISSAO", r.Mensagem, StatusCodes.Status403Forbidden)
+};
+
+static IResult Erro(string codigo, string mensagem, int status) =>
+    Results.Json(new ErroApi(codigo, mensagem), statusCode: status);
 
 static int IdUsuario(ClaimsPrincipal usuario) => int.Parse(usuario.FindFirstValue("sub")!);
 
@@ -234,6 +283,19 @@ record ErroValidacao(string Codigo, string Mensagem, IReadOnlyDictionary<string,
 record HorariosDoDia(string Data, IReadOnlyList<MedicoComHorarios> Medicos);
 record MedicoComHorarios(int Id, string Nome, string Especialidade, IReadOnlyList<HorarioResposta> Horarios);
 record HorarioResposta(int Id, string Inicio, string Fim);
+
+record AgendamentoRequisicao(int? IdPaciente, int? IdHorario, string? TipoAtendimento);
+record ConsultaResposta(int Id, string Status, string TipoAtendimento, string Data, string Inicio, string Fim,
+                        MedicoResumo Medico, PacienteResumo Paciente)
+{
+    public static ConsultaResposta De(ConsultaDetalhe c) => new(
+        c.Id, c.Status, c.TipoAtendimento,
+        c.Data.ToString("yyyy-MM-dd"), c.Inicio.ToString("HH:mm"), c.Fim.ToString("HH:mm"),
+        new MedicoResumo(c.IdMedico, c.NomeMedico, c.Especialidade),
+        new PacienteResumo(c.IdPaciente, c.NomePaciente));
+}
+record MedicoResumo(int Id, string Nome, string Especialidade);
+record PacienteResumo(int Id, string Nome);
 
 record PacienteRequisicao(string? Nome, string? DataNascimento);
 record PacienteResposta(int Id, string Nome, string DataNascimento, int Idade)
