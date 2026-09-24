@@ -201,6 +201,81 @@ aparecer em `GET /api/horarios`.
 Erros: 404 `CONSULTA_NAO_ENCONTRADA` (não existe ou é de outra família) e
 409 `CONSULTA_NAO_CANCELAVEL` (já cancelada, já realizada, ou já começou).
 
+## Clínica: médico e recepção
+
+Rotas dos perfis MEDICO e RECEPCIONISTA. **O médico só mexe na própria
+agenda**: o médico sai do token, e um `idMedico` enviado por ele é ignorado.
+**A recepção mexe em todas**, e por isso informa de qual médico está falando.
+Responsável recebe 403.
+
+### POST /api/horarios
+
+Abre horários na agenda, em blocos:
+
+    { "idMedico": 3, "data": "2026-09-25", "inicio": "08:00", "fim": "12:00", "duracao": 30 }
+
+`duracao` em minutos (15, 20, 30, 40, 45 ou 60; se não vier, 30). O médico não
+precisa mandar `idMedico`.
+
+Sai (201):
+
+    { "criados": 8, "ignorados": 0 }
+
+Blocos que se sobrepõem a um horário que já existe naquele dia são pulados e
+contados em `ignorados` — repetir o mesmo pedido não duplica nada. Se a data
+for hoje, só entram os blocos que ainda não começaram.
+
+Erros: 400 `DADOS_INVALIDOS` (data passada, formato de hora `HH:MM`, fim antes
+do início, duração fora da lista, nenhum bloco cabe) e 404
+`MEDICO_NAO_ENCONTRADO`.
+
+### GET /api/agenda?data=2026-09-25
+
+A agenda do dia (RF08). O médico vê a dele; a recepção vê todos os médicos, ou
+um só com `&medico=3`. Todos os horários aparecem, cada um com a `situacao`:
+`LIVRE`, `BLOQUEADO` ou `OCUPADO`. Os ocupados trazem a consulta, o paciente e
+o contato do responsável:
+
+    {
+      "data": "2026-09-25",
+      "medicos": [
+        {
+          "id": 3, "nome": "Dr. Pedro Alves", "especialidade": "Pediatria",
+          "horarios": [
+            {
+              "id": 41, "inicio": "08:00", "fim": "08:30", "situacao": "OCUPADO",
+              "consulta": {
+                "id": 12, "status": "AGENDADA", "tipoAtendimento": "CONVENIO",
+                "paciente": { "id": 4, "nome": "Lucas Silva", "idade": 7 },
+                "responsavel": { "nome": "Maria Silva", "telefone": "11999990000" }
+              }
+            },
+            { "id": 42, "inicio": "08:30", "fim": "09:00", "situacao": "LIVRE", "consulta": null }
+          ]
+        }
+      ]
+    }
+
+### PATCH /api/horarios/{id}/bloquear e /desbloquear
+
+Sem corpo (RF09). Sai (200) `{ "id": 42, "bloqueado": true }`. Horário
+bloqueado some de `GET /api/horarios`. Não dá para bloquear horário com
+consulta marcada: 409 `HORARIO_OCUPADO` — cancele a consulta antes. Médico
+mexendo em horário de outro médico: 403.
+
+### PATCH /api/consultas/{id}/confirmar
+
+Médico ou recepção. Consulta `AGENDADA` que ainda não começou passa a
+`CONFIRMADA`. Sai (200) `{ "id": 12, "status": "CONFIRMADA" }`.
+
+### PATCH /api/consultas/{id}/realizar
+
+**Só o médico.** Registra que atendeu: consulta `AGENDADA` ou `CONFIRMADA` que
+já começou passa a `REALIZADA`. É o que os relatórios de atendimento contam.
+
+Erros das duas: 404 `CONSULTA_NAO_ENCONTRADA`, 403 (consulta de outro médico),
+409 `STATUS_NAO_PERMITE`, `CONSULTA_NAO_COMECOU` ou `CONSULTA_JA_COMECOU`.
+
 ## POST /api/cadastro/responsavel
 
 Cria a conta do responsável. Médico e recepcionista são criados pela clínica.

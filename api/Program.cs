@@ -44,6 +44,9 @@ builder.Services.AddScoped<HorarioService>();
 builder.Services.AddSingleton<IConsultaRepositorio>(
     _ => new ConsultaRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<ConsultaService>();
+builder.Services.AddSingleton<IAgendaRepositorio>(
+    _ => new AgendaRepositorioMySql(Configuracao.StringDeConexao!));
+builder.Services.AddScoped<AgendaService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<GeradorToken>();
 
@@ -225,8 +228,80 @@ consultas.MapPatch("/{id:int}/cancelar", (int id, ClaimsPrincipal usuario, Consu
         : ErroDeConsulta(resultado);
 });
 
+// RF08 e RF09 — o lado da clínica. Médico mexe só na própria agenda;
+// recepção mexe em todas.
+var clinica = app.MapGroup("/api")
+                 .RequireAuthorization(politica => politica.RequireRole("MEDICO", "RECEPCIONISTA"));
+
+clinica.MapPost("/horarios", (AberturaRequisicao req, ClaimsPrincipal usuario, AgendaService servico) =>
+{
+    var r = servico.AbrirHorarios(AtorDe(usuario), req.IdMedico, req.Data, req.Inicio, req.Fim, req.Duracao);
+    return r.Sucesso
+        ? Results.Json(new HorariosAbertosResposta(r.Valor!.Criados, r.Valor.Ignorados),
+                       statusCode: StatusCodes.Status201Created)
+        : FalhaClinica(r);
+});
+
+clinica.MapGet("/agenda", (string? data, int? medico, ClaimsPrincipal usuario, AgendaService servico) =>
+{
+    var r = servico.AgendaDoDia(AtorDe(usuario), data, medico);
+    if (!r.Sucesso)
+        return FalhaClinica(r);
+
+    var dia = DateOnly.ParseExact(data!.Trim(), "yyyy-MM-dd");
+    var medicos = r.Valor!
+        .GroupBy(i => (i.IdMedico, i.NomeMedico, i.Especialidade))
+        .Select(g => new AgendaMedico(g.Key.IdMedico, g.Key.NomeMedico, g.Key.Especialidade,
+            g.Select(i => new AgendaHorario(
+                i.IdHorario, i.Inicio.ToString("HH:mm"), i.Fim.ToString("HH:mm"), i.Situacao,
+                i.IdConsulta is null ? null : new AgendaConsulta(
+                    i.IdConsulta.Value, i.StatusConsulta!, i.TipoAtendimento!,
+                    new AgendaPaciente(i.IdPaciente!.Value, i.NomePaciente!,
+                        new Paciente { DataNascimento = i.NascimentoPaciente!.Value }.IdadeEm(dia)),
+                    new ContatoResponsavel(i.NomeResponsavel!, i.TelefoneResponsavel!)))).ToList()))
+        .ToList();
+
+    return Results.Ok(new AgendaDoDia(dia.ToString("yyyy-MM-dd"), medicos));
+});
+
+clinica.MapPatch("/horarios/{id:int}/bloquear", (int id, ClaimsPrincipal usuario, AgendaService servico) =>
+{
+    var r = servico.AlterarBloqueio(AtorDe(usuario), id, bloquear: true);
+    return r.Sucesso ? Results.Ok(new BloqueioResposta(id, Bloqueado: true)) : FalhaClinica(r);
+});
+
+clinica.MapPatch("/horarios/{id:int}/desbloquear", (int id, ClaimsPrincipal usuario, AgendaService servico) =>
+{
+    var r = servico.AlterarBloqueio(AtorDe(usuario), id, bloquear: false);
+    return r.Sucesso ? Results.Ok(new BloqueioResposta(id, Bloqueado: false)) : FalhaClinica(r);
+});
+
+clinica.MapPatch("/consultas/{id:int}/confirmar", (int id, ClaimsPrincipal usuario, AgendaService servico) =>
+{
+    var r = servico.Confirmar(AtorDe(usuario), id);
+    return r.Sucesso ? Results.Ok(new StatusConsultaResposta(id, r.Valor!)) : FalhaClinica(r);
+});
+
+// Só o médico registra que atendeu.
+app.MapPatch("/api/consultas/{id:int}/realizar", (int id, ClaimsPrincipal usuario, AgendaService servico) =>
+{
+    var r = servico.Realizar(AtorDe(usuario), id);
+    return r.Sucesso ? Results.Ok(new StatusConsultaResposta(id, r.Valor!)) : FalhaClinica(r);
+}).RequireAuthorization(politica => politica.RequireRole("MEDICO"));
+
 app.Run();
 return 0;
+
+static Ator AtorDe(ClaimsPrincipal usuario) => new(IdUsuario(usuario), usuario.FindFirstValue("role")!);
+
+static IResult FalhaClinica<T>(ResultadoClinica<T> r) => r.Falha switch
+{
+    TipoFalhaClinica.DadosInvalidos => Results.Json(
+        new ErroValidacao(r.Codigo, r.Mensagem, r.Campos!), statusCode: StatusCodes.Status400BadRequest),
+    TipoFalhaClinica.SemPermissao => Erro(r.Codigo, r.Mensagem, StatusCodes.Status403Forbidden),
+    TipoFalhaClinica.NaoEncontrado => Erro(r.Codigo, r.Mensagem, StatusCodes.Status404NotFound),
+    _ => Erro(r.Codigo, r.Mensagem, StatusCodes.Status409Conflict)
+};
 
 static IResult ErroDeConsulta(ResultadoConsulta r) => r.Motivo switch
 {
@@ -283,6 +358,18 @@ record ErroValidacao(string Codigo, string Mensagem, IReadOnlyDictionary<string,
 record HorariosDoDia(string Data, IReadOnlyList<MedicoComHorarios> Medicos);
 record MedicoComHorarios(int Id, string Nome, string Especialidade, IReadOnlyList<HorarioResposta> Horarios);
 record HorarioResposta(int Id, string Inicio, string Fim);
+
+record AberturaRequisicao(int? IdMedico, string? Data, string? Inicio, string? Fim, int? Duracao);
+record HorariosAbertosResposta(int Criados, int Ignorados);
+record BloqueioResposta(int Id, bool Bloqueado);
+record StatusConsultaResposta(int Id, string Status);
+record AgendaDoDia(string Data, IReadOnlyList<AgendaMedico> Medicos);
+record AgendaMedico(int Id, string Nome, string Especialidade, IReadOnlyList<AgendaHorario> Horarios);
+record AgendaHorario(int Id, string Inicio, string Fim, string Situacao, AgendaConsulta? Consulta);
+record AgendaConsulta(int Id, string Status, string TipoAtendimento, AgendaPaciente Paciente,
+                      ContatoResponsavel Responsavel);
+record AgendaPaciente(int Id, string Nome, int Idade);
+record ContatoResponsavel(string Nome, string Telefone);
 
 record AgendamentoRequisicao(int? IdPaciente, int? IdHorario, string? TipoAtendimento);
 record ConsultaResposta(int Id, string Status, string TipoAtendimento, string Data, string Inicio, string Fim,
