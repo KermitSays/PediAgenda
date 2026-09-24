@@ -1,12 +1,17 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using PediAgenda.Api.Seguranca;
 using PediAgenda.Nucleo;
+using PediAgenda.Nucleo.Modelos;
 using PediAgenda.Nucleo.Repositorios;
 using PediAgenda.Nucleo.Servicos;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// A senha do banco vem da variável de ambiente PEDIAGENDA_CONEXAO, nunca do
-// código. Se ela não existir, a API nem sobe — melhor falhar agora do que na
-// primeira tentativa de login.
+// A senha do banco e a chave do token vêm de variáveis de ambiente, nunca do
+// código. Se alguma faltar, a API nem sobe — melhor falhar agora do que na
+// primeira requisição.
 if (!Configuracao.TemBanco)
 {
     Console.Error.WriteLine($"Defina a variável {Configuracao.VariavelAmbiente} antes de subir a API.");
@@ -16,19 +21,71 @@ if (!Configuracao.TemBanco)
     return 1;
 }
 
+if (!ConfiguracaoToken.ChaveValida)
+{
+    Console.Error.WriteLine($"Defina a variável {ConfiguracaoToken.VariavelAmbiente} com pelo menos " +
+                            $"{ConfiguracaoToken.TamanhoMinimoChave} caracteres. Para gerar uma aleatória (PowerShell):");
+    Console.Error.WriteLine("  $b = New-Object byte[] 48; " +
+        "[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); " +
+        $"setx {ConfiguracaoToken.VariavelAmbiente} ([Convert]::ToBase64String($b))");
+    return 1;
+}
+
 builder.Services.AddSingleton<IUsuarioRepositorio>(
     _ => new UsuarioRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<AutenticacaoService>();
 builder.Services.AddScoped<CadastroService>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<GeradorToken>();
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opcoes =>
+    {
+        // Mantém os nomes curtos das informações do token (sub, name, role).
+        opcoes.MapInboundClaims = false;
+        opcoes.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = ConfiguracaoToken.Emissor,
+            ValidAudience = ConfiguracaoToken.Publico,
+            IssuerSigningKey = ConfiguracaoToken.ChaveDeAssinatura(),
+            NameClaimType = "name",
+            RoleClaimType = "role",
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+
+        // Sem isto, token ausente ou vencido devolve 401 com corpo vazio. Aqui
+        // ele segue o mesmo formato de erro do resto da API.
+        opcoes.Events = new JwtBearerEvents
+        {
+            OnChallenge = async contexto =>
+            {
+                contexto.HandleResponse();
+                contexto.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await contexto.Response.WriteAsJsonAsync(new ErroApi("NAO_AUTENTICADO",
+                    "Sessão expirada ou inválida. Faça login novamente."));
+            },
+            OnForbidden = async contexto =>
+            {
+                contexto.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await contexto.Response.WriteAsJsonAsync(new ErroApi("SEM_PERMISSAO",
+                    "Seu perfil não tem acesso a esta função."));
+            }
+        };
+    });
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Serve para o app conferir se a API está no ar antes de tentar o login.
 app.MapGet("/api/saude", () => Results.Ok(new { status = "ok" }));
 
 // RF03 e RF04 — a regra inteira vive no AutenticacaoService, do núcleo.
-// Aqui só traduzimos o resultado dela para HTTP.
-app.MapPost("/api/auth/login", (LoginRequisicao req, AutenticacaoService auth) =>
+// Aqui só traduzimos o resultado dela para HTTP e entregamos o token.
+app.MapPost("/api/auth/login", (LoginRequisicao req, AutenticacaoService auth, GeradorToken tokens) =>
 {
     var resultado = auth.Autenticar(req.Email, req.Senha);
 
@@ -36,25 +93,30 @@ app.MapPost("/api/auth/login", (LoginRequisicao req, AutenticacaoService auth) =
         return Results.Json(new ErroApi(Codigo(resultado.Motivo), resultado.Mensagem),
                             statusCode: Status(resultado.Motivo));
 
-    var u = resultado.Usuario!;
-    return Results.Ok(new UsuarioLogado(u.Id, u.Nome, u.Email,
-                                        u.Perfil.ToString().ToUpperInvariant()));
+    return Results.Ok(Sessao(resultado.Usuario!, tokens));
 });
 
+// Devolve quem é o dono do token. Serve para o app conferir, ao abrir, se o
+// token que ele guardou ainda vale — e é a primeira rota que exige login.
+app.MapGet("/api/auth/eu", (ClaimsPrincipal usuario) =>
+    Results.Ok(new UsuarioLogado(
+        int.Parse(usuario.FindFirstValue("sub")!),
+        usuario.FindFirstValue("name")!,
+        usuario.FindFirstValue("email")!,
+        usuario.FindFirstValue("role")!)))
+   .RequireAuthorization();
+
 // RF01 — cadastro do responsável. Médico e recepcionista são criados pela
-// clínica, não por aqui.
-app.MapPost("/api/cadastro/responsavel", (CadastroRequisicao req, CadastroService cadastro) =>
+// clínica, não por aqui. Já devolve o token: quem acabou de se cadastrar
+// entra direto, sem precisar logar de novo.
+app.MapPost("/api/cadastro/responsavel", (CadastroRequisicao req, CadastroService cadastro, GeradorToken tokens) =>
 {
     var resultado = cadastro.Cadastrar(new DadosResponsavel(
         req.Nome, req.Cpf, req.Email, req.Telefone, req.Senha, req.AceiteTermos));
 
     if (resultado.Sucesso)
-    {
-        var novo = resultado.Usuario!;
-        return Results.Json(new UsuarioLogado(novo.Id, novo.Nome, novo.Email,
-                                              novo.Perfil.ToString().ToUpperInvariant()),
+        return Results.Json(Sessao(resultado.Usuario!, tokens),
                             statusCode: StatusCodes.Status201Created);
-    }
 
     if (resultado.Motivo == MotivoRecusa.DadosInvalidos)
         return Results.Json(new ErroValidacao("DADOS_INVALIDOS", resultado.Mensagem, resultado.Campos!),
@@ -69,6 +131,13 @@ app.MapPost("/api/cadastro/responsavel", (CadastroRequisicao req, CadastroServic
 
 app.Run();
 return 0;
+
+static SessaoIniciada Sessao(Usuario u, GeradorToken tokens)
+{
+    var perfil = u.Perfil.ToString().ToUpperInvariant();
+    var (token, expiraEm) = tokens.Gerar(u.Id, u.Nome, u.Email, perfil);
+    return new SessaoIniciada(u.Id, u.Nome, u.Email, perfil, token, expiraEm);
+}
 
 static int Status(MotivoFalha motivo) => motivo switch
 {
@@ -93,5 +162,6 @@ record LoginRequisicao(string? Email, string? Senha);
 record CadastroRequisicao(string? Nome, string? Cpf, string? Email,
                           string? Telefone, string? Senha, bool AceiteTermos);
 record UsuarioLogado(int Id, string Nome, string Email, string Perfil);
+record SessaoIniciada(int Id, string Nome, string Email, string Perfil, string Token, DateTime ExpiraEm);
 record ErroApi(string Codigo, string Mensagem);
 record ErroValidacao(string Codigo, string Mensagem, IReadOnlyDictionary<string, string> Campos);
