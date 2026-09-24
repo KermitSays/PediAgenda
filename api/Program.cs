@@ -35,6 +35,9 @@ builder.Services.AddSingleton<IUsuarioRepositorio>(
     _ => new UsuarioRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<AutenticacaoService>();
 builder.Services.AddScoped<CadastroService>();
+builder.Services.AddSingleton<IPacienteRepositorio>(
+    _ => new PacienteRepositorioMySql(Configuracao.StringDeConexao!));
+builder.Services.AddScoped<PacienteService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<GeradorToken>();
 
@@ -129,8 +132,45 @@ app.MapPost("/api/cadastro/responsavel", (CadastroRequisicao req, CadastroServic
                         statusCode: StatusCodes.Status409Conflict);
 });
 
+// Pacientes (as crianças) do responsável logado. Só o perfil RESPONSAVEL
+// entra aqui, e o responsável sai do token — não há id na URL para trocar.
+var pacientes = app.MapGroup("/api/pacientes")
+                   .RequireAuthorization(politica => politica.RequireRole("RESPONSAVEL"));
+
+pacientes.MapGet("", (ClaimsPrincipal usuario, PacienteService servico) =>
+{
+    var lista = servico.Listar(IdUsuario(usuario));
+    if (lista is null)
+        return Results.Json(new ErroApi("SEM_PERMISSAO", "Só o responsável pode ver pacientes."),
+                            statusCode: StatusCodes.Status403Forbidden);
+
+    return Results.Ok(lista.Select(PacienteResposta.De));
+});
+
+pacientes.MapPost("", (PacienteRequisicao req, ClaimsPrincipal usuario, PacienteService servico) =>
+{
+    var resultado = servico.Cadastrar(IdUsuario(usuario), req.Nome, req.DataNascimento);
+
+    return resultado.Motivo switch
+    {
+        MotivoRecusaPaciente.Nenhum =>
+            Results.Json(PacienteResposta.De(resultado.Paciente!), statusCode: StatusCodes.Status201Created),
+        MotivoRecusaPaciente.DadosInvalidos =>
+            Results.Json(new ErroValidacao("DADOS_INVALIDOS", resultado.Mensagem, resultado.Campos!),
+                         statusCode: StatusCodes.Status400BadRequest),
+        MotivoRecusaPaciente.JaCadastrado =>
+            Results.Json(new ErroApi("PACIENTE_JA_CADASTRADO", resultado.Mensagem),
+                         statusCode: StatusCodes.Status409Conflict),
+        _ =>
+            Results.Json(new ErroApi("SEM_PERMISSAO", resultado.Mensagem),
+                         statusCode: StatusCodes.Status403Forbidden)
+    };
+});
+
 app.Run();
 return 0;
+
+static int IdUsuario(ClaimsPrincipal usuario) => int.Parse(usuario.FindFirstValue("sub")!);
 
 static SessaoIniciada Sessao(Usuario u, GeradorToken tokens)
 {
@@ -165,3 +205,11 @@ record UsuarioLogado(int Id, string Nome, string Email, string Perfil);
 record SessaoIniciada(int Id, string Nome, string Email, string Perfil, string Token, DateTime ExpiraEm);
 record ErroApi(string Codigo, string Mensagem);
 record ErroValidacao(string Codigo, string Mensagem, IReadOnlyDictionary<string, string> Campos);
+
+record PacienteRequisicao(string? Nome, string? DataNascimento);
+record PacienteResposta(int Id, string Nome, string DataNascimento, int Idade)
+{
+    public static PacienteResposta De(Paciente p) =>
+        new(p.Id, p.Nome, p.DataNascimento.ToString("yyyy-MM-dd"),
+            p.IdadeEm(DateOnly.FromDateTime(DateTime.Today)));
+}
