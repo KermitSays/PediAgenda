@@ -73,6 +73,38 @@ Exige token. Devolve o dono dele:
 Serve para o app conferir, ao abrir, se o token guardado ainda vale. Se vier
 401, pede login.
 
+## Pacientes
+
+Os filhos do responsável logado. Exigem token de perfil RESPONSAVEL; médico e
+recepção recebem 403. O responsável vem do token — não vai id na URL, então
+ninguém consegue ver os filhos de outra família trocando um número.
+
+### GET /api/pacientes
+
+Sai (200), em ordem de nome, lista vazia se ainda não houver nenhum:
+
+    [
+      { "id": 2, "nome": "Ana Silva", "dataNascimento": "2022-07-01", "idade": 4 },
+      { "id": 1, "nome": "Lucas Silva", "dataNascimento": "2019-03-10", "idade": 7 }
+    ]
+
+### POST /api/pacientes
+
+Entra:
+
+    { "nome": "Lucas Silva", "dataNascimento": "2019-03-10" }
+
+A data vai no formato `AAAA-MM-DD` (no MAUI: `data.ToString("yyyy-MM-dd")`).
+
+Sai (201) o paciente criado, no mesmo formato da lista.
+
+Erros:
+
+- 400 `DADOS_INVALIDOS`, com `campos`: nome vazio, data em outro formato, data
+  no futuro, ou paciente com mais de 17 anos (a clínica é pediátrica)
+- 409 `PACIENTE_JA_CADASTRADO`: mesmo nome e mesma data de nascimento para o
+  mesmo responsável — protege contra toque duplo no botão de salvar
+
 ## POST /api/cadastro/responsavel
 
 Cria a conta do responsável. Médico e recepcionista são criados pela clínica.
