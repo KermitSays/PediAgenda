@@ -38,6 +38,9 @@ builder.Services.AddScoped<CadastroService>();
 builder.Services.AddSingleton<IPacienteRepositorio>(
     _ => new PacienteRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<PacienteService>();
+builder.Services.AddSingleton<IHorarioRepositorio>(
+    _ => new HorarioRepositorioMySql(Configuracao.StringDeConexao!));
+builder.Services.AddScoped<HorarioService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<GeradorToken>();
 
@@ -167,6 +170,28 @@ pacientes.MapPost("", (PacienteRequisicao req, ClaimsPrincipal usuario, Paciente
     };
 });
 
+// RF05 e RNF03 — horários livres de um dia, agrupados por médico. Qualquer
+// perfil logado consulta: o responsável para agendar, a recepção para atender
+// quem liga.
+app.MapGet("/api/horarios", (string? data, string? especialidade, int? medico, HorarioService servico) =>
+{
+    var resultado = servico.Livres(data, especialidade, medico);
+
+    if (!resultado.Sucesso)
+        return Results.Json(new ErroValidacao("DADOS_INVALIDOS", "Verifique os filtros.", resultado.Campos!),
+                            statusCode: StatusCodes.Status400BadRequest);
+
+    var medicos = resultado.Livres
+        .GroupBy(h => (h.IdMedico, h.NomeMedico, h.Especialidade))
+        .Select(grupo => new MedicoComHorarios(
+            grupo.Key.IdMedico, grupo.Key.NomeMedico, grupo.Key.Especialidade,
+            grupo.Select(h => new HorarioResposta(
+                h.IdHorario, h.Inicio.ToString("HH:mm"), h.Fim.ToString("HH:mm"))).ToList()))
+        .ToList();
+
+    return Results.Ok(new HorariosDoDia(resultado.Data.ToString("yyyy-MM-dd"), medicos));
+}).RequireAuthorization();
+
 app.Run();
 return 0;
 
@@ -205,6 +230,10 @@ record UsuarioLogado(int Id, string Nome, string Email, string Perfil);
 record SessaoIniciada(int Id, string Nome, string Email, string Perfil, string Token, DateTime ExpiraEm);
 record ErroApi(string Codigo, string Mensagem);
 record ErroValidacao(string Codigo, string Mensagem, IReadOnlyDictionary<string, string> Campos);
+
+record HorariosDoDia(string Data, IReadOnlyList<MedicoComHorarios> Medicos);
+record MedicoComHorarios(int Id, string Nome, string Especialidade, IReadOnlyList<HorarioResposta> Horarios);
+record HorarioResposta(int Id, string Inicio, string Fim);
 
 record PacienteRequisicao(string? Nome, string? DataNascimento);
 record PacienteResposta(int Id, string Nome, string DataNascimento, int Idade)

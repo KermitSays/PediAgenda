@@ -105,6 +105,46 @@ Erros:
 - 409 `PACIENTE_JA_CADASTRADO`: mesmo nome e mesma data de nascimento para o
   mesmo responsável — protege contra toque duplo no botão de salvar
 
+## GET /api/horarios
+
+Horários livres de um dia, agrupados por médico. Exige token (qualquer perfil).
+
+    GET /api/horarios?data=2026-09-25
+    GET /api/horarios?data=2026-09-25&especialidade=Pediatria
+    GET /api/horarios?data=2026-09-25&medico=3
+
+`data` é obrigatória (`AAAA-MM-DD`); `especialidade` e `medico` são filtros
+opcionais.
+
+Sai (200) — só aparecem médicos com pelo menos um horário livre:
+
+    {
+      "data": "2026-09-25",
+      "medicos": [
+        {
+          "id": 3,
+          "nome": "Dr. Pedro Alves",
+          "especialidade": "Pediatria",
+          "horarios": [
+            { "id": 41, "inicio": "08:00", "fim": "08:30" },
+            { "id": 42, "inicio": "08:30", "fim": "09:00" }
+          ]
+        }
+      ]
+    }
+
+Dia sem atendimento (fim de semana, por exemplo) volta `"medicos": []`. O `id`
+do horário é o que a tela vai mandar para agendar.
+
+Livre quer dizer: não bloqueado na agenda e sem consulta ativa. Consulta
+cancelada devolve o horário para a lista. Se a data for hoje, só entram os
+horários que ainda não começaram. A lista é calculada na hora, a partir do
+banco (RNF03).
+
+Data vazia, em outro formato ou no passado: 400 `DADOS_INVALIDOS`.
+
+Para ter horários para testar, rode `banco/dados_de_teste.sql`.
+
 ## POST /api/cadastro/responsavel
 
 Cria a conta do responsável. Médico e recepcionista são criados pela clínica.
