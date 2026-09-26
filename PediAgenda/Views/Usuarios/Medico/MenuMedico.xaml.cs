@@ -82,10 +82,8 @@ public partial class MenuMedico : ContentPage
     // CONSULTAS
     private async void MedicoConsultasButton_Clicked(object sender, TappedEventArgs e)
     {
-        await DisplayAlertAsync(
-            "Consultas",
-            "Tela de consultas ainda será implementada.",
-            "OK");
+        await Shell.Current.GoToAsync(
+            nameof(ConsultasMedico));
     }
 
     // RELATÓRIOS

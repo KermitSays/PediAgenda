@@ -80,6 +80,10 @@
                         Padding="14"
                         StrokeShape="RoundRectangle 16">
 
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="PacientesMedico_Clicked" />
+                        </Border.GestureRecognizers>
+
                         <Grid
                             ColumnDefinitions="70,*,Auto"
                             ColumnSpacing="14">

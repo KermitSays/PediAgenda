@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Medico.ProntuarioPaciente"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Prontuário"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="24,30,24,30"
+            Spacing="18">
+
+            <!-- TÍTULO -->
+            <Label
+                Text="Prontuário"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <!-- DADOS DO PACIENTE -->
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 16">
+
+                <VerticalStackLayout
+                    Spacing="12">
+
+                    <Label
+                        Text="Dados do Paciente"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Grid
+                        RowDefinitions="Auto,Auto,Auto"
+                        ColumnDefinitions="Auto,*"
+                        RowSpacing="8"
+                        ColumnSpacing="10">
+
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Text="Nome:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            x:Name="NomePacienteLabel"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Text="Data de nascimento:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            x:Name="DataNascimentoLabel"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Text="Responsável:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            x:Name="ResponsavelLabel"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </Grid>
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- HISTÓRICO -->
+            <Label
+                Text="Histórico"
+                FontSize="20"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <CollectionView
+                x:Name="HistoricoCollectionView"
+                SelectionMode="None">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout
+                        Orientation="Vertical"
+                        ItemSpacing="12" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+
+                        <Border
+                            BackgroundColor="{StaticResource White}"
+                            Stroke="{StaticResource InputBlue}"
+                            StrokeThickness="1"
+                            Padding="16"
+                            StrokeShape="RoundRectangle 16">
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="ConsultaHistorico_Clicked" />
+                            </Border.GestureRecognizers>
+
+                            <Grid
+                                ColumnDefinitions="*,Auto"
+                                ColumnSpacing="12">
+
+                                <VerticalStackLayout
+                                    Grid.Column="0"
+                                    Spacing="4">
+
+                                    <Label
+                                        Text="{Binding TipoConsulta}"
+                                        FontSize="16"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource TextDark}" />
+
+                                    <Label
+                                        Text="{Binding DataTexto}"
+                                        FontSize="14"
+                                        TextColor="{StaticResource InputPlaceholder}" />
+
+                                </VerticalStackLayout>
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="›"
+                                    FontSize="28"
+                                    TextColor="{StaticResource PrimaryBlue}"
+                                    VerticalOptions="Center" />
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+                <CollectionView.EmptyView>
+
+                    <Label
+                        Text="Nenhuma consulta registrada."
+                        FontSize="15"
+                        TextColor="{StaticResource InputPlaceholder}"
+                        HorizontalTextAlignment="Center"
+                        Margin="0,5,0,10" />
+
+                </CollectionView.EmptyView>
+
+            </CollectionView>
+
+            <!-- VOLTAR -->
+            <Button
+                Text="← Voltar"
+                Clicked="VoltarButton_Clicked"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                FontSize="16"
+                HorizontalOptions="Center"
+                Margin="0,5,0,0" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

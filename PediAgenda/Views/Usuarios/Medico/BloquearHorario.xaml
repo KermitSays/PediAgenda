@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Medico.BloquearHorario"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+    Title="Bloquear Horário"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="24,30,24,24"
+            Spacing="18">
+
+            <!-- TÍTULO -->
+            <Label
+                Text="Bloquear Horário"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <!-- DATA INICIAL -->
+            <VerticalStackLayout Spacing="7">
+
+                <Label
+                    Text="Data Inicial"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 14"
+                    Padding="12,4">
+
+                    <DatePicker
+                        x:Name="DataInicialPicker"
+                        Format="dd/MM/yyyy"
+                        TextColor="{StaticResource TextDark}"
+                        MinimumDate="{x:Static sys:DateTime.Today}" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+            <!-- DATA FINAL -->
+            <VerticalStackLayout Spacing="7">
+
+                <Label
+                    Text="Data Final"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 14"
+                    Padding="12,4">
+
+                    <DatePicker
+                        x:Name="DataFinalPicker"
+                        Format="dd/MM/yyyy"
+                        TextColor="{StaticResource TextDark}"
+                        MinimumDate="{x:Static sys:DateTime.Today}" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+            <!-- HORÁRIO INICIAL -->
+            <VerticalStackLayout Spacing="7">
+
+                <Label
+                    Text="Horário Inicial"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 14"
+                    Padding="12,4">
+
+                    <TimePicker
+                        x:Name="HorarioInicialPicker"
+                        Format="HH:mm"
+                        TextColor="{StaticResource TextDark}" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+            <!-- HORÁRIO FINAL -->
+            <VerticalStackLayout Spacing="7">
+
+                <Label
+                    Text="Horário Final"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 14"
+                    Padding="12,4">
+
+                    <TimePicker
+                        x:Name="HorarioFinalPicker"
+                        Format="HH:mm"
+                        TextColor="{StaticResource TextDark}" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+            <!-- MOTIVO -->
+            <VerticalStackLayout Spacing="7">
+
+                <Label
+                    Text="Motivo"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 14"
+                    Padding="12">
+
+                    <Editor
+                        x:Name="MotivoEditor"
+                        Placeholder="Informe o motivo do bloqueio..."
+                        PlaceholderColor="{StaticResource InputPlaceholder}"
+                        TextColor="{StaticResource TextDark}"
+                        FontSize="15"
+                        AutoSize="TextChanges"
+                        MinimumHeightRequest="100" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+            <!-- AÇÕES -->
+            <VerticalStackLayout
+                Spacing="10"
+                Margin="0,8,0,0">
+
+                <Button
+                    Text="BLOQUEAR HORÁRIO"
+                    HeightRequest="52"
+                    CornerRadius="16"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="{StaticResource White}"
+                    FontAttributes="Bold"
+                    Clicked="BloquearHorarioButton_Clicked" />
+
+                <Button
+                    Text="Cancelar"
+                    HeightRequest="50"
+                    CornerRadius="16"
+                    BackgroundColor="{StaticResource White}"
+                    TextColor="{StaticResource PrimaryBlue}"
+                    BorderColor="{StaticResource PrimaryBlue}"
+                    BorderWidth="1"
+                    Clicked="CancelarButton_Clicked" />
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

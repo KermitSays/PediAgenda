@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Medico.DetalhesProntuario"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Detalhes do Prontuário"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="24,30,24,30"
+            Spacing="18">
+
+            <Label
+                Text="Detalhes da consulta"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 16">
+
+                <VerticalStackLayout
+                    Spacing="14">
+
+                    <Label
+                        Text="Consulta"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Grid
+                        ColumnDefinitions="Auto,*"
+                        RowDefinitions="Auto,Auto"
+                        ColumnSpacing="10"
+                        RowSpacing="10">
+
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Text="Tipo:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            x:Name="TipoConsultaLabel"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Text="Data:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            x:Name="DataConsultaLabel"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </Grid>
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <Label
+                Text="Observações"
+                FontSize="20"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 16">
+
+                <Label
+                    x:Name="ObservacoesLabel"
+                    FontSize="15"
+                    LineBreakMode="WordWrap"
+                    TextColor="{StaticResource TextDark}" />
+
+            </Border>
+
+            <Button
+                Text="← Voltar"
+                Clicked="VoltarButton_Clicked"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                FontSize="16"
+                HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>
