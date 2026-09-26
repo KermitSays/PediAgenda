@@ -1,12 +1,20 @@
-# PediAgenda — API de login
+# PediAgenda — API
 
-API que o app chama para autenticar. .NET 9, banco MySQL `pediagenda`.
+API que o app chama para autenticar, cadastrar e, daqui em diante, agendar.
+.NET 9, banco MySQL `pediagenda`.
 
 ## Rodar
 
-A senha do banco vem de variável de ambiente, nunca do código:
+A senha do banco e a chave do token vêm de variáveis de ambiente, nunca do
+código:
 
     setx PEDIAGENDA_CONEXAO "Server=localhost;Port=3306;Database=pediagenda;User ID=SEU_USUARIO;Password=SUA_SENHA;"
+
+A chave do token é aleatória, cada um gera a sua (PowerShell):
+
+    $b = New-Object byte[] 48; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); setx PEDIAGENDA_JWT_CHAVE ([Convert]::ToBase64String($b))
+
+Feche e reabra o terminal, e:
 
     dotnet run --project api/PediAgenda.Api.csproj --urls http://localhost:5000
 
@@ -20,7 +28,14 @@ Entra:
 
 Sai (200):
 
-    { "id": 7, "nome": "Maria Silva", "email": "maria@exemplo.com", "perfil": "RESPONSAVEL" }
+    {
+      "id": 7,
+      "nome": "Maria Silva",
+      "email": "maria@exemplo.com",
+      "perfil": "RESPONSAVEL",
+      "token": "eyJhbGciOiJIUzI1NiIs...",
+      "expiraEm": "2026-09-24T21:00:00Z"
+    }
 
 `perfil` é RESPONSAVEL, MEDICO ou RECEPCIONISTA — é por ele que o app escolhe a tela.
 
@@ -29,6 +44,34 @@ Erro (400, 401, 403 ou 423):
     { "codigo": "CREDENCIAIS_INVALIDAS", "mensagem": "E-mail ou senha inválidos." }
 
 A tela pode exibir o `mensagem` direto.
+
+## O token
+
+O app guarda o `token` e manda em todas as chamadas que exigem login, no
+cabeçalho `Authorization`:
+
+    http.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", sessao.Token);
+
+Ele vale 8 horas. Depois disso, ou se estiver ausente ou alterado, a API
+responde 401 e o app deve voltar para a tela de login:
+
+    { "codigo": "NAO_AUTENTICADO", "mensagem": "Sessão expirada ou inválida. Faça login novamente." }
+
+Rota certa, mas perfil errado (por exemplo, responsável tentando abrir a agenda
+do médico), responde 403 com `SEM_PERMISSAO`.
+
+Para guardar o token no celular, use `SecureStorage` do MAUI, não
+`Preferences`: ele fica criptografado pelo sistema.
+
+## GET /api/auth/eu
+
+Exige token. Devolve o dono dele:
+
+    { "id": 7, "nome": "Maria Silva", "email": "maria@exemplo.com", "perfil": "RESPONSAVEL" }
+
+Serve para o app conferir, ao abrir, se o token guardado ainda vale. Se vier
+401, pede login.
 
 ## POST /api/cadastro/responsavel
 
@@ -48,10 +91,8 @@ Entra:
 Todos obrigatórios. O CPF pode vir com ponto e traço. A senha segue a mesma
 regra do login, mínimo de 8 caracteres.
 
-Sai (201) igual ao login — dá para ir direto para a tela inicial, sem pedir
-login de novo:
-
-    { "id": 7, "nome": "Maria Silva", "email": "maria@exemplo.com", "perfil": "RESPONSAVEL" }
+Sai (201) igual ao login, com token — dá para ir direto para a tela inicial,
+sem pedir login de novo.
 
 Campo inválido (400) vem com a lista, para a tela marcar cada um:
 
