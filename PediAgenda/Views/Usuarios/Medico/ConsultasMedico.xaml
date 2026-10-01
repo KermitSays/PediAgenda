@@ -156,6 +156,18 @@
                     FontAttributes="Bold"
                     Clicked="BloquearHorarioButton_Clicked" />
 
+                <!-- LIBERAR HORÁRIOS -->
+                <Button
+                    Text="LIBERAR HORÁRIOS"
+                    HeightRequest="52"
+                    CornerRadius="16"
+                    BackgroundColor="{StaticResource White}"
+                    TextColor="{StaticResource PrimaryBlue}"
+                    BorderColor="{StaticResource PrimaryBlue}"
+                    BorderWidth="1"
+                    FontAttributes="Bold"
+                    Clicked="LiberarHorariosButton_Clicked" />
+
                 <!-- VOLTAR -->
                 <Button
                     Text="Voltar"

@@ -106,6 +106,12 @@
 	  <MauiXaml Update="Views\Usuarios\Medico\DetalhesProntuario.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\Usuarios\Medico\EditarBloqueio.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Usuarios\Medico\LiberarHorarios.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\Usuarios\Medico\MenuMedico.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

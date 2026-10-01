@@ -105,5 +105,12 @@ public partial class AppShell : Shell
             nameof(Views.Usuarios.Medico.BloquearHorario),
             typeof(Views.Usuarios.Medico.BloquearHorario));
 
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Medico.LiberarHorarios),
+            typeof(Views.Usuarios.Medico.LiberarHorarios));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Medico.EditarBloqueio),
+            typeof(Views.Usuarios.Medico.EditarBloqueio));
     }
 }

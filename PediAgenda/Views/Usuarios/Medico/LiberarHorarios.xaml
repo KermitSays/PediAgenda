@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Medico.LiberarHorarios"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Liberar Horários"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <Grid
+        RowDefinitions="Auto,*"
+        Padding="24,30,24,20"
+        RowSpacing="18">
+
+        <!-- TÍTULO -->
+        <Label
+            Grid.Row="0"
+            Text="Liberar Horários"
+            FontSize="28"
+            FontAttributes="Bold"
+            TextColor="{StaticResource TextDark}" />
+
+        <!-- LISTA DE BLOQUEIOS -->
+        <CollectionView
+            Grid.Row="1"
+            x:Name="BloqueiosCollectionView"
+            SelectionMode="None">
+
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout
+                    Orientation="Vertical"
+                    ItemSpacing="12" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+
+                    <Border
+                        BackgroundColor="{StaticResource White}"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="16">
+
+                        <VerticalStackLayout Spacing="10">
+
+                            <!-- DATA -->
+                            <Label
+                                Text="{Binding PeriodoData}"
+                                FontSize="17"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+                            <!-- HORÁRIO -->
+                            <Label
+                                Text="{Binding PeriodoHorario}"
+                                FontSize="16"
+                                TextColor="{StaticResource PrimaryBlue}" />
+
+                            <!-- MOTIVO -->
+                            <Label
+                                Text="{Binding MotivoTexto}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextDark}" />
+
+                            <!-- EDITAR -->
+                            <Button Text="EDITAR BLOQUEIO"
+                                    HeightRequest="46"
+                                    CornerRadius="14"
+                                    BackgroundColor="{StaticResource PrimaryBlue}"
+                                    TextColor="{StaticResource White}"
+                                    FontAttributes="Bold"
+                                    Clicked="EditarBloqueioButton_Clicked" />
+
+                            <!-- LIBERAR PERÍODO -->
+                            <Button Text="LIBERAR TODO O PERÍODO"
+                                    HeightRequest="46"
+                                    CornerRadius="14"
+                                    BackgroundColor="{StaticResource White}"
+                                    TextColor="{StaticResource PrimaryBlue}"
+                                    BorderColor="{StaticResource PrimaryBlue}"
+                                    BorderWidth="1"
+                                    FontAttributes="Bold"
+                                    Clicked="LiberarPeriodoButton_Clicked" />
+
+                        </VerticalStackLayout>
+
+                    </Border>
+
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+
+                <VerticalStackLayout
+                    Padding="20"
+                    Spacing="10"
+                    VerticalOptions="Center">
+
+                    <Label
+                        Text="Nenhum horário bloqueado."
+                        FontSize="17"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        Text="Os bloqueios criados pelo médico aparecerão aqui."
+                        FontSize="14"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource TextDark}" />
+
+                </VerticalStackLayout>
+
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

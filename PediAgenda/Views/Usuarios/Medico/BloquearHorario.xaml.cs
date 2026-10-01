@@ -74,7 +74,17 @@ public partial class BloquearHorario : ContentPage
         if (!confirmar)
             return;
 
-        // Bloqueio mockado nesta etapa
+        // Salva o bloqueio
+        BloqueiosMedico.Bloqueios.Add(
+            new BloqueioHorario
+            {
+                DataInicial = dataInicial,
+                DataFinal = dataFinal,
+                HorarioInicial = horarioInicial,
+                HorarioFinal = horarioFinal,
+                Motivo = motivo
+            });
+
         await DisplayAlertAsync(
             "Horário bloqueado",
             "O horário foi bloqueado com sucesso.",

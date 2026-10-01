@@ -6,95 +6,152 @@ public partial class ConsultasMedico : ContentPage
 {
     public ObservableCollection<ConsultaAgenda> Agenda { get; set; }
 
+    // Construtor da página ConsultasMedico
     public ConsultasMedico()
     {
         InitializeComponent();
 
         DataConsultaPicker.DateSelected += DataConsultaPicker_DateSelected;
-
-        CarregarAgenda(DataConsultaPicker.Date ?? DateTime.Today);
     }
 
+    // Sobrescreve o método OnAppearing para carregar a agenda ao aparecer a página
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        CarregarAgenda(
+            DataConsultaPicker.Date ?? DateTime.Today);
+    }
+
+    // Evento de seleção de data no DatePicker
     private void DataConsultaPicker_DateSelected(
         object? sender,
         DateChangedEventArgs e)
     {
-        CarregarAgenda(e.NewDate ?? DateTime.Today);
+        CarregarAgenda(
+            e.NewDate ?? DateTime.Today);
     }
 
+    // Método para carregar a agenda com horários e status
     private void CarregarAgenda(DateTime data)
     {
-        // Agenda mockada da data selecionada
-        Agenda = new ObservableCollection<ConsultaAgenda>
+        Agenda = new ObservableCollection<ConsultaAgenda>();
+
+        for (int hora = 9; hora <= 16; hora++)
         {
-            new ConsultaAgenda
-            {
-                Horario = "09:00",
-                Paciente = "Maria Alice",
-                Status = "Confirmado",
-                StatusCor = Colors.Green
-            },
+            TimeSpan horario = new TimeSpan(hora, 0, 0);
 
-            new ConsultaAgenda
-            {
-                Horario = "10:00",
-                Paciente = "João Pedro",
-                Status = "Confirmado",
-                StatusCor = Colors.Green
-            },
+            ConsultaMedico? consulta =
+                ConsultasMedicoDados.Consultas
+                    .FirstOrDefault(
+                        consulta =>
+                            consulta.Data.Date == data.Date &&
+                            consulta.Horario == horario);
 
-            new ConsultaAgenda
+            if (consulta != null)
             {
-                Horario = "11:00",
-                Paciente = "Renata Oliveira",
-                Status = "Confirmado",
-                StatusCor = Colors.Green
-            },
+                Agenda.Add(
+                    new ConsultaAgenda
+                    {
+                        Horario = consulta.Horario.ToString(@"hh\:mm"),
+                        Paciente = consulta.Paciente,
+                        Status = consulta.Status,
+                        StatusCor = ObterCorStatus(consulta.Status)
+                    });
 
-            new ConsultaAgenda
-            {
-                Horario = "12:00",
-                Paciente = "Isaac",
-                Status = "Cancelado",
-                StatusCor = Colors.Red
-            },
-
-            new ConsultaAgenda
-            {
-                Horario = "13:00",
-                Paciente = "Thiago",
-                Status = "Por Confirmar",
-                StatusCor = Colors.Orange
-            },
-
-            new ConsultaAgenda
-            {
-                Horario = "14:00",
-                Paciente = "Bianca",
-                Status = "Por Confirmar",
-                StatusCor = Colors.Orange
-            },
-
-            new ConsultaAgenda
-            {
-                Horario = "15:00",
-                Paciente = "-----------",
-                Status = "Horário disponível",
-                StatusCor = Colors.Blue
-            },
-
-            new ConsultaAgenda
-            {
-                Horario = "16:00",
-                Paciente = "-----------",
-                Status = "Horário disponível",
-                StatusCor = Colors.Blue
+                continue;
             }
-        };
 
-        AgendaCollectionView.ItemsSource = Agenda;
+            AdicionarHorario(
+                data,
+                horario.ToString(@"hh\:mm"),
+                "-----------",
+                "Horário disponível",
+                Colors.Blue);
+        }
     }
 
+    // Método para obter a cor correspondente ao status da consulta
+    private Color ObterCorStatus(string status)
+    {
+        return status switch
+        {
+            "Confirmado" => Colors.Green,
+            "Cancelado" => Colors.Red,
+            "Por Confirmar" => Colors.Orange,
+            "Horário disponível" => Colors.Blue,
+            "Horário bloqueado" => Colors.Red,
+            _ => Colors.Black
+        };
+    }
+
+    // Método para adicionar um horário à agenda
+    private void AdicionarHorario(
+    DateTime data,
+    string horario,
+    string paciente,
+    string status,
+    Color statusCor)
+    {
+        TimeSpan horarioConsulta =
+            TimeSpan.Parse(horario);
+
+        BloqueioHorario? bloqueio =
+            EncontrarBloqueio(
+                data,
+                horarioConsulta);
+
+        if (bloqueio != null)
+        {
+            Agenda.Add(
+                new ConsultaAgenda
+                {
+                    Horario = horario,
+                    Paciente = "-----------",
+                    Status = "Horário bloqueado",
+                    StatusCor = Colors.Red
+                });
+
+            return;
+        }
+
+        Agenda.Add(
+            new ConsultaAgenda
+            {
+                Horario = horario,
+                Paciente = paciente,
+                Status = status,
+                StatusCor = statusCor
+            });
+    }
+
+    // Método para encontrar um bloqueio de horário na agenda
+    private BloqueioHorario? EncontrarBloqueio(
+        DateTime data,
+        TimeSpan horario)
+    {
+        foreach (BloqueioHorario bloqueio
+            in BloqueiosMedico.Bloqueios)
+        {
+            bool dataDentroDoBloqueio =
+                data.Date >= bloqueio.DataInicial.Date &&
+                data.Date <= bloqueio.DataFinal.Date;
+
+            if (!dataDentroDoBloqueio)
+                continue;
+
+            bool horarioDentroDoBloqueio =
+                horario >= bloqueio.HorarioInicial &&
+                horario < bloqueio.HorarioFinal;
+
+            if (horarioDentroDoBloqueio)
+                return bloqueio;
+        }
+
+        return null;
+    }
+
+    // Evento de clique do botão "Bloquear Horário" 
     private async void BloquearHorarioButton_Clicked(
         object sender,
         EventArgs e)
@@ -110,6 +167,7 @@ public partial class ConsultasMedico : ContentPage
         await Shell.Current.GoToAsync("..");
     }
 
+    // Classe para representar uma consulta na agenda
     public class ConsultaAgenda
     {
         public string Horario { get; set; } = string.Empty;
@@ -119,5 +177,13 @@ public partial class ConsultasMedico : ContentPage
         public string Status { get; set; } = string.Empty;
 
         public Color StatusCor { get; set; } = Colors.Black;
+    }
+
+    // Evento de clique do botão "Liberar Horários"
+    private async void LiberarHorariosButton_Clicked(
+    object sender,
+    EventArgs e)
+    {
+        await Shell.Current.GoToAsync(nameof(LiberarHorarios));
     }
 }
