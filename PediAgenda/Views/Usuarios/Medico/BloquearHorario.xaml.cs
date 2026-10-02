@@ -1,5 +1,7 @@
 namespace PediAgenda.Views.Usuarios.Medico;
 
+using PediAgenda.Views.Usuarios.Responsavel;
+
 public partial class BloquearHorario : ContentPage
 {
     public BloquearHorario()
@@ -146,6 +148,19 @@ public partial class BloquearHorario : ContentPage
             consulta.Status = "Cancelado";
             consulta.CanceladaPorBloqueio = true;
             consulta.MotivoCancelamento = motivo;
+
+            NotificacoesDados.Notificacoes.Add(
+                new Notificacao
+                {
+                    Titulo = "Consulta cancelada",
+                    Mensagem =
+                        $"A consulta de {consulta.Paciente} " +
+                        $"do dia {consulta.Data:dd/MM/yyyy} às {consulta.Horario:hh\\:mm} " +
+                        $"foi cancelada pelo médico devido a um bloqueio de agenda.\n\n" +
+                        $"Motivo: {motivo}",
+                    DataHora = DateTime.Now,
+                    Lida = false
+                });
         }
 
         BloqueiosMedico.Bloqueios.Add(
