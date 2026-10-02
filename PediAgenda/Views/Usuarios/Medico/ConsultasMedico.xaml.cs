@@ -69,6 +69,9 @@ public partial class ConsultasMedico : ContentPage
                 "Horário disponível",
                 Colors.Blue);
         }
+
+        AgendaCollectionView.ItemsSource = Agenda;
+
     }
 
     // Método para obter a cor correspondente ao status da consulta

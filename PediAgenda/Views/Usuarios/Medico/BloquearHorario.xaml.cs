@@ -13,6 +13,41 @@ public partial class BloquearHorario : ContentPage
         HorarioFinalPicker.Time = new TimeSpan(12, 0, 0);
     }
 
+    // Método para encontrar consultas afetadas pelo bloqueio
+    private List<ConsultaMedico> EncontrarConsultasAfetadas(
+    DateTime dataInicial,
+    DateTime dataFinal,
+    TimeSpan horarioInicial,
+    TimeSpan horarioFinal)
+    {
+        List<ConsultaMedico> consultasAfetadas = new();
+
+        foreach (ConsultaMedico consulta in ConsultasMedicoDados.Consultas)
+        {
+            bool dataDentroDoBloqueio =
+                consulta.Data.Date >= dataInicial.Date &&
+                consulta.Data.Date <= dataFinal.Date;
+
+            if (!dataDentroDoBloqueio)
+                continue;
+
+            bool horarioDentroDoBloqueio =
+                consulta.Horario >= horarioInicial &&
+                consulta.Horario < horarioFinal;
+
+            if (!horarioDentroDoBloqueio)
+                continue;
+
+            if (consulta.Status == "Cancelado")
+                continue;
+
+            consultasAfetadas.Add(consulta);
+        }
+
+        return consultasAfetadas;
+    }
+
+    // Evento do botão "Bloquear Horário"
     private async void BloquearHorarioButton_Clicked(
         object sender,
         EventArgs e)
@@ -59,22 +94,60 @@ public partial class BloquearHorario : ContentPage
             return;
         }
 
+        // Monta a mensagem de confirmação
         string periodo =
             $"{dataInicial:dd/MM/yyyy} às {horarioInicial:hh\\:mm} " +
             $"até {dataFinal:dd/MM/yyyy} às {horarioFinal:hh\\:mm}";
 
-        bool confirmar = await DisplayAlertAsync(
-            "Confirmar bloqueio",
+        // Encontra as consultas afetadas pelo bloqueio
+        List<ConsultaMedico> consultasAfetadas =
+            EncontrarConsultasAfetadas(
+                dataInicial,
+                dataFinal,
+                horarioInicial,
+                horarioFinal);
+
+        // Monta a mensagem de confirmação com as consultas afetadas
+        string mensagemConfirmacao =
             $"Deseja bloquear o horário?\n\n" +
             $"Período: {periodo}\n\n" +
-            $"Motivo: {motivo}",
+            $"Motivo: {motivo}";
+
+        if (consultasAfetadas.Count > 0)
+        {
+            mensagemConfirmacao +=
+                $"\n\nAtenção: {consultasAfetadas.Count} " +
+                $"{(consultasAfetadas.Count == 1 ? "consulta será afetada" : "consultas serão afetadas")}.";
+
+            mensagemConfirmacao += "\n\nConsultas:";
+
+            foreach (ConsultaMedico consulta in consultasAfetadas)
+            {
+                mensagemConfirmacao +=
+                    $"\n• {consulta.Horario:hh\\:mm} - {consulta.Paciente}";
+            }
+
+            mensagemConfirmacao +=
+                "\n\nEssas consultas serão canceladas e os responsáveis serão notificados.";
+        }
+
+        // Solicita confirmação do bloqueio
+        bool confirmar = await DisplayAlertAsync(
+            "Confirmar bloqueio",
+            mensagemConfirmacao,
             "Bloquear",
             "Cancelar");
 
         if (!confirmar)
             return;
 
-        // Salva o bloqueio
+        foreach (ConsultaMedico consulta in consultasAfetadas)
+        {
+            consulta.Status = "Cancelado";
+            consulta.CanceladaPorBloqueio = true;
+            consulta.MotivoCancelamento = motivo;
+        }
+
         BloqueiosMedico.Bloqueios.Add(
             new BloqueioHorario
             {
@@ -93,6 +166,7 @@ public partial class BloquearHorario : ContentPage
         await Shell.Current.GoToAsync("..");
     }
 
+    // Evento do botão "Cancelar"
     private async void CancelarButton_Clicked(
         object sender,
         EventArgs e)

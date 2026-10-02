@@ -50,6 +50,22 @@ public static class ConsultasMedicoDados
             Horario = new TimeSpan(14, 0, 0),
             Paciente = "Bianca",
             Status = "Por Confirmar"
+        },
+
+        new ConsultaMedico
+        {
+            Data = new DateTime(2026, 10, 2),
+            Horario = new TimeSpan(14, 0, 0),
+            Paciente = "Bianca",
+            Status = "Por Confirmar"
+        },
+
+        new ConsultaMedico
+        {
+            Data = new DateTime(2026, 10, 2),
+            Horario = new TimeSpan(15, 0, 0),
+            Paciente = "Thiago",
+            Status = "Por Confirmar"
         }
     };
 }
