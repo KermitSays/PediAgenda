@@ -1,60 +1,91 @@
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
+[QueryProperty(nameof(ConsultaId), "ConsultaId")]
 [QueryProperty(nameof(Medico), "Medico")]
 [QueryProperty(nameof(Especialidade), "Especialidade")]
 [QueryProperty(nameof(Paciente), "Paciente")]
 public partial class ReagendarConsulta : ContentPage
 {
+    private int consultaId;
+
     private string? medico;
+
     private string? especialidade;
+
     private string? paciente;
+
     private string? horarioSelecionado;
+
+
+    public int ConsultaId
+    {
+        get => consultaId;
+
+        set => consultaId = value;
+    }
+
 
     public string Medico
     {
         get => medico ?? string.Empty;
+
         set
         {
             medico = value;
 
             if (MedicoLabel != null)
+            {
                 MedicoLabel.Text = value;
+            }
         }
     }
+
 
     public string Especialidade
     {
         get => especialidade ?? string.Empty;
+
         set
         {
             especialidade = value;
 
             if (EspecialidadeLabel != null)
+            {
                 EspecialidadeLabel.Text = value;
+            }
         }
     }
+
 
     public string Paciente
     {
         get => paciente ?? string.Empty;
+
         set
         {
             paciente = value;
 
             if (PacienteLabel != null)
+            {
                 PacienteLabel.Text = value;
+            }
         }
     }
+
 
     public ReagendarConsulta()
     {
         InitializeComponent();
 
-        DataPicker.MinimumDate = DateTime.Today;
-        DataPicker.Date = DateTime.Today;
+        DataPicker.MinimumDate =
+            DateTime.Today;
+
+        DataPicker.Date =
+            DateTime.Today;
 
         CarregarHorarios();
     }
+
 
     // ALTERA A DATA
     private void DataPicker_DateSelected(
@@ -68,10 +99,12 @@ public partial class ReagendarConsulta : ContentPage
         ErroHorarioLabel.IsVisible = false;
     }
 
+
     // CARREGA OS HORÁRIOS
     private void CarregarHorarios()
     {
         HorariosContainer.Children.Clear();
+
 
         string[] horarios =
         {
@@ -91,6 +124,7 @@ public partial class ReagendarConsulta : ContentPage
             "16:30"
         };
 
+
         foreach (string horario in horarios)
         {
             HorariosContainer.Children.Add(
@@ -98,107 +132,236 @@ public partial class ReagendarConsulta : ContentPage
         }
     }
 
+
     // CRIA O CARD DO HORÁRIO
-    private Border CriarCardHorario(string horario)
+    private Border CriarCardHorario(
+        string horario)
     {
-        Border card = new Border
-        {
-            BackgroundColor =
-                (Color)Application.Current.Resources["White"],
+        Border card =
+            new Border
+            {
+                BackgroundColor =
+                    (Color)Application.Current.Resources["White"],
 
-            Stroke =
-                (Color)Application.Current.Resources["InputBlue"],
+                Stroke =
+                    (Color)Application.Current.Resources["InputBlue"],
 
-            StrokeThickness = 1,
+                StrokeThickness = 1,
 
-            Padding = new Thickness(18, 12),
+                Padding =
+                    new Thickness(18, 12),
 
-            Margin = new Thickness(0, 0, 10, 10),
+                Margin =
+                    new Thickness(0, 0, 10, 10),
 
-            StrokeShape =
-                new Microsoft.Maui.Controls.Shapes.RoundRectangle
-                {
-                    CornerRadius = new CornerRadius(12)
-                }
-        };
+                StrokeShape =
+                    new Microsoft.Maui.Controls.Shapes.RoundRectangle
+                    {
+                        CornerRadius =
+                            new CornerRadius(12)
+                    }
+            };
 
-        Label horarioLabel = new Label
-        {
-            Text = horario,
-            FontSize = 16,
-            FontAttributes = FontAttributes.Bold,
 
-            TextColor =
-                (Color)Application.Current.Resources["TextDark"],
+        Label horarioLabel =
+            new Label
+            {
+                Text = horario,
 
-            HorizontalOptions = LayoutOptions.Center,
-            VerticalOptions = LayoutOptions.Center
-        };
+                FontSize = 16,
 
-        card.Content = horarioLabel;
+                FontAttributes =
+                    FontAttributes.Bold,
+
+                TextColor =
+                    (Color)Application.Current.Resources["TextDark"],
+
+                HorizontalOptions =
+                    LayoutOptions.Center,
+
+                VerticalOptions =
+                    LayoutOptions.Center
+            };
+
+
+        card.Content =
+            horarioLabel;
+
 
         TapGestureRecognizer tap =
             new TapGestureRecognizer();
 
-        tap.Tapped += (sender, e) =>
-        {
-            horarioSelecionado = horario;
 
-            foreach (View item in HorariosContainer.Children)
+        tap.Tapped +=
+            (sender, e) =>
             {
-                if (item is Border outroCard)
+                horarioSelecionado =
+                    horario;
+
+
+                foreach (View item
+                    in HorariosContainer.Children)
                 {
-                    outroCard.BackgroundColor =
-                        (Color)Application.Current.Resources["White"];
+                    if (item is Border outroCard)
+                    {
+                        outroCard.BackgroundColor =
+                            (Color)Application.Current.Resources["White"];
 
-                    outroCard.Stroke =
-                        (Color)Application.Current.Resources["InputBlue"];
+                        outroCard.Stroke =
+                            (Color)Application.Current.Resources["InputBlue"];
 
-                    outroCard.StrokeThickness = 1;
+                        outroCard.StrokeThickness =
+                            1;
+                    }
                 }
-            }
 
-            card.BackgroundColor =
-                Color.FromArgb("#E8F3FF");
 
-            card.Stroke =
-                (Color)Application.Current.Resources["PrimaryBlue"];
+                card.BackgroundColor =
+                    Color.FromArgb("#E8F3FF");
 
-            card.StrokeThickness = 2;
+                card.Stroke =
+                    (Color)Application.Current.Resources["PrimaryBlue"];
 
-            ErroHorarioLabel.IsVisible = false;
-        };
+                card.StrokeThickness =
+                    2;
 
-        card.GestureRecognizers.Add(tap);
+
+                ErroHorarioLabel.IsVisible =
+                    false;
+            };
+
+
+        card.GestureRecognizers.Add(
+            tap);
+
 
         return card;
     }
+
 
     // CONFIRMA O REAGENDAMENTO
     private async void ConfirmarButton_Clicked(
         object sender,
         EventArgs e)
     {
-        if (string.IsNullOrEmpty(horarioSelecionado))
+        if (string.IsNullOrEmpty(
+            horarioSelecionado))
         {
             ErroHorarioLabel.Text =
                 "Selecione um horário para continuar.";
 
-            ErroHorarioLabel.IsVisible = true;
+            ErroHorarioLabel.IsVisible =
+                true;
 
             return;
         }
 
-        string novaData =
-            DataPicker.Date.ToString();
+
+        // Localiza o paciente nos dados compartilhados
+        PacienteResponsavelItem? pacienteEncontrado =
+            ResponsavelDados.Pacientes
+                .FirstOrDefault(p =>
+                    p.Nome.Equals(
+                        Paciente,
+                        StringComparison.OrdinalIgnoreCase));
+
+
+        if (pacienteEncontrado == null)
+        {
+            await DisplayAlertAsync(
+                "Erro",
+                "Não foi possível localizar o paciente.",
+                "OK");
+
+            return;
+        }
+
+
+        // Localiza a consulta pelo ID
+        ConsultaResponsavelItem? consulta =
+            pacienteEncontrado.Consultas
+                .FirstOrDefault(c =>
+                    c.Id == ConsultaId);
+
+
+        if (consulta == null)
+        {
+            await DisplayAlertAsync(
+                "Erro",
+                "Não foi possível localizar a consulta.",
+                "OK");
+
+            return;
+        }
+
+
+        bool confirmar =
+            await DisplayAlertAsync(
+                "Confirmar reagendamento",
+                $"Deseja reagendar a consulta para " +
+                $"{DataPicker.Date:dd/MM/yyyy} às " +
+                $"{horarioSelecionado}?",
+                "SIM",
+                "NÃO");
+
+
+        if (!confirmar)
+            return;
+
+
+        // Atualiza a consulta existente
+        consulta.Data =
+            DataPicker.Date ?? DateTime.Today;
+
+
+        if (TimeSpan.TryParse(
+            horarioSelecionado,
+            out TimeSpan novoHorario))
+        {
+            consulta.Horario =
+                novoHorario;
+        }
+
+
+        // Após um reagendamento,
+        // a consulta volta para confirmação
+        consulta.Status =
+            "Por confirmar";
+
+
+        // Cria notificação para o responsável
+        NotificacoesDados.Notificacoes.Add(
+            new Notificacao
+            {
+                Titulo =
+                    "Consulta reagendada",
+
+                Mensagem =
+                    $"A consulta de {Paciente} com {Medico} " +
+                    $"foi reagendada para " +
+                    $"{consulta.Data:dd/MM/yyyy} às " +
+                    $"{consulta.Horario:hh\\:mm}.",
+
+                DataHora =
+                    DateTime.Now,
+
+                Lida =
+                    false
+            });
+
 
         await DisplayAlertAsync(
-            "Reagendamento",
-            $"Consulta reagendada para {novaData} às {horarioSelecionado}.",
+            "Reagendamento concluído",
+            $"Consulta reagendada para " +
+            $"{consulta.Data:dd/MM/yyyy} às " +
+            $"{consulta.Horario:hh\\:mm}.",
             "OK");
 
-        await Shell.Current.GoToAsync("..");
+
+        await Shell.Current.GoToAsync(
+            nameof(MinhasConsultas));
     }
+
 
     // VOLTAR
     private async void VoltarButton_Clicked(

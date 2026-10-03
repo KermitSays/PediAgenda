@@ -1,5 +1,6 @@
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
+[QueryProperty(nameof(ConsultaId), "ConsultaId")]
 [QueryProperty(nameof(Medico), "Medico")]
 [QueryProperty(nameof(Especialidade), "Especialidade")]
 [QueryProperty(nameof(Paciente), "Paciente")]
@@ -10,18 +11,37 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 [QueryProperty(nameof(Status), "Status")]
 public partial class MinhasConsultasDetalhes : ContentPage
 {
+    private int consultaId;
+
     private string? medico;
+
     private string? especialidade;
+
     private string? paciente;
+
     private string? data;
+
     private string? horario;
+
     private string? modalidade;
+
     private string? valor;
+
     private string? status;
+
+
+    public int ConsultaId
+    {
+        get => consultaId;
+
+        set => consultaId = value;
+    }
+
 
     public string Medico
     {
         get => medico ?? string.Empty;
+
         set
         {
             medico = value;
@@ -31,9 +51,11 @@ public partial class MinhasConsultasDetalhes : ContentPage
         }
     }
 
+
     public string Especialidade
     {
         get => especialidade ?? string.Empty;
+
         set
         {
             especialidade = value;
@@ -43,9 +65,11 @@ public partial class MinhasConsultasDetalhes : ContentPage
         }
     }
 
+
     public string Paciente
     {
         get => paciente ?? string.Empty;
+
         set
         {
             paciente = value;
@@ -55,9 +79,11 @@ public partial class MinhasConsultasDetalhes : ContentPage
         }
     }
 
+
     public string Data
     {
         get => data ?? string.Empty;
+
         set
         {
             data = value;
@@ -67,9 +93,11 @@ public partial class MinhasConsultasDetalhes : ContentPage
         }
     }
 
+
     public string Horario
     {
         get => horario ?? string.Empty;
+
         set
         {
             horario = value;
@@ -79,9 +107,11 @@ public partial class MinhasConsultasDetalhes : ContentPage
         }
     }
 
+
     public string Modalidade
     {
         get => modalidade ?? string.Empty;
+
         set
         {
             modalidade = value;
@@ -91,9 +121,11 @@ public partial class MinhasConsultasDetalhes : ContentPage
         }
     }
 
+
     public string Valor
     {
         get => valor ?? string.Empty;
+
         set
         {
             valor = value;
@@ -103,9 +135,11 @@ public partial class MinhasConsultasDetalhes : ContentPage
         }
     }
 
+
     public string Status
     {
         get => status ?? string.Empty;
+
         set
         {
             status = value;
@@ -115,42 +149,100 @@ public partial class MinhasConsultasDetalhes : ContentPage
         }
     }
 
+
     public MinhasConsultasDetalhes()
     {
         InitializeComponent();
     }
 
+
     // REAGENDAR CONSULTA
     private async void ReagendarButton_Clicked(
-    object sender,
-    EventArgs e)
+        object sender,
+        EventArgs e)
     {
         await Shell.Current.GoToAsync(
             nameof(ReagendarConsulta),
             new Dictionary<string, object>
             {
-            { "Medico", Medico },
-            { "Especialidade", Especialidade },
-            { "Paciente", Paciente }
+                {
+                    "ConsultaId",
+                    ConsultaId
+                },
+
+                {
+                    "Medico",
+                    Medico
+                },
+
+                {
+                    "Especialidade",
+                    Especialidade
+                },
+
+                {
+                    "Paciente",
+                    Paciente
+                }
             });
     }
 
+
     // CANCELAR CONSULTA
     private async void CancelarButton_Clicked(
-    object sender,
-    EventArgs e)
+        object sender,
+        EventArgs e)
     {
+        // Impede tentar cancelar novamente
+        if (Status.Equals(
+            "Cancelada",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            await DisplayAlertAsync(
+                "Consulta cancelada",
+                "Esta consulta já está cancelada.",
+                "OK");
+
+            return;
+        }
+
+
         await Shell.Current.GoToAsync(
             nameof(CancelarConsulta),
             new Dictionary<string, object>
             {
-            { "Medico", Medico },
-            { "Especialidade", Especialidade },
-            { "Paciente", Paciente },
-            { "Data", Data },
-            { "Horario", Horario }
+                {
+                    "ConsultaId",
+                    ConsultaId
+                },
+
+                {
+                    "Medico",
+                    Medico
+                },
+
+                {
+                    "Especialidade",
+                    Especialidade
+                },
+
+                {
+                    "Paciente",
+                    Paciente
+                },
+
+                {
+                    "Data",
+                    Data
+                },
+
+                {
+                    "Horario",
+                    Horario
+                }
             });
     }
+
 
     // VOLTAR
     private async void VoltarButton_Clicked(

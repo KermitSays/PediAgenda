@@ -37,11 +37,6 @@
             Margin="0,24,0,15"
             SelectionMode="None">
 
-            <CollectionView.ItemsSource>
-                <x:Array Type="{x:Type x:Object}">
-                </x:Array>
-            </CollectionView.ItemsSource>
-
             <CollectionView.ItemTemplate>
                 <DataTemplate>
 

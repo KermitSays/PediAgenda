@@ -24,6 +24,8 @@ public partial class MinhasConsultas : ContentPage
     {
         base.OnAppearing();
 
+        // Força a atualização da lista quando volta
+        // de cancelamento ou reagendamento.
         PacientesCollectionView.ItemsSource = null;
 
         PacientesCollectionView.ItemsSource =
@@ -66,6 +68,11 @@ public partial class MinhasConsultas : ContentPage
                 nameof(MinhasConsultasDetalhes),
                 new Dictionary<string, object>
                 {
+                    {
+                        "ConsultaId",
+                        consulta.Id
+                    },
+
                     {
                         "Medico",
                         consulta.Medico
@@ -110,6 +117,7 @@ public partial class MinhasConsultas : ContentPage
     }
 
 
+    // VOLTAR
     private async void VoltarButton_Clicked(
         object sender,
         EventArgs e)
