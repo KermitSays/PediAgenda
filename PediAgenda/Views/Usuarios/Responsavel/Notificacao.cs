@@ -11,4 +11,7 @@ public class Notificacao
     public DateTime DataHora { get; set; }
 
     public bool Lida { get; set; }
+
+    public string DataHoraFormatada =>
+        DataHora.ToString("dd/MM/yyyy 'às' HH:mm");
 }
