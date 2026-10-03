@@ -89,9 +89,7 @@ public partial class MenuMedico : ContentPage
     // RELATÓRIOS
     private async void MedicoRelatoriosButton_Clicked(object sender, TappedEventArgs e)
     {
-        await DisplayAlertAsync(
-            "Relatórios",
-            "Tela de Relatórios ainda será implementada.",
-            "OK");
+        await Shell.Current.GoToAsync(
+            nameof(RelatoriosMedico));
     }
 }

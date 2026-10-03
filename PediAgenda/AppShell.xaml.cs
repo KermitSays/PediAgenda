@@ -112,5 +112,9 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(
             nameof(Views.Usuarios.Medico.EditarBloqueio),
             typeof(Views.Usuarios.Medico.EditarBloqueio));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Medico.RelatoriosMedico),
+            typeof(Views.Usuarios.Medico.RelatoriosMedico));
     }
 }
