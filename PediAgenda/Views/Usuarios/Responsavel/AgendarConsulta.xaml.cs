@@ -2,14 +2,61 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 
 public partial class AgendarConsulta : ContentPage
 {
+    private PacienteResponsavelItem? pacienteSelecionado;
+
     private string? especialidadeSelecionada;
+
 
     public AgendarConsulta()
     {
         InitializeComponent();
+
+        CarregarPacientes();
     }
 
-    //Mockup de especialidades, futuramente será substituído por uma chamada à API
+
+    // CARREGA OS DEPENDENTES DO RESPONSÁVEL
+
+    private void CarregarPacientes()
+    {
+        PacientePicker.Items.Clear();
+
+
+        foreach (PacienteResponsavelItem paciente
+            in ResponsavelDados.Pacientes)
+        {
+            PacientePicker.Items.Add(
+                paciente.Nome);
+        }
+    }
+
+
+    // PACIENTE SELECIONADO
+
+    private void PacientePicker_SelectedIndexChanged(
+        object sender,
+        EventArgs e)
+    {
+        if (PacientePicker.SelectedIndex < 0)
+        {
+            pacienteSelecionado = null;
+
+            return;
+        }
+
+
+        pacienteSelecionado =
+            ResponsavelDados.Pacientes[
+                PacientePicker.SelectedIndex];
+
+
+        ErroLabel.IsVisible =
+            false;
+    }
+
+
+    // ESPECIALIDADE SELECIONADA
+
     private void EspecialidadePicker_SelectedIndexChanged(
         object sender,
         EventArgs e)
@@ -17,39 +64,75 @@ public partial class AgendarConsulta : ContentPage
         if (EspecialidadePicker.SelectedIndex >= 0)
         {
             especialidadeSelecionada =
-                EspecialidadePicker.Items[EspecialidadePicker.SelectedIndex];
+                EspecialidadePicker.Items[
+                    EspecialidadePicker.SelectedIndex];
 
-            ErroLabel.IsVisible = false;
+
+            ErroLabel.IsVisible =
+                false;
         }
         else
         {
-            especialidadeSelecionada = null;
+            especialidadeSelecionada =
+                null;
         }
     }
 
-    // Botão para continuar para a próxima tela
+
+    // CONTINUAR
+
     private async void ContinuarButton_Clicked(
         object sender,
         EventArgs e)
     {
-        if (string.IsNullOrEmpty(especialidadeSelecionada))
+        if (pacienteSelecionado == null)
+        {
+            ErroLabel.Text =
+                "Selecione o paciente para continuar.";
+
+            ErroLabel.IsVisible =
+                true;
+
+            return;
+        }
+
+
+        if (string.IsNullOrEmpty(
+            especialidadeSelecionada))
         {
             ErroLabel.Text =
                 "Selecione uma especialidade para continuar.";
 
-            ErroLabel.IsVisible = true;
+            ErroLabel.IsVisible =
+                true;
+
             return;
         }
 
-        // Envia a especialidade escolhida para a próxima tela, Pode ser substituído futuramente
-        // por uma chamada à API para buscar os médicos disponíveis
+
         await Shell.Current.GoToAsync(
             nameof(AgendarMedico),
             new Dictionary<string, object>
             {
-                { "Especialidade", especialidadeSelecionada }
+                {
+                    "PacienteId",
+                    pacienteSelecionado.Id
+                },
+
+                {
+                    "Paciente",
+                    pacienteSelecionado.Nome
+                },
+
+                {
+                    "Especialidade",
+                    especialidadeSelecionada
+                }
             });
     }
+
+
+    // VOLTAR
 
     private async void VoltarButton_Clicked(
         object sender,

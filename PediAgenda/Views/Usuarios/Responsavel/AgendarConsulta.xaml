@@ -9,11 +9,14 @@
     NavigationPage.HasNavigationBar="False">
 
     <ScrollView>
+
         <VerticalStackLayout
             Padding="24,35,24,24"
             Spacing="24">
 
+
             <!-- TÍTULO -->
+
             <Label
                 Text="Agendar consulta"
                 FontSize="28"
@@ -21,38 +24,67 @@
                 TextColor="{StaticResource TextDark}"
                 HorizontalOptions="Center" />
 
-            
-            <!-- ESPECIALIDADES -->
+
+            <!-- PACIENTE -->
+
             <VerticalStackLayout Spacing="8">
 
                 <Label
-                        Text="Especialidade"
-                        FontSize="20"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource TextDark}" />    
+                    Text="Paciente"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
 
                 <Picker
-                        x:Name="EspecialidadePicker"
-                        Title="Escolha uma especialidade"
-                        FontSize="16"
-                        TextColor="{StaticResource TextDark}"
-                        TitleColor="{StaticResource InputPlaceholder}"
-                        BackgroundColor="{StaticResource White}"
-                        SelectedIndexChanged="EspecialidadePicker_SelectedIndexChanged">
+                    x:Name="PacientePicker"
+                    Title="Escolha o paciente"
+                    FontSize="16"
+                    TextColor="{StaticResource TextDark}"
+                    TitleColor="{StaticResource InputPlaceholder}"
+                    BackgroundColor="{StaticResource White}"
+                    SelectedIndexChanged="PacientePicker_SelectedIndexChanged" />
 
-                    <!-- Mockup de especialidades - Substituído futuramente por uma chamada à API -->
+            </VerticalStackLayout>
+
+
+            <!-- ESPECIALIDADE -->
+
+            <VerticalStackLayout Spacing="8">
+
+                <Label
+                    Text="Especialidade"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Picker
+                    x:Name="EspecialidadePicker"
+                    Title="Escolha uma especialidade"
+                    FontSize="16"
+                    TextColor="{StaticResource TextDark}"
+                    TitleColor="{StaticResource InputPlaceholder}"
+                    BackgroundColor="{StaticResource White}"
+                    SelectedIndexChanged="EspecialidadePicker_SelectedIndexChanged">
+
                     <Picker.Items>
+
                         <x:String>Pediatria</x:String>
+
                         <x:String>Neuropediatria</x:String>
+
                         <x:String>Cardiologia</x:String>
+
                         <x:String>Endocrinologia</x:String>
+
                     </Picker.Items>
 
                 </Picker>
 
             </VerticalStackLayout>
 
+
             <!-- MENSAGEM DE ERRO -->
+
             <Label
                 x:Name="ErroLabel"
                 Text=""
@@ -61,7 +93,9 @@
                 HorizontalTextAlignment="Center"
                 IsVisible="False" />
 
+
             <!-- CONTINUAR -->
+
             <Button
                 Text="CONTINUAR"
                 FontSize="16"
@@ -72,7 +106,9 @@
                 TextColor="{StaticResource White}"
                 Clicked="ContinuarButton_Clicked" />
 
+
             <!-- VOLTAR -->
+
             <Button
                 Text="← Voltar"
                 FontSize="15"
@@ -81,6 +117,7 @@
                 Clicked="VoltarButton_Clicked" />
 
         </VerticalStackLayout>
+
     </ScrollView>
 
 </ContentPage>

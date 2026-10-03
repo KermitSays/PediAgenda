@@ -1,5 +1,9 @@
+using System.Globalization;
+
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
+[QueryProperty(nameof(PacienteId), "PacienteId")]
+[QueryProperty(nameof(Paciente), "Paciente")]
 [QueryProperty(nameof(Medico), "Medico")]
 [QueryProperty(nameof(Especialidade), "Especialidade")]
 [QueryProperty(nameof(Data), "Data")]
@@ -8,15 +12,40 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 [QueryProperty(nameof(FotoMedico), "FotoMedico")]
 public partial class AgendarConfirmacao : ContentPage
 {
+    private int pacienteId;
+
+    private string? paciente;
+
     private string? medico;
+
     private string? especialidade;
+
     private string? data;
+
     private string? horario;
+
     private string? tipoAtendimento;
+
     private string? fotoMedico;
 
+    private bool agendamentoSalvo;
 
-    // MÉDICO
+
+    public int PacienteId
+    {
+        get => pacienteId;
+
+        set => pacienteId = value;
+    }
+
+
+    public string Paciente
+    {
+        get => paciente ?? string.Empty;
+
+        set => paciente = value;
+    }
+
 
     public string Medico
     {
@@ -26,22 +55,23 @@ public partial class AgendarConfirmacao : ContentPage
         {
             medico = value;
 
+
             if (MedicoLabel != null)
             {
-                MedicoLabel.Text = value;
+                MedicoLabel.Text =
+                    value;
             }
         }
     }
 
-    // FOTO DO MÉDICO
+
     public string FotoMedico
     {
         get => fotoMedico ?? string.Empty;
+
         set => fotoMedico = value;
     }
 
-
-    // ESPECIALIDADE
 
     public string Especialidade
     {
@@ -51,15 +81,15 @@ public partial class AgendarConfirmacao : ContentPage
         {
             especialidade = value;
 
+
             if (EspecialidadeLabel != null)
             {
-                EspecialidadeLabel.Text = value;
+                EspecialidadeLabel.Text =
+                    value;
             }
         }
     }
 
-
-    // DATA
 
     public string Data
     {
@@ -69,15 +99,15 @@ public partial class AgendarConfirmacao : ContentPage
         {
             data = value;
 
+
             if (DataLabel != null)
             {
-                DataLabel.Text = value;
+                DataLabel.Text =
+                    value;
             }
         }
     }
 
-
-    // HORÁRIO
 
     public string Horario
     {
@@ -87,15 +117,15 @@ public partial class AgendarConfirmacao : ContentPage
         {
             horario = value;
 
+
             if (HorarioLabel != null)
             {
-                HorarioLabel.Text = value;
+                HorarioLabel.Text =
+                    value;
             }
         }
     }
 
-
-    // TIPO DE ATENDIMENTO
 
     public string TipoAtendimento
     {
@@ -103,11 +133,14 @@ public partial class AgendarConfirmacao : ContentPage
 
         set
         {
-            tipoAtendimento = value;
+            tipoAtendimento =
+                value;
+
 
             if (TipoAtendimentoLabel != null)
             {
-                TipoAtendimentoLabel.Text = value;
+                TipoAtendimentoLabel.Text =
+                    value;
             }
         }
     }
@@ -125,15 +158,185 @@ public partial class AgendarConfirmacao : ContentPage
         object sender,
         EventArgs e)
     {
+        // Evita cadastrar duas vezes
+        // caso o botão seja tocado rapidamente.
+        if (agendamentoSalvo)
+            return;
+
+
+        PacienteResponsavelItem? pacienteEncontrado =
+            ResponsavelDados.Pacientes
+                .FirstOrDefault(p =>
+                    p.Id == PacienteId);
+
+
+        if (pacienteEncontrado == null)
+        {
+            await DisplayAlertAsync(
+                "Erro",
+                "Não foi possível localizar o paciente.",
+                "OK");
+
+            return;
+        }
+
+
+        if (!DateTime.TryParseExact(
+            Data,
+            "dd/MM/yyyy",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out DateTime dataConsulta))
+        {
+            await DisplayAlertAsync(
+                "Erro",
+                "A data da consulta é inválida.",
+                "OK");
+
+            return;
+        }
+
+
+        if (!TimeSpan.TryParse(
+            Horario,
+            out TimeSpan horarioConsulta))
+        {
+            await DisplayAlertAsync(
+                "Erro",
+                "O horário da consulta é inválido.",
+                "OK");
+
+            return;
+        }
+
+
+        int novoId =
+            ResponsavelDados.Pacientes
+                .SelectMany(p =>
+                    p.Consultas)
+                .Select(c =>
+                    c.Id)
+                .DefaultIfEmpty(0)
+                .Max()
+            + 1;
+
+
+        string modalidade;
+
+        string valor;
+
+
+        if (TipoAtendimento.StartsWith(
+            "Particular",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            modalidade =
+                "Particular";
+
+            valor =
+                "R$ 200,00";
+        }
+        else
+        {
+            modalidade =
+                "Convênio";
+
+            valor =
+                TipoAtendimento;
+        }
+
+
+        ConsultaResponsavelItem novaConsulta =
+            new ConsultaResponsavelItem
+            {
+                Id =
+                    novoId,
+
+                Medico =
+                    Medico,
+
+                Especialidade =
+                    Especialidade,
+
+                Data =
+                    dataConsulta,
+
+                Horario =
+                    horarioConsulta,
+
+                Modalidade =
+                    modalidade,
+
+                Valor =
+                    valor,
+
+                Status =
+                    "Por confirmar"
+            };
+
+
+        pacienteEncontrado.Consultas.Add(
+            novaConsulta);
+
+
+        // Gera notificação
+        NotificacoesDados.Notificacoes.Add(
+            new Notificacao
+            {
+                Titulo =
+                    "Consulta agendada",
+
+                Mensagem =
+                    $"A consulta de {Paciente} com {Medico} " +
+                    $"foi agendada para " +
+                    $"{dataConsulta:dd/MM/yyyy} às " +
+                    $"{horarioConsulta:hh\\:mm}.",
+
+                DataHora =
+                    DateTime.Now,
+
+                Lida =
+                    false
+            });
+
+
+        agendamentoSalvo =
+            true;
+
+
         await Shell.Current.GoToAsync(
             nameof(AgendamentoConcluido),
             new Dictionary<string, object>
             {
-            { "Medico", Medico },
-            { "FotoMedico", FotoMedico },
-            { "Especialidade", Especialidade },
-            { "Data", Data },
-            { "Horario", Horario }
+                {
+                    "Paciente",
+                    Paciente
+                },
+
+                {
+                    "Medico",
+                    Medico
+                },
+
+                {
+                    "FotoMedico",
+                    FotoMedico
+                },
+
+                {
+                    "Especialidade",
+                    Especialidade
+                },
+
+                {
+                    "Data",
+                    Data
+                },
+
+                {
+                    "Horario",
+                    Horario
+                }
             });
     }
 

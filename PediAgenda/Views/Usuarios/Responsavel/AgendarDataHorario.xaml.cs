@@ -1,28 +1,42 @@
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
+[QueryProperty(nameof(PacienteId), "PacienteId")]
+[QueryProperty(nameof(Paciente), "Paciente")]
 [QueryProperty(nameof(Medico), "Medico")]
 [QueryProperty(nameof(FotoMedico), "FotoMedico")]
 [QueryProperty(nameof(Especialidade), "Especialidade")]
 public partial class AgendarDataHorario : ContentPage
 {
-    // Guarda o médico recebido da tela anterior.
+    private int pacienteId;
+
+    private string? paciente;
+
     private string? medico;
 
-    // Guarda a foto do médico recebida da tela anterior.
     private string? fotoMedico;
 
-    // Guarda a especialidade recebida da tela anterior.
     private string? especialidade;
 
-    // Guarda o horário escolhido pelo usuário.
     private string? horarioSelecionado;
 
-    // Evita que o evento de mudança de data seja chamado várias vezes
     private bool ajustandoData;
 
 
+    public int PacienteId
+    {
+        get => pacienteId;
 
-    // MÉDICO
+        set => pacienteId = value;
+    }
+
+
+    public string Paciente
+    {
+        get => paciente ?? string.Empty;
+
+        set => paciente = value;
+    }
+
 
     public string Medico
     {
@@ -32,13 +46,15 @@ public partial class AgendarDataHorario : ContentPage
         {
             medico = value;
 
-            // Atualiza o nome do médico na tela.
+
             if (MedicoLabel != null)
             {
-                MedicoLabel.Text = value;
+                MedicoLabel.Text =
+                    value;
             }
         }
     }
+
 
     public string FotoMedico
     {
@@ -48,8 +64,6 @@ public partial class AgendarDataHorario : ContentPage
     }
 
 
-    // ESPECIALIDADE
-
     public string Especialidade
     {
         get => especialidade ?? string.Empty;
@@ -58,44 +72,58 @@ public partial class AgendarDataHorario : ContentPage
         {
             especialidade = value;
 
-            // Atualiza a especialidade na tela.
+
             if (EspecialidadeLabel != null)
             {
-                EspecialidadeLabel.Text = value;
+                EspecialidadeLabel.Text =
+                    value;
             }
         }
     }
 
 
-
-    // CONSTRUTOR
-
     public AgendarDataHorario()
     {
         InitializeComponent();
 
-        DataPicker.MinimumDate = DateTime.Today;
-        DataPicker.Date = ProximaDataDisponivel();
+
+        DataPicker.MinimumDate =
+            DateTime.Today;
+
+
+        DataPicker.Date =
+            ProximaDataDisponivel();
+
 
         CarregarHorarios();
     }
 
-    // Retorna a próxima data disponível para agendamento, ignorando finais de semana.
+
+    // PRÓXIMA DATA DISPONÍVEL
+
     private DateTime ProximaDataDisponivel()
     {
-        DateTime data = DateTime.Today;
+        DateTime data =
+            DateTime.Today;
 
-        while (data.DayOfWeek == DayOfWeek.Saturday ||
-               data.DayOfWeek == DayOfWeek.Sunday)
+
+        while (
+            data.DayOfWeek ==
+                DayOfWeek.Saturday ||
+
+            data.DayOfWeek ==
+                DayOfWeek.Sunday)
         {
-            data = data.AddDays(1);
+            data =
+                data.AddDays(1);
         }
+
 
         return data;
     }
 
 
-    // QUANDO A DATA É ALTERADA
+    // ALTERA A DATA
 
     private void DataPicker_DateSelected(
         object sender,
@@ -104,43 +132,59 @@ public partial class AgendarDataHorario : ContentPage
         if (ajustandoData)
             return;
 
+
         if (e.NewDate.HasValue &&
-            (e.NewDate.Value.DayOfWeek == DayOfWeek.Saturday ||
-             e.NewDate.Value.DayOfWeek == DayOfWeek.Sunday))
+            (
+                e.NewDate.Value.DayOfWeek ==
+                    DayOfWeek.Saturday ||
+
+                e.NewDate.Value.DayOfWeek ==
+                    DayOfWeek.Sunday
+            ))
         {
             ErroHorarioLabel.Text =
                 "A clínica não atende aos finais de semana.";
 
-            ErroHorarioLabel.IsVisible = true;
 
-            ajustandoData = true;
+            ErroHorarioLabel.IsVisible =
+                true;
 
-            DataPicker.Date = ProximaDataDisponivel();
 
-            ajustandoData = false;
+            ajustandoData =
+                true;
+
+
+            DataPicker.Date =
+                ProximaDataDisponivel();
+
+
+            ajustandoData =
+                false;
+
 
             return;
         }
 
-        horarioSelecionado = null;
+
+        horarioSelecionado =
+            null;
+
 
         CarregarHorarios();
 
-        ErroHorarioLabel.IsVisible = false;
+
+        ErroHorarioLabel.IsVisible =
+            false;
     }
 
 
-    // CARREGAR HORÁRIOS
+    // CARREGA OS HORÁRIOS
 
     private void CarregarHorarios()
     {
-        // Remove os cards antigos antes de criar os novos.
         HorariosContainer.Children.Clear();
 
 
-        // Lista de horários disponíveis.
-        
-        // Por enquanto eles estão fixos. Futuramente virão do banco/API.
         string[] horarios =
         {
             "08:00",
@@ -160,175 +204,205 @@ public partial class AgendarDataHorario : ContentPage
         };
 
 
-        // Percorre todos os horários da lista.
         foreach (string horario in horarios)
         {
-            // Para cada horário, cria um card.
             HorariosContainer.Children.Add(
                 CriarCardHorario(horario));
         }
     }
 
 
-    // CRIAR CARD DE HORÁRIO
+    // CRIA O CARD DO HORÁRIO
 
-    // Este método cria visualmente um card para cada horário.
-    private Border CriarCardHorario(string horario)
+    private Border CriarCardHorario(
+        string horario)
     {
-        // Cria o Border que será o nosso card.
-        Border card = new Border
-        {
-            // Cor normal do fundo.
-            BackgroundColor =
-                (Color)Application.Current.Resources["White"],
-
-            // Cor normal da borda.
-            Stroke =
-                (Color)Application.Current.Resources["InputBlue"],
-
-            // Espessura normal da borda.
-            StrokeThickness = 1,
-
-            // Espaçamento interno do card.
-            Padding = new Thickness(18, 12),
-
-            // Espaçamento entre os cards.
-            Margin = new Thickness(0, 0, 10, 10),
-
-            // Deixa os cantos arredondados.
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
+        Border card =
+            new Border
             {
-                CornerRadius = new CornerRadius(12)
-            }
-        };
+                BackgroundColor =
+                    (Color)Application.Current.Resources["White"],
+
+                Stroke =
+                    (Color)Application.Current.Resources["InputBlue"],
+
+                StrokeThickness =
+                    1,
+
+                Padding =
+                    new Thickness(18, 12),
+
+                Margin =
+                    new Thickness(0, 0, 10, 10),
+
+                StrokeShape =
+                    new Microsoft.Maui.Controls.Shapes.RoundRectangle
+                    {
+                        CornerRadius =
+                            new CornerRadius(12)
+                    }
+            };
 
 
-        // TEXTO DO HORÁRIO
+        Label horarioLabel =
+            new Label
+            {
+                Text =
+                    horario,
 
-        // Cria o Label que mostrará "08:00", "08:30" etc.
-        Label horarioLabel = new Label
-        {
-            Text = horario,
+                FontSize =
+                    16,
 
-            FontSize = 16,
+                FontAttributes =
+                    FontAttributes.Bold,
 
-            FontAttributes = FontAttributes.Bold,
+                TextColor =
+                    (Color)Application.Current.Resources["TextDark"],
 
-            TextColor =
-                (Color)Application.Current.Resources["TextDark"],
+                HorizontalOptions =
+                    LayoutOptions.Center,
 
-            HorizontalOptions = LayoutOptions.Center,
-
-            VerticalOptions = LayoutOptions.Center
-        };
-
-
-        // Coloca o texto dentro do card.
-        card.Content = horarioLabel;
+                VerticalOptions =
+                    LayoutOptions.Center
+            };
 
 
-       
-        // TOQUE NO CARD
+        card.Content =
+            horarioLabel;
 
-        // Cria o gesto que detecta quando o usuário toca no card.
+
         TapGestureRecognizer tap =
             new TapGestureRecognizer();
 
 
-        // O código abaixo será executado quando o card for tocado.
-        tap.Tapped += (sender, e) =>
-        {
-            // Guarda o horário que o usuário escolheu.
-            horarioSelecionado = horario;
-
-
-            // Percorre todos os cards de horário.
-            foreach (View item in HorariosContainer.Children)
+        tap.Tapped +=
+            (sender, e) =>
             {
-                // Verifica se o item é realmente um Border/card.
-                if (item is Border outroCard)
+                horarioSelecionado =
+                    horario;
+
+
+                foreach (View item
+                    in HorariosContainer.Children)
                 {
-                    // Volta todos os outros cards para
-                    // a aparência normal.
-                    outroCard.BackgroundColor =
-                        (Color)Application.Current.Resources["White"];
+                    if (item is Border outroCard)
+                    {
+                        outroCard.BackgroundColor =
+                            (Color)Application.Current.Resources["White"];
 
-                    outroCard.Stroke =
-                        (Color)Application.Current.Resources["InputBlue"];
+                        outroCard.Stroke =
+                            (Color)Application.Current.Resources["InputBlue"];
 
-                    outroCard.StrokeThickness = 1;
+                        outroCard.StrokeThickness =
+                            1;
+                    }
                 }
-            }
 
 
-            
-            // CARD SELECIONADO
-
-            // Fundo azul clarinho.
-            card.BackgroundColor =
-                Color.FromArgb("#EAF5FA");
-
-            // Borda azul mais forte.
-            card.Stroke =
-                (Color)Application.Current.Resources["PrimaryBlue"];
-
-            // Borda um pouco mais grossa.
-            card.StrokeThickness = 2.5;
+                card.BackgroundColor =
+                    Color.FromArgb("#EAF5FA");
 
 
-            // Como o usuário escolheu um horário,
-            // escondemos a mensagem de erro.
-            ErroHorarioLabel.IsVisible = false;
-        };
+                card.Stroke =
+                    (Color)Application.Current.Resources["PrimaryBlue"];
 
 
-        // Adiciona o gesto de toque ao card.
-        card.GestureRecognizers.Add(tap);
+                card.StrokeThickness =
+                    2.5;
 
 
-        // Devolve o card pronto para ser colocado na tela.
+                ErroHorarioLabel.IsVisible =
+                    false;
+            };
+
+
+        card.GestureRecognizers.Add(
+            tap);
+
+
         return card;
     }
 
-    // BOTÃO CONTINUAR
+
+    // CONTINUAR
+
     private async void ContinuarButton_Clicked(
         object sender,
         EventArgs e)
     {
-        // Verifica se o usuário escolheu algum horário.
-        if (string.IsNullOrEmpty(horarioSelecionado))
+        if (string.IsNullOrEmpty(
+            horarioSelecionado))
         {
-            // Mostra a mensagem de erro.
             ErroHorarioLabel.Text =
                 "Selecione um horário para continuar.";
 
-            ErroHorarioLabel.IsVisible = true;
+
+            ErroHorarioLabel.IsVisible =
+                true;
+
 
             return;
         }
 
+
+        DateTime dataEscolhida =
+            DataPicker.Date
+            ?? DateTime.Today;
+
+
         string dataSelecionada =
-            ((DateTime)DataPicker.Date).ToString("dd/MM/yyyy");
+            dataEscolhida.ToString(
+                "dd/MM/yyyy");
+
 
         await Shell.Current.GoToAsync(
             nameof(AgendarTipoAtendimento),
             new Dictionary<string, object>
             {
-                { "Medico", Medico },
-                { "FotoMedico", FotoMedico },
-                { "Especialidade", Especialidade },
-                { "Data", dataSelecionada },
-                { "Horario", horarioSelecionado }
+                {
+                    "PacienteId",
+                    PacienteId
+                },
+
+                {
+                    "Paciente",
+                    Paciente
+                },
+
+                {
+                    "Medico",
+                    Medico
+                },
+
+                {
+                    "FotoMedico",
+                    FotoMedico
+                },
+
+                {
+                    "Especialidade",
+                    Especialidade
+                },
+
+                {
+                    "Data",
+                    dataSelecionada
+                },
+
+                {
+                    "Horario",
+                    horarioSelecionado
+                }
             });
     }
 
 
-    // BOTÃO VOLTAR
+    // VOLTAR
+
     private async void VoltarButton_Clicked(
         object sender,
         EventArgs e)
     {
-        // Volta para a página anterior.
         await Shell.Current.GoToAsync("..");
     }
 }
