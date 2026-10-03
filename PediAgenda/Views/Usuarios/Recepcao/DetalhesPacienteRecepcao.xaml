@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Recepcao.DetalhesPacienteRecepcao"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Paciente"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="24,24"
+            Spacing="18">
+
+            <!-- CABEÇALHO -->
+            <VerticalStackLayout Spacing="4">
+
+                <Label
+                    x:Name="NomePacienteLabel"
+                    FontSize="26"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    Text="Dados do paciente"
+                    FontSize="14"
+                    TextColor="{StaticResource InputPlaceholder}" />
+
+            </VerticalStackLayout>
+
+
+            <!-- DADOS DO PACIENTE -->
+            <Border
+                BackgroundColor="White"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 18">
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Label
+                        Text="Paciente"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        x:Name="NascimentoLabel"
+                        FontSize="14"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        x:Name="StatusPacienteLabel"
+                        FontSize="14"
+                        TextColor="{StaticResource TextDark}" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+
+            <!-- RESPONSÁVEL -->
+            <Border
+                BackgroundColor="White"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 18">
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Label
+                        Text="Responsável"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        x:Name="ResponsavelLabel"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        x:Name="TelefoneLabel"
+                        FontSize="14"
+                        TextColor="{StaticResource InputPlaceholder}" />
+
+                    <Label
+                        x:Name="EmailLabel"
+                        FontSize="14"
+                        TextColor="{StaticResource InputPlaceholder}" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+
+            <!-- PRÓXIMA CONSULTA -->
+            <Label
+                Text="Próxima consulta"
+                FontSize="20"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Border
+                x:Name="ProximaConsultaCard"
+                BackgroundColor="White"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 18">
+
+                <VerticalStackLayout Spacing="7">
+
+                    <Label
+                        x:Name="ProximaConsultaDataLabel"
+                        FontSize="17"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource PrimaryBlue}" />
+
+                    <Label
+                        x:Name="ProximaConsultaMedicoLabel"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        x:Name="ProximaConsultaEspecialidadeLabel"
+                        FontSize="14"
+                        TextColor="{StaticResource InputPlaceholder}" />
+
+                    <Label
+                        x:Name="ProximaConsultaStatusLabel"
+                        FontSize="14"
+                        TextColor="{StaticResource TextDark}" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+
+            <Label
+                x:Name="SemProximaConsultaLabel"
+                Text="Nenhuma consulta futura encontrada."
+                IsVisible="False"
+                FontSize="14"
+                TextColor="{StaticResource InputPlaceholder}" />
+
+
+            <!-- HISTÓRICO -->
+            <Grid ColumnDefinitions="*,Auto">
+
+                <Label
+                    Text="Histórico de consultas"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    x:Name="QuantidadeConsultasLabel"
+                    Grid.Column="1"
+                    FontSize="13"
+                    TextColor="{StaticResource InputPlaceholder}"
+                    VerticalOptions="Center" />
+
+            </Grid>
+
+
+            <CollectionView
+                ItemsSource="{Binding ConsultasPaciente}"
+                SelectionMode="None">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout
+                        Orientation="Vertical"
+                        ItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Border
+                            BackgroundColor="White"
+                            Stroke="{StaticResource InputBlue}"
+                            StrokeThickness="1"
+                            Padding="14"
+                            StrokeShape="RoundRectangle 14">
+
+                            <Grid
+                                RowDefinitions="Auto,Auto"
+                                ColumnDefinitions="*,Auto"
+                                RowSpacing="5">
+
+                                <Label
+                                    Text="{Binding Medico}"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource TextDark}" />
+
+                                <Border
+                                    Grid.Column="1"
+                                    BackgroundColor="{StaticResource PageBlue}"
+                                    StrokeThickness="0"
+                                    Padding="8,4"
+                                    StrokeShape="RoundRectangle 10">
+
+                                    <Label
+                                        Text="{Binding Status}"
+                                        FontSize="11"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource PrimaryBlue}" />
+
+                                </Border>
+
+                                <Label
+                                    Grid.Row="1"
+                                    Grid.ColumnSpan="2"
+                                    Text="{Binding DataHoraFormatada}"
+                                    FontSize="13"
+                                    TextColor="{StaticResource InputPlaceholder}" />
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+
+            <!-- AÇÕES -->
+            <Button
+                Text="AGENDAR CONSULTA"
+                HeightRequest="48"
+                CornerRadius="24"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="White"
+                FontAttributes="Bold"
+                Clicked="AgendarConsultaButton_Clicked" />
+
+            <Button
+                Text="VER CONSULTAS"
+                HeightRequest="48"
+                CornerRadius="24"
+                BackgroundColor="White"
+                BorderColor="{StaticResource PrimaryBlue}"
+                BorderWidth="1"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                Clicked="VerConsultasButton_Clicked" />
+
+            <Button
+                Text="← Voltar"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource TextDark}"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

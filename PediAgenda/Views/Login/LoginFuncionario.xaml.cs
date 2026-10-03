@@ -49,11 +49,7 @@ public partial class LoginFuncionario : ContentPage
 
     private async void EntrarRecepcionistaButton_Clicked(object sender, EventArgs e)
     {
-        //Alerta Provisorio
-        await DisplayAlertAsync(
-            "Botão de Entrar",
-            "Botão ainda será implementado.",
-            "OK");
+        await Shell.Current.GoToAsync(nameof(Usuarios.Recepcao.MenuRecepcao));
     }
 
     // Método auxiliar para exibir mensagens de erro

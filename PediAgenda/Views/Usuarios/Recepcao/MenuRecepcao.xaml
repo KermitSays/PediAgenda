@@ -1,12 +1,255 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="PediAgenda.Views.Recepcao.MenuRecepcao"
-             Title="MenuRecepcao">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Recepcao.MenuRecepcao"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Menu Recepção"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <Grid
+        RowDefinitions="Auto,Auto,*"
+        Padding="24,30,24,20">
+
+        <!-- CABEÇALHO -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Spacing="4"
+            Margin="0,0,0,20">
+
+            <Label
+                Text="Olá, Recepção!"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                x:Name="DataAtualLabel"
+                FontSize="15"
+                TextColor="{StaticResource InputPlaceholder}" />
+
+        </VerticalStackLayout>
+
+
+        <!-- MENU -->
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,*,*"
+            ColumnSpacing="18"
+            Margin="0,0,0,24">
+
+            <!-- PACIENTES -->
+            <VerticalStackLayout
+                Grid.Column="0"
+                Spacing="6"
+                HorizontalOptions="Center">
+
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="PacientesButton_Clicked" />
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Image
+                    Source="paciente_icon.png"
+                    WidthRequest="85"
+                    HeightRequest="85"
+                    Aspect="AspectFit" />
+
+                <Label
+                    Text="Pacientes"
+                    FontSize="15"
+                    TextColor="{StaticResource TextDark}"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+
+            <!-- MEDICOS -->
+            <VerticalStackLayout
+                Grid.Column="1"
+                Spacing="6"
+                HorizontalOptions="Center">
+
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="MedicosButton_Clicked" />
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Image
+                    Source="medico_icon.png"
+                    WidthRequest="85"
+                    HeightRequest="85"
+                    Aspect="AspectFit" />
+
+                <Label
+                    Text="Médicos"
+                    FontSize="15"
+                    TextColor="{StaticResource TextDark}"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+
+            <!-- CONSULTAS -->
+            <VerticalStackLayout
+                Grid.Column="2"
+                Spacing="6"
+                HorizontalOptions="Center">
+
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="ConsultasButton_Clicked" />
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Image
+                    Source="consulta_icon.png"
+                    WidthRequest="85"
+                    HeightRequest="85"
+                    Aspect="AspectFit" />
+
+                <Label
+                    Text="Consultas"
+                    FontSize="15"
+                    TextColor="{StaticResource TextDark}"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+        </Grid>
+
+
+        <!-- CONSULTAS DO DIA -->
+        <VerticalStackLayout
+            Grid.Row="2"
+            Spacing="14">
+
+            <Grid ColumnDefinitions="*,Auto">
+
+                <Label
+                    Text="Consultas de hoje"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    x:Name="QuantidadeConsultasLabel"
+                    Grid.Column="1"
+                    FontSize="13"
+                    TextColor="{StaticResource InputPlaceholder}"
+                    VerticalOptions="Center" />
+
+            </Grid>
+
+
+            <CollectionView
+                ItemsSource="{Binding ConsultasHoje}"
+                SelectionMode="None">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout
+                        Orientation="Vertical"
+                        ItemSpacing="12" />
+                </CollectionView.ItemsLayout>
+
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+
+                        <Border
+                            BackgroundColor="White"
+                            Stroke="{StaticResource InputBlue}"
+                            StrokeThickness="1"
+                            Padding="16"
+                            StrokeShape="RoundRectangle 16">
+
+                            <Grid
+                                ColumnDefinitions="70,*,Auto"
+                                ColumnSpacing="12">
+
+                                <!-- HORÁRIO -->
+                                <Label
+                                    Grid.Column="0"
+                                    Text="{Binding Horario}"
+                                    FontSize="17"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource PrimaryBlue}"
+                                    VerticalOptions="Center"
+                                    HorizontalTextAlignment="Center" />
+
+
+                                <!-- PACIENTE -->
+                                <VerticalStackLayout
+                                    Grid.Column="1"
+                                    Spacing="3"
+                                    VerticalOptions="Center">
+
+                                    <Label
+                                        Text="{Binding Paciente}"
+                                        FontSize="17"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource TextDark}" />
+
+                                    <Label
+                                        Text="{Binding Medico}"
+                                        FontSize="13"
+                                        TextColor="{StaticResource InputPlaceholder}" />
+
+                                </VerticalStackLayout>
+
+
+                                <!-- STATUS -->
+                                <Border
+                                    Grid.Column="2"
+                                    BackgroundColor="{StaticResource PageBlue}"
+                                    StrokeThickness="0"
+                                    Padding="10,6"
+                                    StrokeShape="RoundRectangle 10"
+                                    VerticalOptions="Center">
+
+                                    <Label
+                                        Text="{Binding Status}"
+                                        FontSize="12"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource PrimaryBlue}" />
+
+                                </Border>
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+
+                <CollectionView.EmptyView>
+
+                    <VerticalStackLayout
+                        Padding="20"
+                        Spacing="6"
+                        HorizontalOptions="Center">
+
+                        <Label
+                            Text="Nenhuma consulta hoje"
+                            FontSize="17"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Não há consultas registradas para hoje."
+                            FontSize="14"
+                            TextColor="{StaticResource InputPlaceholder}"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+
+                </CollectionView.EmptyView>
+
+            </CollectionView>
+
+        </VerticalStackLayout>
+
+    </Grid>
+
 </ContentPage>

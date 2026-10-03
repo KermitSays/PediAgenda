@@ -72,6 +72,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Views\Usuarios\Recepcao\MedicosRecepcao.xaml.cs">
+	    <DependentUpon>MedicosRecepcao.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Views\Usuarios\Responsavel\PacientesResponsavel.xaml.cs">
 	    <DependentUpon>PacientesResponsavel.xaml</DependentUpon>
 	  </Compile>
@@ -126,7 +129,16 @@
 	  <MauiXaml Update="Views\Usuarios\Medico\RelatoriosMedico.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\Usuarios\Recepcao\MedicosRecepcao.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Usuarios\Recepcao\DetalhesPacienteRecepcao.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\Usuarios\Recepcao\MenuRecepcao.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Usuarios\Recepcao\PacientesRecepcao.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\Usuarios\Responsavel\AgendamentoConcluido.xaml">

@@ -116,5 +116,22 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(
             nameof(Views.Usuarios.Medico.RelatoriosMedico),
             typeof(Views.Usuarios.Medico.RelatoriosMedico));
+
+        //ROTAS RECEPÇÃO
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Recepcao.MenuRecepcao),
+            typeof(Views.Usuarios.Recepcao.MenuRecepcao));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Recepcao.PacientesRecepcao),
+            typeof(Views.Usuarios.Recepcao.PacientesRecepcao));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Recepcao.DetalhesPacienteRecepcao),
+            typeof(Views.Usuarios.Recepcao.DetalhesPacienteRecepcao));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Recepcao.MedicosRecepcao),
+            typeof(Views.Usuarios.Recepcao.MedicosRecepcao));
     }
 }

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Recepcao.MedicosRecepcao"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Médicos"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <Grid
+        RowDefinitions="Auto,*"
+        Padding="24,24,24,20">
+
+        <!-- CABEÇALHO E FILTROS -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Spacing="14"
+            Margin="0,0,0,18">
+
+            <Label
+                Text="Agenda Médica"
+                FontSize="26"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                Text="Consulte e gerencie os horários dos médicos."
+                FontSize="14"
+                TextColor="{StaticResource InputPlaceholder}" />
+
+
+            <!-- MÉDICO -->
+            <VerticalStackLayout Spacing="6">
+
+                <Label
+                    Text="Médico"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="White"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="10,3"
+                    StrokeShape="RoundRectangle 14">
+
+                    <Picker
+                        x:Name="MedicoPicker"
+                        Title="Selecione o médico"
+                        TextColor="{StaticResource TextDark}"
+                        TitleColor="{StaticResource InputPlaceholder}"
+                        SelectedIndexChanged="Filtro_Changed" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+
+            <!-- DATA -->
+            <VerticalStackLayout Spacing="6">
+
+                <Label
+                    Text="Data"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="White"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="10,3"
+                    StrokeShape="RoundRectangle 14">
+
+                    <DatePicker
+                        x:Name="DataPicker"
+                        Format="dd/MM/yyyy"
+                        TextColor="{StaticResource TextDark}"
+                        DateSelected="DataPicker_DateSelected" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+
+            <!-- RESUMO -->
+            <Grid
+                ColumnDefinitions="*,Auto">
+
+                <Label
+                    Text="Horários"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    x:Name="QuantidadeHorariosLabel"
+                    Grid.Column="1"
+                    FontSize="13"
+                    TextColor="{StaticResource InputPlaceholder}"
+                    VerticalOptions="Center" />
+
+            </Grid>
+
+        </VerticalStackLayout>
+
+
+        <!-- LISTA DE HORÁRIOS -->
+        <CollectionView
+            Grid.Row="1"
+            ItemsSource="{Binding HorariosFiltrados}"
+            SelectionMode="None">
+
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout
+                    Orientation="Vertical"
+                    ItemSpacing="12" />
+            </CollectionView.ItemsLayout>
+
+
+            <CollectionView.ItemTemplate>
+
+                <DataTemplate>
+
+                    <Border
+                        BackgroundColor="White"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        Padding="16"
+                        StrokeShape="RoundRectangle 16">
+
+                        <Grid
+                            RowDefinitions="Auto,Auto,Auto"
+                            ColumnDefinitions="70,*,Auto"
+                            ColumnSpacing="12"
+                            RowSpacing="6">
+
+                            <!-- HORÁRIO -->
+                            <Label
+                                Grid.Row="0"
+                                Grid.RowSpan="2"
+                                Grid.Column="0"
+                                Text="{Binding HorarioFormatado}"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource PrimaryBlue}"
+                                VerticalOptions="Center"
+                                HorizontalTextAlignment="Center" />
+
+
+                            <!-- STATUS -->
+                            <Label
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Text="{Binding Status}"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+
+                            <!-- DESCRIÇÃO -->
+                            <Label
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Grid.ColumnSpan="2"
+                                Text="{Binding Descricao}"
+                                FontSize="13"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+
+                            <!-- AÇÃO -->
+                            <Button
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Grid.ColumnSpan="2"
+                                Text="{Binding TextoAcao}"
+                                Margin="0,8,0,0"
+                                HeightRequest="42"
+                                CornerRadius="21"
+                                BackgroundColor="{StaticResource PrimaryBlue}"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                CommandParameter="{Binding .}"
+                                Clicked="HorarioButton_Clicked" />
+
+                        </Grid>
+
+                    </Border>
+
+                </DataTemplate>
+
+            </CollectionView.ItemTemplate>
+
+
+            <CollectionView.EmptyView>
+
+                <VerticalStackLayout
+                    Padding="30"
+                    Spacing="6"
+                    HorizontalOptions="Center">
+
+                    <Label
+                        Text="Nenhum horário encontrado"
+                        FontSize="17"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}"
+                        HorizontalTextAlignment="Center" />
+
+                    <Label
+                        Text="Selecione outro médico ou outra data."
+                        FontSize="14"
+                        TextColor="{StaticResource InputPlaceholder}"
+                        HorizontalTextAlignment="Center" />
+
+                </VerticalStackLayout>
+
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>
