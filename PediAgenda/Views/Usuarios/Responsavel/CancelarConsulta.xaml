@@ -14,128 +14,245 @@
             Padding="24,35"
             Spacing="18">
 
-            <!-- TÍTULO -->
-            <Label
-                Text="Cancelar consulta"
-                FontSize="26"
-                FontAttributes="Bold"
-                TextColor="{StaticResource TextDark}" />
 
-            <Label
-                Text="Deseja realmente cancelar esta consulta?"
-                FontSize="15"
-                TextColor="{StaticResource TextDark}" />
+            <!-- ÁREA DE CANCELAMENTO -->
 
-            <!-- RESUMO DA CONSULTA -->
-            <Border
-                BackgroundColor="{StaticResource White}"
-                Stroke="{StaticResource InputBlue}"
-                StrokeThickness="1"
-                Padding="18"
-                StrokeShape="RoundRectangle 14">
+            <VerticalStackLayout
+                x:Name="CancelamentoContainer"
+                Spacing="18">
 
-                <VerticalStackLayout Spacing="12">
 
-                    <Label
-                        Text="Resumo da consulta"
-                        FontSize="17"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource TextDark}" />
+                <!-- TÍTULO -->
 
-                    <VerticalStackLayout Spacing="3">
+                <Label
+                    Text="Cancelar consulta"
+                    FontSize="26"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+
+                <Label
+                    Text="Deseja realmente cancelar esta consulta?"
+                    FontSize="15"
+                    TextColor="{StaticResource TextDark}" />
+
+
+                <!-- RESUMO DA CONSULTA -->
+
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="18"
+                    StrokeShape="RoundRectangle 14">
+
+                    <VerticalStackLayout
+                        Spacing="12">
 
                         <Label
-                            Text="Médico"
-                            FontSize="12"
-                            TextColor="{StaticResource InputPlaceholder}" />
-
-                        <Label
-                            x:Name="MedicoLabel"
-                            FontSize="15"
+                            Text="Resumo da consulta"
+                            FontSize="17"
                             FontAttributes="Bold"
                             TextColor="{StaticResource TextDark}" />
 
+
+                        <!-- MÉDICO -->
+
+                        <VerticalStackLayout
+                            Spacing="3">
+
+                            <Label
+                                Text="Médico"
+                                FontSize="12"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                            <Label
+                                x:Name="MedicoLabel"
+                                FontSize="15"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+                        </VerticalStackLayout>
+
+
+                        <!-- ESPECIALIDADE -->
+
+                        <VerticalStackLayout
+                            Spacing="3">
+
+                            <Label
+                                Text="Especialidade"
+                                FontSize="12"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                            <Label
+                                x:Name="EspecialidadeLabel"
+                                FontSize="15"
+                                TextColor="{StaticResource TextDark}" />
+
+                        </VerticalStackLayout>
+
+
+                        <!-- PACIENTE -->
+
+                        <VerticalStackLayout
+                            Spacing="3">
+
+                            <Label
+                                Text="Paciente"
+                                FontSize="12"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                            <Label
+                                x:Name="PacienteLabel"
+                                FontSize="15"
+                                TextColor="{StaticResource TextDark}" />
+
+                        </VerticalStackLayout>
+
+
+                        <!-- DATA -->
+
+                        <VerticalStackLayout
+                            Spacing="3">
+
+                            <Label
+                                Text="Data"
+                                FontSize="12"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                            <Label
+                                x:Name="DataLabel"
+                                FontSize="15"
+                                TextColor="{StaticResource TextDark}" />
+
+                        </VerticalStackLayout>
+
+
+                        <!-- HORÁRIO -->
+
+                        <VerticalStackLayout
+                            Spacing="3">
+
+                            <Label
+                                Text="Horário"
+                                FontSize="12"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                            <Label
+                                x:Name="HorarioLabel"
+                                FontSize="15"
+                                TextColor="{StaticResource TextDark}" />
+
+                        </VerticalStackLayout>
+
                     </VerticalStackLayout>
 
-                    <VerticalStackLayout Spacing="3">
+                </Border>
 
-                        <Label
-                            Text="Especialidade"
-                            FontSize="12"
-                            TextColor="{StaticResource InputPlaceholder}" />
 
-                        <Label
-                            x:Name="EspecialidadeLabel"
-                            FontSize="15"
-                            TextColor="{StaticResource TextDark}" />
+                <!-- CANCELAR -->
 
-                    </VerticalStackLayout>
+                <Button
+                    Text="CANCELAR CONSULTA"
+                    HeightRequest="52"
+                    CornerRadius="14"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="{StaticResource White}"
+                    FontAttributes="Bold"
+                    Clicked="CancelarButton_Clicked" />
 
-                    <VerticalStackLayout Spacing="3">
 
-                        <Label
-                            Text="Paciente"
-                            FontSize="12"
-                            TextColor="{StaticResource InputPlaceholder}" />
+                <!-- VOLTAR -->
 
-                        <Label
-                            x:Name="PacienteLabel"
-                            FontSize="15"
-                            TextColor="{StaticResource TextDark}" />
+                <Button
+                    Text="VOLTAR"
+                    HeightRequest="52"
+                    CornerRadius="14"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource PrimaryBlue}"
+                    FontAttributes="Bold"
+                    Clicked="VoltarButton_Clicked" />
 
-                    </VerticalStackLayout>
+            </VerticalStackLayout>
 
-                    <VerticalStackLayout Spacing="3">
 
-                        <Label
-                            Text="Data"
-                            FontSize="12"
-                            TextColor="{StaticResource InputPlaceholder}" />
+            <!-- CANCELAMENTO CONCLUÍDO -->
+            
+            <VerticalStackLayout
+                x:Name="ConclusaoContainer"
+                IsVisible="False"
+                Spacing="22"
+                Padding="0,40,0,0">
 
-                        <Label
-                            x:Name="DataLabel"
-                            FontSize="15"
-                            TextColor="{StaticResource TextDark}" />
 
-                    </VerticalStackLayout>
+                <VerticalStackLayout
+                    Spacing="8"
+                    HorizontalOptions="Center">
 
-                    <VerticalStackLayout Spacing="3">
+                    <Label
+                        Text="Consulta cancelada"
+                        FontSize="28"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource TextDark}" />
 
-                        <Label
-                            Text="Horário"
-                            FontSize="12"
-                            TextColor="{StaticResource InputPlaceholder}" />
-
-                        <Label
-                            x:Name="HorarioLabel"
-                            FontSize="15"
-                            TextColor="{StaticResource TextDark}" />
-
-                    </VerticalStackLayout>
+                    <Label
+                        Text="O cancelamento foi realizado com sucesso."
+                        FontSize="16"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource PrimaryBlue}" />
 
                 </VerticalStackLayout>
 
-            </Border>
 
-            <!-- BOTÃO CANCELAR -->
-            <Button
-                Text="CANCELAR CONSULTA"
-                HeightRequest="52"
-                CornerRadius="14"
-                BackgroundColor="{StaticResource PrimaryBlue}"
-                TextColor="{StaticResource White}"
-                FontAttributes="Bold"
-                Clicked="CancelarButton_Clicked" />
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="20"
+                    StrokeShape="RoundRectangle 16">
 
-            <!-- BOTÃO VOLTAR -->
-            <Button
-                Text="VOLTAR"
-                HeightRequest="52"
-                CornerRadius="14"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource PrimaryBlue}"
-                FontAttributes="Bold"
-                Clicked="VoltarButton_Clicked" />
+                    <VerticalStackLayout
+                        Spacing="7">
+
+                        <Label
+                            Text="O horário foi liberado novamente para a agenda."
+                            FontSize="15"
+                            HorizontalTextAlignment="Center"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            Text="Você pode consultar seus outros agendamentos em Minhas Consultas."
+                            FontSize="14"
+                            HorizontalTextAlignment="Center"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+
+                <Button
+                    Text="VOLTAR PARA MINHAS CONSULTAS"
+                    HeightRequest="52"
+                    CornerRadius="14"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="{StaticResource White}"
+                    FontAttributes="Bold"
+                    Clicked="MinhasConsultasButton_Clicked" />
+
+
+                <Button
+                    Text="VOLTAR AO MENU INICIAL"
+                    HeightRequest="52"
+                    CornerRadius="14"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource PrimaryBlue}"
+                    FontAttributes="Bold"
+                    Clicked="MenuButton_Clicked" />
+
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
 

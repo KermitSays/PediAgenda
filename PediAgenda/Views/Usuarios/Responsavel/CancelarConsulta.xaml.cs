@@ -20,6 +20,8 @@ public partial class CancelarConsulta : ContentPage
 
     private string? horario;
 
+    private bool cancelamentoConcluido;
+
 
     public int ConsultaId
     {
@@ -36,6 +38,7 @@ public partial class CancelarConsulta : ContentPage
         set
         {
             medico = value;
+
 
             if (MedicoLabel != null)
             {
@@ -54,6 +57,7 @@ public partial class CancelarConsulta : ContentPage
         {
             especialidade = value;
 
+
             if (EspecialidadeLabel != null)
             {
                 EspecialidadeLabel.Text =
@@ -70,6 +74,7 @@ public partial class CancelarConsulta : ContentPage
         set
         {
             paciente = value;
+
 
             if (PacienteLabel != null)
             {
@@ -88,6 +93,7 @@ public partial class CancelarConsulta : ContentPage
         {
             data = value;
 
+
             if (DataLabel != null)
             {
                 DataLabel.Text =
@@ -105,6 +111,7 @@ public partial class CancelarConsulta : ContentPage
         {
             horario = value;
 
+
             if (HorarioLabel != null)
             {
                 HorarioLabel.Text =
@@ -121,10 +128,15 @@ public partial class CancelarConsulta : ContentPage
 
 
     // CONFIRMAR CANCELAMENTO
+
     private async void CancelarButton_Clicked(
         object sender,
         EventArgs e)
     {
+        if (cancelamentoConcluido)
+            return;
+
+
         bool confirmar =
             await DisplayAlertAsync(
                 "Cancelar consulta",
@@ -137,7 +149,6 @@ public partial class CancelarConsulta : ContentPage
             return;
 
 
-        // Localiza o paciente
         PacienteResponsavelItem? pacienteEncontrado =
             ResponsavelDados.Pacientes
                 .FirstOrDefault(p =>
@@ -157,7 +168,6 @@ public partial class CancelarConsulta : ContentPage
         }
 
 
-        // Localiza a consulta pelo ID
         ConsultaResponsavelItem? consulta =
             pacienteEncontrado.Consultas
                 .FirstOrDefault(c =>
@@ -188,12 +198,37 @@ public partial class CancelarConsulta : ContentPage
         }
 
 
-        // Mantém no histórico
+        if (consulta.Status.Equals(
+            "Realizada",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            await DisplayAlertAsync(
+                "Consulta realizada",
+                "Uma consulta já realizada não pode ser cancelada.",
+                "OK");
+
+            return;
+        }
+
+
+        // CANCELA A CONSULTA
+
         consulta.Status =
             "Cancelada";
 
 
-        // Cria a notificação
+        // LIBERA O HORÁRIO NOVAMENTE
+
+        if (consulta.IdHorario > 0)
+        {
+            HorarioAgendamentoDados
+                .LiberarHorario(
+                    consulta.IdHorario);
+        }
+
+
+        // NOTIFICAÇÃO
+
         NotificacoesDados.Notificacoes.Add(
             new Notificacao
             {
@@ -213,18 +248,45 @@ public partial class CancelarConsulta : ContentPage
             });
 
 
-        await DisplayAlertAsync(
-            "Consulta cancelada",
-            "A consulta foi cancelada com sucesso.",
-            "OK");
+        cancelamentoConcluido =
+            true;
 
 
-        await Shell.Current.GoToAsync(
-            nameof(MinhasConsultas));
+        // MOSTRA A TELA FINAL DO FLUXO
+
+        CancelamentoContainer.IsVisible =
+            false;
+
+
+        ConclusaoContainer.IsVisible =
+            true;
     }
 
 
-    // VOLTAR
+    // MINHAS CONSULTAS
+
+    private async void MinhasConsultasButton_Clicked(
+        object sender,
+        EventArgs e)
+    {
+        await NavegacaoResponsavel
+            .IrParaMinhasConsultasAsync();
+    }
+
+
+    // MENU PRINCIPAL
+
+    private async void MenuButton_Clicked(
+        object sender,
+        EventArgs e)
+    {
+        await NavegacaoResponsavel
+            .IrParaMenuAsync();
+    }
+
+
+    // VOLTAR ANTES DE CANCELAR
+
     private async void VoltarButton_Clicked(
         object sender,
         EventArgs e)

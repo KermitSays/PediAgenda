@@ -103,6 +103,7 @@ public partial class AgendamentoConcluido : ContentPage
     {
         InitializeComponent();
 
+
         BindingContext =
             this;
     }
@@ -138,8 +139,8 @@ public partial class AgendamentoConcluido : ContentPage
         object sender,
         EventArgs e)
     {
-        await Shell.Current.GoToAsync(
-            nameof(MinhasConsultas));
+        await NavegacaoResponsavel
+            .IrParaMinhasConsultasAsync();
     }
 
 
@@ -149,7 +150,7 @@ public partial class AgendamentoConcluido : ContentPage
         object sender,
         EventArgs e)
     {
-        await Shell.Current.GoToAsync(
-            nameof(MenuResponsavel));
+        await NavegacaoResponsavel
+            .IrParaMenuAsync();
     }
 }

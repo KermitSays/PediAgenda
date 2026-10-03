@@ -1,47 +1,66 @@
 <?xml version="1.0" encoding="utf-8" ?>
+
 <ContentPage
     x:Class="PediAgenda.Views.Usuarios.Responsavel.PacientesResponsavel"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="Pacientes"
-    BackgroundColor="{StaticResource PageBlue}">
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
 
-    <ScrollView>
+    <Grid
+        Padding="24,30,24,24"
+        RowDefinitions="Auto,*,Auto">
+
+
+        <!-- TÍTULO -->
+
         <VerticalStackLayout
-            Padding="24,30"
-            Spacing="20">
+            Grid.Row="0"
+            Spacing="4">
 
-            <!-- TÍTULO -->
-            <VerticalStackLayout Spacing="4">
+            <Label
+                Text="Meus pacientes"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
 
-                <Label
-                    Text="Meus pacientes"
-                    FontSize="28"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}" />
+            <Label
+                Text="Consulte os dados e o histórico de cada paciente."
+                FontSize="15"
+                TextColor="{StaticResource InputPlaceholder}" />
 
-                <Label
-                    Text="Pacientes cadastrados"
-                    FontSize="15"
-                    TextColor="{StaticResource InputPlaceholder}" />
+        </VerticalStackLayout>
 
-            </VerticalStackLayout>
 
-            <!-- LISTA DE PACIENTES -->
-            <CollectionView
-                ItemsSource="{Binding PacientesLista}"
-                SelectionMode="None">
+        <!-- PACIENTES -->
 
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout
-                        Orientation="Vertical"
-                        ItemSpacing="14" />
-                </CollectionView.ItemsLayout>
+        <CollectionView
+            Grid.Row="1"
+            x:Name="PacientesCollectionView"
+            ItemsSource="{Binding PacientesLista}"
+            Margin="0,24,0,15"
+            SelectionMode="None">
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
+            <CollectionView.ItemsLayout>
+
+                <LinearItemsLayout
+                    Orientation="Vertical"
+                    ItemSpacing="14" />
+
+            </CollectionView.ItemsLayout>
+
+
+            <CollectionView.ItemTemplate>
+
+                <DataTemplate>
+
+                    <VerticalStackLayout
+                        Spacing="10">
+
 
                         <!-- CARD DO PACIENTE -->
+
                         <Border
                             BackgroundColor="{StaticResource White}"
                             Stroke="{StaticResource InputBlue}"
@@ -49,11 +68,21 @@
                             Padding="16"
                             StrokeShape="RoundRectangle 16">
 
+                            <Border.GestureRecognizers>
+
+                                <TapGestureRecognizer
+                                    Tapped="PacienteCard_Tapped" />
+
+                            </Border.GestureRecognizers>
+
+
                             <Grid
                                 ColumnDefinitions="70,*"
                                 ColumnSpacing="16">
 
+
                                 <!-- FOTO -->
+
                                 <Border
                                     Grid.Column="0"
                                     WidthRequest="64"
@@ -71,44 +100,193 @@
 
                                 </Border>
 
+
                                 <!-- INFORMAÇÕES -->
+
                                 <VerticalStackLayout
                                     Grid.Column="1"
                                     Spacing="3"
                                     VerticalOptions="Center">
 
-                                    <!-- NOME -->
                                     <Label
                                         Text="{Binding Nome}"
                                         FontSize="18"
                                         FontAttributes="Bold"
                                         TextColor="{StaticResource TextDark}" />
 
-                                    <!-- IDADE -->
+
                                     <Label
                                         Text="{Binding Idade, StringFormat='{0} anos'}"
                                         FontSize="15"
                                         FontAttributes="Bold"
                                         TextColor="{StaticResource PrimaryBlue}" />
 
-                                    <!-- DATA DE NASCIMENTO -->
+
                                     <Label
                                         Text="{Binding DataNascimento, StringFormat='Nascimento: {0:dd/MM/yyyy}'}"
                                         FontSize="14"
                                         TextColor="{StaticResource InputPlaceholder}" />
 
+
+                                    <Label
+                                        Text="Toque para ver o histórico"
+                                        FontSize="12"
+                                        TextColor="{StaticResource PrimaryBlue}"
+                                        Margin="0,4,0,0" />
+
                                 </VerticalStackLayout>
 
                             </Grid>
 
+
+                            <!-- DESTAQUE QUANDO ABERTO -->
+
+                            <Border.Triggers>
+
+                                <DataTrigger
+                                    TargetType="Border"
+                                    Binding="{Binding IsHistoricoExpanded}"
+                                    Value="True">
+
+                                    <Setter
+                                        Property="Stroke"
+                                        Value="{StaticResource PrimaryBlue}" />
+
+                                    <Setter
+                                        Property="StrokeThickness"
+                                        Value="2" />
+
+                                    <Setter
+                                        Property="BackgroundColor"
+                                        Value="#E8F3FF" />
+
+                                </DataTrigger>
+
+                            </Border.Triggers>
+
                         </Border>
 
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
 
-            </CollectionView>
+                        <!-- ÁREA DO HISTÓRICO -->
 
-        </VerticalStackLayout>
-    </ScrollView>
+                        <VerticalStackLayout
+                            IsVisible="{Binding IsHistoricoExpanded}"
+                            Spacing="10"
+                            Padding="12,0,0,8">
+
+
+                            <Label
+                                Text="Histórico de consultas"
+                                FontSize="17"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}"
+                                Margin="8,4,0,2" />
+
+
+                            <!-- CONSULTAS DO HISTÓRICO -->
+
+                            <VerticalStackLayout
+                                BindableLayout.ItemsSource="{Binding HistoricoConsultasOrdenado}"
+                                Spacing="10">
+
+                                <BindableLayout.ItemTemplate>
+
+                                    <DataTemplate>
+
+                                        <Border
+                                            BackgroundColor="{StaticResource White}"
+                                            Stroke="{StaticResource InputBlue}"
+                                            StrokeThickness="1"
+                                            Padding="14"
+                                            Margin="20,0,0,0"
+                                            StrokeShape="RoundRectangle 12">
+
+                                            <Border.GestureRecognizers>
+
+                                                <TapGestureRecognizer
+                                                    Tapped="HistoricoConsultaCard_Tapped" />
+
+                                            </Border.GestureRecognizers>
+
+
+                                            <VerticalStackLayout
+                                                Spacing="4">
+
+                                                <Label
+                                                    Text="{Binding Medico}"
+                                                    FontSize="15"
+                                                    FontAttributes="Bold"
+                                                    TextColor="{StaticResource TextDark}" />
+
+                                                <Label
+                                                    Text="{Binding Especialidade}"
+                                                    FontSize="13"
+                                                    TextColor="{StaticResource PrimaryBlue}" />
+
+                                                <Label
+                                                    Text="{Binding DataHorario}"
+                                                    FontSize="13"
+                                                    TextColor="{StaticResource TextDark}" />
+
+                                                <Label
+                                                    Text="{Binding Status}"
+                                                    FontSize="12"
+                                                    FontAttributes="Bold"
+                                                    TextColor="{StaticResource InputPlaceholder}" />
+
+                                            </VerticalStackLayout>
+
+                                        </Border>
+
+                                    </DataTemplate>
+
+                                </BindableLayout.ItemTemplate>
+
+                            </VerticalStackLayout>
+
+
+                            <!-- SEM HISTÓRICO -->
+
+                            <Border
+                                IsVisible="{Binding SemHistorico}"
+                                BackgroundColor="{StaticResource White}"
+                                Stroke="{StaticResource InputBlue}"
+                                StrokeThickness="1"
+                                Padding="14"
+                                Margin="20,0,0,0"
+                                StrokeShape="RoundRectangle 12">
+
+                                <Label
+                                    Text="Este paciente ainda não possui consultas no histórico."
+                                    FontSize="13"
+                                    TextColor="{StaticResource InputPlaceholder}"
+                                    HorizontalTextAlignment="Center" />
+
+                            </Border>
+
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+
+                </DataTemplate>
+
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+
+
+        <!-- VOLTAR -->
+
+        <Button
+            Grid.Row="2"
+            Text="VOLTAR"
+            HeightRequest="52"
+            CornerRadius="14"
+            BackgroundColor="{StaticResource PrimaryBlue}"
+            TextColor="{StaticResource White}"
+            FontAttributes="Bold"
+            Clicked="VoltarButton_Clicked" />
+
+    </Grid>
 
 </ContentPage>

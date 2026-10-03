@@ -9,9 +9,11 @@
     NavigationPage.HasNavigationBar="False">
 
     <ScrollView>
+
         <VerticalStackLayout
             Padding="24,40,24,24"
             Spacing="22">
+
 
             <!-- SUCESSO -->
 
@@ -34,7 +36,8 @@
 
             </VerticalStackLayout>
 
-            <!-- RESUMO DA CONSULTA -->
+
+            <!-- RESUMO -->
 
             <Border
                 BackgroundColor="{StaticResource White}"
@@ -53,59 +56,97 @@
                         HorizontalTextAlignment="Center"
                         TextColor="{StaticResource TextDark}" />
 
+
                     <Image
                         Source="{Binding FotoMedico}"
                         WidthRequest="65"
-                        HeightRequest="65"/>
+                        HeightRequest="65" />
 
-                    <!-- MÉDICO -->                    
-                    <VerticalStackLayout  
+
+                    <!-- PACIENTE -->
+
+                    <VerticalStackLayout
                         Spacing="3">
 
-                            <Label
-                                Text="{Binding Medico}"
-                                FontSize="18"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource TextDark}" />
+                        <Label
+                            Text="Paciente"
+                            FontSize="13"
+                            TextColor="{StaticResource InputPlaceholder}" />
 
-                            <Label
-                                Text="{Binding Especialidade}"
-                                FontSize="15"
-                                TextColor="{StaticResource PrimaryBlue}" />
-                        </VerticalStackLayout>                    
+                        <Label
+                            Text="{Binding Paciente}"
+                            FontSize="18"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
 
-                    <!-- DATA E HORÁRIO -->
-                    <VerticalStackLayout
-                            Spacing="3">
+                    </VerticalStackLayout>
 
-                            <Label
-                                Text="Data"
-                                FontSize="13"
-                                TextColor="{StaticResource InputPlaceholder}" />
 
-                            <Label
-                                Text="{Binding Data}"
-                                FontSize="16"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource TextDark}" />
-                        </VerticalStackLayout>
+                    <!-- MÉDICO -->
 
                     <VerticalStackLayout
-                            Spacing="3">
+                        Spacing="3">
 
-                        <Label Text="Horário"
-                               FontSize="13"
-                               TextColor="{StaticResource InputPlaceholder}" />
+                        <Label
+                            Text="Médico"
+                            FontSize="13"
+                            TextColor="{StaticResource InputPlaceholder}" />
 
-                        <Label Text="{Binding Horario}"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="{StaticResource TextDark}" />
+                        <Label
+                            Text="{Binding Medico}"
+                            FontSize="18"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            Text="{Binding Especialidade}"
+                            FontSize="15"
+                            TextColor="{StaticResource PrimaryBlue}" />
+
+                    </VerticalStackLayout>
+
+
+                    <!-- DATA -->
+
+                    <VerticalStackLayout
+                        Spacing="3">
+
+                        <Label
+                            Text="Data"
+                            FontSize="13"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label
+                            Text="{Binding Data}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </VerticalStackLayout>
+
+
+                    <!-- HORÁRIO -->
+
+                    <VerticalStackLayout
+                        Spacing="3">
+
+                        <Label
+                            Text="Horário"
+                            FontSize="13"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label
+                            Text="{Binding Horario}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
                     </VerticalStackLayout>
 
                 </VerticalStackLayout>
 
             </Border>
+
 
             <!-- MENSAGEM -->
 
@@ -115,6 +156,7 @@
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}"
                 HorizontalTextAlignment="Center" />
+
 
             <!-- BOTÕES -->
 
@@ -127,6 +169,7 @@
                 FontAttributes="Bold"
                 Clicked="ConsultasButton_Clicked" />
 
+
             <Button
                 Text="VOLTAR AO INÍCIO"
                 HeightRequest="48"
@@ -137,6 +180,7 @@
                 Clicked="MenuButton_Clicked" />
 
         </VerticalStackLayout>
+
     </ScrollView>
 
 </ContentPage>

@@ -12,7 +12,9 @@
         Padding="24,30,24,24"
         RowDefinitions="Auto,*,Auto">
 
+
         <!-- TÍTULO -->
+
         <VerticalStackLayout
             Grid.Row="0"
             Spacing="5">
@@ -27,10 +29,12 @@
                 Text="Selecione um paciente para visualizar suas consultas."
                 FontSize="15"
                 TextColor="{StaticResource TextDark}" />
+
         </VerticalStackLayout>
 
 
         <!-- LISTA DE PACIENTES -->
+
         <CollectionView
             Grid.Row="1"
             x:Name="PacientesCollectionView"
@@ -38,15 +42,17 @@
             SelectionMode="None">
 
             <CollectionView.ItemTemplate>
+
                 <DataTemplate>
 
                     <VerticalStackLayout
                         Spacing="10"
                         Margin="0,0,0,14">
 
+
                         <!-- CARD DO PACIENTE -->
+
                         <Border
-                            x:Name="PacienteCard"
                             BackgroundColor="{StaticResource White}"
                             Stroke="{StaticResource InputBlue}"
                             StrokeThickness="1"
@@ -55,12 +61,19 @@
                             StrokeShape="RoundRectangle 14">
 
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="PacienteCard_Tapped" />
+
+                                <TapGestureRecognizer
+                                    Tapped="PacienteCard_Tapped" />
+
                             </Border.GestureRecognizers>
 
-                            <HorizontalStackLayout Spacing="12">
 
-                                <!-- FOTO DO PACIENTE -->
+                            <HorizontalStackLayout
+                                Spacing="12">
+
+
+                                <!-- FOTO -->
+
                                 <Border
                                     WidthRequest="52"
                                     HeightRequest="52"
@@ -70,9 +83,12 @@
                                     <Image
                                         Source="{Binding Foto}"
                                         Aspect="AspectFill" />
+
                                 </Border>
 
-                                <!-- NOME DO PACIENTE -->
+
+                                <!-- NOME -->
+
                                 <VerticalStackLayout
                                     VerticalOptions="Center"
                                     Spacing="2">
@@ -92,7 +108,9 @@
 
                             </HorizontalStackLayout>
 
-                            <!-- ESTILO QUANDO ESTÁ ABERTO -->
+
+                            <!-- ESTILO ABERTO -->
+
                             <Border.Triggers>
 
                                 <DataTrigger
@@ -119,9 +137,10 @@
                         </Border>
 
 
-                        <!-- CONSULTAS DO PACIENTE -->
+                        <!-- CONSULTAS ATIVAS -->
+
                         <VerticalStackLayout
-                            BindableLayout.ItemsSource="{Binding Consultas}"
+                            BindableLayout.ItemsSource="{Binding ConsultasAtivasOrdenadas}"
                             IsVisible="{Binding IsExpanded}"
                             Spacing="10"
                             Padding="12,0,0,0">
@@ -130,7 +149,6 @@
 
                                 <DataTemplate>
 
-                                    <!-- CARD DA CONSULTA -->
                                     <Border
                                         BackgroundColor="{StaticResource White}"
                                         Stroke="{StaticResource InputBlue}"
@@ -140,10 +158,15 @@
                                         StrokeShape="RoundRectangle 12">
 
                                         <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Tapped="ConsultaCard_Tapped" />
+
+                                            <TapGestureRecognizer
+                                                Tapped="ConsultaCard_Tapped" />
+
                                         </Border.GestureRecognizers>
 
-                                        <VerticalStackLayout Spacing="4">
+
+                                        <VerticalStackLayout
+                                            Spacing="4">
 
                                             <Label
                                                 Text="{Binding Medico}"
@@ -161,7 +184,14 @@
                                                 FontSize="13"
                                                 TextColor="{StaticResource TextDark}" />
 
+                                            <Label
+                                                Text="{Binding Status}"
+                                                FontSize="12"
+                                                FontAttributes="Bold"
+                                                TextColor="{StaticResource PrimaryBlue}" />
+
                                         </VerticalStackLayout>
+
                                     </Border>
 
                                 </DataTemplate>
@@ -170,15 +200,53 @@
 
                         </VerticalStackLayout>
 
+
+                        <!-- SEM CONSULTAS ATIVAS -->
+
+                        <Border
+                            IsVisible="{Binding SemConsultasAtivas}"
+                            BackgroundColor="{StaticResource White}"
+                            Stroke="{StaticResource InputBlue}"
+                            StrokeThickness="1"
+                            Padding="14"
+                            Margin="32,0,0,8"
+                            StrokeShape="RoundRectangle 12">
+
+                            <Border.Triggers>
+
+                                <DataTrigger
+                                    TargetType="Border"
+                                    Binding="{Binding IsExpanded}"
+                                    Value="False">
+
+                                    <Setter
+                                        Property="IsVisible"
+                                        Value="False" />
+
+                                </DataTrigger>
+
+                            </Border.Triggers>
+
+
+                            <Label
+                                Text="Nenhuma consulta ativa para este paciente."
+                                FontSize="13"
+                                TextColor="{StaticResource InputPlaceholder}"
+                                HorizontalTextAlignment="Center" />
+
+                        </Border>
+
                     </VerticalStackLayout>
 
                 </DataTemplate>
+
             </CollectionView.ItemTemplate>
 
         </CollectionView>
 
 
         <!-- VOLTAR -->
+
         <Button
             Grid.Row="2"
             Text="VOLTAR"

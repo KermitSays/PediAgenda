@@ -47,7 +47,9 @@ public partial class MinhasConsultasDetalhes : ContentPage
             medico = value;
 
             if (MedicoLabel != null)
+            {
                 MedicoLabel.Text = value;
+            }
         }
     }
 
@@ -61,7 +63,9 @@ public partial class MinhasConsultasDetalhes : ContentPage
             especialidade = value;
 
             if (EspecialidadeLabel != null)
+            {
                 EspecialidadeLabel.Text = value;
+            }
         }
     }
 
@@ -75,7 +79,9 @@ public partial class MinhasConsultasDetalhes : ContentPage
             paciente = value;
 
             if (PacienteLabel != null)
+            {
                 PacienteLabel.Text = value;
+            }
         }
     }
 
@@ -89,7 +95,9 @@ public partial class MinhasConsultasDetalhes : ContentPage
             data = value;
 
             if (DataLabel != null)
+            {
                 DataLabel.Text = value;
+            }
         }
     }
 
@@ -103,7 +111,9 @@ public partial class MinhasConsultasDetalhes : ContentPage
             horario = value;
 
             if (HorarioLabel != null)
+            {
                 HorarioLabel.Text = value;
+            }
         }
     }
 
@@ -117,7 +127,9 @@ public partial class MinhasConsultasDetalhes : ContentPage
             modalidade = value;
 
             if (ModalidadeLabel != null)
+            {
                 ModalidadeLabel.Text = value;
+            }
         }
     }
 
@@ -131,7 +143,9 @@ public partial class MinhasConsultasDetalhes : ContentPage
             valor = value;
 
             if (ValorLabel != null)
+            {
                 ValorLabel.Text = value;
+            }
         }
     }
 
@@ -144,8 +158,14 @@ public partial class MinhasConsultasDetalhes : ContentPage
         {
             status = value;
 
+
             if (StatusLabel != null)
+            {
                 StatusLabel.Text = value;
+            }
+
+
+            AtualizarAcoesConsulta();
         }
     }
 
@@ -153,10 +173,38 @@ public partial class MinhasConsultasDetalhes : ContentPage
     public MinhasConsultasDetalhes()
     {
         InitializeComponent();
+
+        AtualizarAcoesConsulta();
+    }
+
+
+    // MOSTRA OU ESCONDE AS AÇÕES
+
+    private void AtualizarAcoesConsulta()
+    {
+        if (AcoesConsultaContainer == null)
+            return;
+
+
+        bool podeAlterar =
+            !Status.Equals(
+                "Realizada",
+                StringComparison.OrdinalIgnoreCase)
+
+            &&
+
+            !Status.Equals(
+                "Cancelada",
+                StringComparison.OrdinalIgnoreCase);
+
+
+        AcoesConsultaContainer.IsVisible =
+            podeAlterar;
     }
 
 
     // REAGENDAR CONSULTA
+
     private async void ReagendarButton_Clicked(
         object sender,
         EventArgs e)
@@ -189,24 +237,11 @@ public partial class MinhasConsultasDetalhes : ContentPage
 
 
     // CANCELAR CONSULTA
+
     private async void CancelarButton_Clicked(
         object sender,
         EventArgs e)
     {
-        // Impede tentar cancelar novamente
-        if (Status.Equals(
-            "Cancelada",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            await DisplayAlertAsync(
-                "Consulta cancelada",
-                "Esta consulta já está cancelada.",
-                "OK");
-
-            return;
-        }
-
-
         await Shell.Current.GoToAsync(
             nameof(CancelarConsulta),
             new Dictionary<string, object>
@@ -245,6 +280,7 @@ public partial class MinhasConsultasDetalhes : ContentPage
 
 
     // VOLTAR
+
     private async void VoltarButton_Clicked(
         object sender,
         EventArgs e)

@@ -2,12 +2,15 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 
 [QueryProperty(nameof(PacienteId), "PacienteId")]
 [QueryProperty(nameof(Paciente), "Paciente")]
+[QueryProperty(nameof(MedicoId), "MedicoId")]
 [QueryProperty(nameof(Medico), "Medico")]
 [QueryProperty(nameof(FotoMedico), "FotoMedico")]
 [QueryProperty(nameof(Especialidade), "Especialidade")]
 public partial class AgendarDataHorario : ContentPage
 {
     private int pacienteId;
+
+    private int medicoId;
 
     private string? paciente;
 
@@ -17,7 +20,8 @@ public partial class AgendarDataHorario : ContentPage
 
     private string? especialidade;
 
-    private string? horarioSelecionado;
+    private HorarioAgendamentoItem?
+        horarioSelecionado;
 
     private bool ajustandoData;
 
@@ -27,6 +31,22 @@ public partial class AgendarDataHorario : ContentPage
         get => pacienteId;
 
         set => pacienteId = value;
+    }
+
+
+    public int MedicoId
+    {
+        get => medicoId;
+
+        set
+        {
+            medicoId = value;
+
+            if (HorariosContainer != null)
+            {
+                CarregarHorarios();
+            }
+        }
     }
 
 
@@ -93,6 +113,12 @@ public partial class AgendarDataHorario : ContentPage
 
         DataPicker.Date =
             ProximaDataDisponivel();
+    }
+
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
 
 
         CarregarHorarios();
@@ -154,12 +180,35 @@ public partial class AgendarDataHorario : ContentPage
                 true;
 
 
+            DateTime proximaData =
+                e.NewDate.Value.AddDays(1);
+
+
+            while (
+                proximaData.DayOfWeek ==
+                    DayOfWeek.Saturday ||
+
+                proximaData.DayOfWeek ==
+                    DayOfWeek.Sunday)
+            {
+                proximaData =
+                    proximaData.AddDays(1);
+            }
+
+
             DataPicker.Date =
-                ProximaDataDisponivel();
+                proximaData;
 
 
             ajustandoData =
                 false;
+
+
+            horarioSelecionado =
+                null;
+
+
+            CarregarHorarios();
 
 
             return;
@@ -178,36 +227,63 @@ public partial class AgendarDataHorario : ContentPage
     }
 
 
-    // CARREGA OS HORÁRIOS
+    // CARREGA OS HORÁRIOS DISPONÍVEIS
 
     private void CarregarHorarios()
     {
+        if (HorariosContainer == null ||
+            DataPicker == null ||
+            MedicoId <= 0)
+        {
+            return;
+        }
+
+
         HorariosContainer.Children.Clear();
 
 
-        string[] horarios =
+        horarioSelecionado =
+            null;
+
+
+        DateTime dataSelecionada =
+            DataPicker.Date
+            ?? DateTime.Today;
+
+
+        List<HorarioAgendamentoItem>
+            horariosDisponiveis =
+                HorarioAgendamentoDados
+                    .ObterHorariosDisponiveis(
+                        MedicoId,
+                        dataSelecionada);
+
+
+        if (horariosDisponiveis.Count == 0)
         {
-            "08:00",
-            "08:30",
-            "09:00",
-            "09:30",
-            "10:00",
-            "10:30",
-            "13:00",
-            "13:30",
-            "14:00",
-            "14:30",
-            "15:00",
-            "15:30",
-            "16:00",
-            "16:30"
-        };
+            ErroHorarioLabel.Text =
+                "Não existem horários disponíveis para esta data.";
 
 
-        foreach (string horario in horarios)
+            ErroHorarioLabel.IsVisible =
+                true;
+
+
+            return;
+        }
+
+
+        ErroHorarioLabel.IsVisible =
+            false;
+
+
+        foreach (
+            HorarioAgendamentoItem horario
+            in horariosDisponiveis)
         {
             HorariosContainer.Children.Add(
-                CriarCardHorario(horario));
+                CriarCardHorario(
+                    horario));
         }
     }
 
@@ -215,28 +291,37 @@ public partial class AgendarDataHorario : ContentPage
     // CRIA O CARD DO HORÁRIO
 
     private Border CriarCardHorario(
-        string horario)
+        HorarioAgendamentoItem horario)
     {
         Border card =
             new Border
             {
                 BackgroundColor =
-                    (Color)Application.Current.Resources["White"],
+                    (Color)Application.Current!
+                        .Resources["White"],
 
                 Stroke =
-                    (Color)Application.Current.Resources["InputBlue"],
+                    (Color)Application.Current!
+                        .Resources["InputBlue"],
 
                 StrokeThickness =
                     1,
 
                 Padding =
-                    new Thickness(18, 12),
+                    new Thickness(
+                        18,
+                        12),
 
                 Margin =
-                    new Thickness(0, 0, 10, 10),
+                    new Thickness(
+                        0,
+                        0,
+                        10,
+                        10),
 
                 StrokeShape =
-                    new Microsoft.Maui.Controls.Shapes.RoundRectangle
+                    new Microsoft.Maui.Controls
+                        .Shapes.RoundRectangle
                     {
                         CornerRadius =
                             new CornerRadius(12)
@@ -248,7 +333,7 @@ public partial class AgendarDataHorario : ContentPage
             new Label
             {
                 Text =
-                    horario,
+                    horario.HoraTexto,
 
                 FontSize =
                     16,
@@ -257,7 +342,8 @@ public partial class AgendarDataHorario : ContentPage
                     FontAttributes.Bold,
 
                 TextColor =
-                    (Color)Application.Current.Resources["TextDark"],
+                    (Color)Application.Current!
+                        .Resources["TextDark"],
 
                 HorizontalOptions =
                     LayoutOptions.Center,
@@ -282,16 +368,20 @@ public partial class AgendarDataHorario : ContentPage
                     horario;
 
 
-                foreach (View item
+                foreach (
+                    View item
                     in HorariosContainer.Children)
                 {
-                    if (item is Border outroCard)
+                    if (item
+                        is Border outroCard)
                     {
                         outroCard.BackgroundColor =
-                            (Color)Application.Current.Resources["White"];
+                            (Color)Application.Current!
+                                .Resources["White"];
 
                         outroCard.Stroke =
-                            (Color)Application.Current.Resources["InputBlue"];
+                            (Color)Application.Current!
+                                .Resources["InputBlue"];
 
                         outroCard.StrokeThickness =
                             1;
@@ -300,11 +390,13 @@ public partial class AgendarDataHorario : ContentPage
 
 
                 card.BackgroundColor =
-                    Color.FromArgb("#EAF5FA");
+                    Color.FromArgb(
+                        "#EAF5FA");
 
 
                 card.Stroke =
-                    (Color)Application.Current.Resources["PrimaryBlue"];
+                    (Color)Application.Current!
+                        .Resources["PrimaryBlue"];
 
 
                 card.StrokeThickness =
@@ -330,8 +422,7 @@ public partial class AgendarDataHorario : ContentPage
         object sender,
         EventArgs e)
     {
-        if (string.IsNullOrEmpty(
-            horarioSelecionado))
+        if (horarioSelecionado == null)
         {
             ErroHorarioLabel.Text =
                 "Selecione um horário para continuar.";
@@ -370,6 +461,11 @@ public partial class AgendarDataHorario : ContentPage
                 },
 
                 {
+                    "MedicoId",
+                    MedicoId
+                },
+
+                {
                     "Medico",
                     Medico
                 },
@@ -385,13 +481,18 @@ public partial class AgendarDataHorario : ContentPage
                 },
 
                 {
+                    "HorarioId",
+                    horarioSelecionado.IdHorario
+                },
+
+                {
                     "Data",
                     dataSelecionada
                 },
 
                 {
                     "Horario",
-                    horarioSelecionado
+                    horarioSelecionado.HoraTexto
                 }
             });
     }

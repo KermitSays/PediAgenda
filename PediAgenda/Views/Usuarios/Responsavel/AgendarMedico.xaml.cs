@@ -73,6 +73,7 @@ public partial class AgendarMedico : ContentPage
                     {
                         new Medico
                         {
+                            IdMedico = 1,
                             Nome = "Dra. Ana Oliveira",
                             Rqe = "RQE 12345",
                             Foto = "user.png"
@@ -80,6 +81,7 @@ public partial class AgendarMedico : ContentPage
 
                         new Medico
                         {
+                            IdMedico = 2,
                             Nome = "Dr. Carlos Mendes",
                             Rqe = "RQE 23456",
                             Foto = "user.png"
@@ -87,6 +89,7 @@ public partial class AgendarMedico : ContentPage
 
                         new Medico
                         {
+                            IdMedico = 3,
                             Nome = "Dra. Juliana Santos",
                             Rqe = "RQE 34567",
                             Foto = "user.png"
@@ -99,6 +102,7 @@ public partial class AgendarMedico : ContentPage
                     {
                         new Medico
                         {
+                            IdMedico = 4,
                             Nome = "Dra. Mariana Costa",
                             Rqe = "RQE 45678",
                             Foto = "user.png"
@@ -106,6 +110,7 @@ public partial class AgendarMedico : ContentPage
 
                         new Medico
                         {
+                            IdMedico = 5,
                             Nome = "Dr. Rafael Almeida",
                             Rqe = "RQE 56789",
                             Foto = "user.png"
@@ -118,6 +123,7 @@ public partial class AgendarMedico : ContentPage
                     {
                         new Medico
                         {
+                            IdMedico = 6,
                             Nome = "Dr. Felipe Martins",
                             Rqe = "RQE 67890",
                             Foto = "user.png"
@@ -125,6 +131,7 @@ public partial class AgendarMedico : ContentPage
 
                         new Medico
                         {
+                            IdMedico = 7,
                             Nome = "Dra. Camila Rodrigues",
                             Rqe = "RQE 78901",
                             Foto = "user.png"
@@ -137,6 +144,7 @@ public partial class AgendarMedico : ContentPage
                     {
                         new Medico
                         {
+                            IdMedico = 8,
                             Nome = "Dra. Beatriz Lima",
                             Rqe = "RQE 89012",
                             Foto = "user.png"
@@ -144,6 +152,7 @@ public partial class AgendarMedico : ContentPage
 
                         new Medico
                         {
+                            IdMedico = 9,
                             Nome = "Dr. Lucas Ferreira",
                             Rqe = "RQE 90123",
                             Foto = "user.png"
@@ -234,6 +243,11 @@ public partial class AgendarMedico : ContentPage
                 },
 
                 {
+                    "MedicoId",
+                    medicoSelecionado.IdMedico
+                },
+
+                {
                     "Medico",
                     medicoSelecionado.Nome
                 },
@@ -265,6 +279,9 @@ public partial class AgendarMedico : ContentPage
 public class Medico : INotifyPropertyChanged
 {
     private bool selecionado;
+
+
+    public int IdMedico { get; set; }
 
 
     public string Nome { get; set; } =

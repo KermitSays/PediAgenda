@@ -2,14 +2,20 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 
 [QueryProperty(nameof(PacienteId), "PacienteId")]
 [QueryProperty(nameof(Paciente), "Paciente")]
+[QueryProperty(nameof(MedicoId), "MedicoId")]
 [QueryProperty(nameof(Medico), "Medico")]
 [QueryProperty(nameof(Especialidade), "Especialidade")]
+[QueryProperty(nameof(HorarioId), "HorarioId")]
 [QueryProperty(nameof(Data), "Data")]
 [QueryProperty(nameof(Horario), "Horario")]
 [QueryProperty(nameof(FotoMedico), "FotoMedico")]
 public partial class AgendarTipoAtendimento : ContentPage
 {
     private int pacienteId;
+
+    private int medicoId;
+
+    private int horarioId;
 
     private string? paciente;
 
@@ -33,6 +39,22 @@ public partial class AgendarTipoAtendimento : ContentPage
         get => pacienteId;
 
         set => pacienteId = value;
+    }
+
+
+    public int MedicoId
+    {
+        get => medicoId;
+
+        set => medicoId = value;
+    }
+
+
+    public int HorarioId
+    {
+        get => horarioId;
+
+        set => horarioId = value;
     }
 
 
@@ -101,11 +123,13 @@ public partial class AgendarTipoAtendimento : ContentPage
 
 
         ConvenioCard.Stroke =
-            (Color)Application.Current.Resources["PrimaryBlue"];
+            (Color)Application.Current!
+                .Resources["PrimaryBlue"];
 
 
         ParticularCard.Stroke =
-            (Color)Application.Current.Resources["InputBlue"];
+            (Color)Application.Current!
+                .Resources["InputBlue"];
 
 
         ConveniosContainer.IsVisible =
@@ -128,11 +152,13 @@ public partial class AgendarTipoAtendimento : ContentPage
 
 
         ParticularCard.Stroke =
-            (Color)Application.Current.Resources["PrimaryBlue"];
+            (Color)Application.Current!
+                .Resources["PrimaryBlue"];
 
 
         ConvenioCard.Stroke =
-            (Color)Application.Current.Resources["InputBlue"];
+            (Color)Application.Current!
+                .Resources["InputBlue"];
 
 
         ConveniosContainer.IsVisible =
@@ -230,6 +256,11 @@ public partial class AgendarTipoAtendimento : ContentPage
                 },
 
                 {
+                    "MedicoId",
+                    MedicoId
+                },
+
+                {
                     "Medico",
                     Medico
                 },
@@ -242,6 +273,11 @@ public partial class AgendarTipoAtendimento : ContentPage
                 {
                     "Especialidade",
                     Especialidade
+                },
+
+                {
+                    "HorarioId",
+                    HorarioId
                 },
 
                 {

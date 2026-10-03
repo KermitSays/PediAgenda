@@ -15,125 +15,262 @@
             Padding="24,30,24,24"
             Spacing="20">
 
-            <!-- TÍTULO -->
-            <VerticalStackLayout Spacing="5">
+            <!-- REAGENDAMENTO  -->
 
-                <Label
-                    Text="Reagendar consulta"
-                    FontSize="28"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}" />
-
-                <Label
-                    Text="Escolha uma nova data e horário para sua consulta."
-                    FontSize="15"
-                    TextColor="{StaticResource TextDark}" />
-
-            </VerticalStackLayout>
+            <VerticalStackLayout
+                x:Name="ReagendamentoContainer"
+                Spacing="20">
 
 
-            <!-- RESUMO DA CONSULTA -->
-            <Border
-                BackgroundColor="{StaticResource White}"
-                Stroke="{StaticResource InputBlue}"
-                StrokeThickness="1"
-                Padding="18">
+                <!-- TÍTULO -->
 
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="14" />
-                </Border.StrokeShape>
-
-                <VerticalStackLayout Spacing="8">
+                <VerticalStackLayout
+                    Spacing="5">
 
                     <Label
-                        Text="Consulta atual"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource PrimaryBlue}" />
-
-                    <Label
-                        x:Name="MedicoLabel"
-                        FontSize="17"
+                        Text="Reagendar consulta"
+                        FontSize="28"
                         FontAttributes="Bold"
                         TextColor="{StaticResource TextDark}" />
 
                     <Label
-                        x:Name="EspecialidadeLabel"
-                        FontSize="15"
-                        TextColor="{StaticResource TextDark}" />
-
-                    <Label
-                        x:Name="PacienteLabel"
+                        Text="Escolha uma nova data e horário para sua consulta."
                         FontSize="15"
                         TextColor="{StaticResource TextDark}" />
 
                 </VerticalStackLayout>
 
-            </Border>
+
+                <!-- RESUMO DA CONSULTA -->
+
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="18">
+
+                    <Border.StrokeShape>
+
+                        <RoundRectangle
+                            CornerRadius="14" />
+
+                    </Border.StrokeShape>
 
 
-            <!-- DATA -->
-            <VerticalStackLayout Spacing="8">
+                    <VerticalStackLayout
+                        Spacing="8">
 
-                <Label
-                    Text="Nova data"
-                    FontSize="18"
+                        <Label
+                            Text="Consulta atual"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource PrimaryBlue}" />
+
+                        <Label
+                            x:Name="MedicoLabel"
+                            FontSize="17"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="EspecialidadeLabel"
+                            FontSize="15"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="PacienteLabel"
+                            FontSize="15"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+
+                <!-- DATA -->
+
+                <VerticalStackLayout
+                    Spacing="8">
+
+                    <Label
+                        Text="Nova data"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <DatePicker
+                        x:Name="DataPicker"
+                        Format="dd/MM/yyyy"
+                        MinimumDate="{x:Static sys:DateTime.Today}"
+                        DateSelected="DataPicker_DateSelected" />
+
+                </VerticalStackLayout>
+
+
+                <!-- HORÁRIOS -->
+
+                <VerticalStackLayout
+                    Spacing="10">
+
+                    <Label
+                        Text="Novo horário"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <FlexLayout
+                        x:Name="HorariosContainer"
+                        Wrap="Wrap"
+                        Direction="Row"
+                        JustifyContent="Start" />
+
+                    <Label
+                        x:Name="ErroHorarioLabel"
+                        TextColor="Red"
+                        FontSize="14"
+                        IsVisible="False" />
+
+                </VerticalStackLayout>
+
+
+                <!-- CONFIRMAR -->
+
+                <Button
+                    Text="CONFIRMAR REAGENDAMENTO"
+                    HeightRequest="52"
+                    CornerRadius="14"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="{StaticResource White}"
                     FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}" />
+                    Clicked="ConfirmarButton_Clicked" />
 
-                <DatePicker
-                    x:Name="DataPicker"
-                    Format="dd/MM/yyyy"
-                    MinimumDate="{x:Static sys:DateTime.Today}"
-                    DateSelected="DataPicker_DateSelected" />
+
+                <!-- VOLTAR -->
+
+                <Button
+                    Text="VOLTAR"
+                    HeightRequest="52"
+                    CornerRadius="14"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource PrimaryBlue}"
+                    FontAttributes="Bold"
+                    Clicked="VoltarButton_Clicked" />
 
             </VerticalStackLayout>
 
+            <!-- REAGENDAMENTO CONCLUÍDO -->
 
-            <!-- HORÁRIOS -->
-            <VerticalStackLayout Spacing="10">
+            <VerticalStackLayout
+                x:Name="ConclusaoContainer"
+                IsVisible="False"
+                Spacing="22"
+                Padding="0,40,0,0">
 
-                <Label
-                    Text="Novo horário"
-                    FontSize="18"
+
+                <VerticalStackLayout
+                    Spacing="8"
+                    HorizontalOptions="Center">
+
+                    <Label
+                        Text="Consulta reagendada!"
+                        FontSize="28"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        Text="A nova data e horário foram registrados com sucesso."
+                        FontSize="16"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource PrimaryBlue}" />
+
+                </VerticalStackLayout>
+
+
+                <!-- NOVO AGENDAMENTO -->
+
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="20"
+                    StrokeShape="RoundRectangle 16">
+
+                    <VerticalStackLayout
+                        Spacing="12">
+
+                        <Label
+                            Text="Novo agendamento"
+                            FontSize="18"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+
+                        <VerticalStackLayout
+                            Spacing="3">
+
+                            <Label
+                                Text="Data"
+                                FontSize="12"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                            <Label
+                                x:Name="NovaDataLabel"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+                        </VerticalStackLayout>
+
+
+                        <VerticalStackLayout
+                            Spacing="3">
+
+                            <Label
+                                Text="Horário"
+                                FontSize="12"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                            <Label
+                                x:Name="NovoHorarioLabel"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+                        </VerticalStackLayout>
+
+
+                        <Label
+                            Text="Status: Por confirmar"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource PrimaryBlue}" />
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+
+                <Button
+                    Text="VOLTAR PARA MINHAS CONSULTAS"
+                    HeightRequest="52"
+                    CornerRadius="14"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="{StaticResource White}"
                     FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}" />
+                    Clicked="MinhasConsultasButton_Clicked" />
 
-                <FlexLayout
-                    x:Name="HorariosContainer"
-                    Wrap="Wrap"
-                    Direction="Row"
-                    JustifyContent="Start" />
 
-                <Label
-                    x:Name="ErroHorarioLabel"
-                    TextColor="Red"
-                    FontSize="14"
-                    IsVisible="False" />
+                <Button
+                    Text="VOLTAR AO MENU INICIAL"
+                    HeightRequest="52"
+                    CornerRadius="14"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource PrimaryBlue}"
+                    FontAttributes="Bold"
+                    Clicked="MenuButton_Clicked" />
 
             </VerticalStackLayout>
-
-
-            <!-- CONFIRMAR -->
-            <Button
-                Text="CONFIRMAR REAGENDAMENTO"
-                HeightRequest="52"
-                CornerRadius="14"
-                BackgroundColor="{StaticResource PrimaryBlue}"
-                TextColor="{StaticResource White}"
-                FontAttributes="Bold"
-                Clicked="ConfirmarButton_Clicked" />
-
-
-            <!-- VOLTAR -->
-            <Button
-                Text="VOLTAR"
-                HeightRequest="52"
-                CornerRadius="14"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource PrimaryBlue}"
-                FontAttributes="Bold"
-                Clicked="VoltarButton_Clicked" />
 
         </VerticalStackLayout>
 

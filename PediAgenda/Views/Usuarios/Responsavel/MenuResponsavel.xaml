@@ -9,122 +9,176 @@
     NavigationPage.HasNavigationBar="False">
 
     <ScrollView>
+
         <VerticalStackLayout
             Padding="24,30,24,24"
             Spacing="22">
 
+
             <!-- CABEÇALHO -->
-            <VerticalStackLayout Grid.Column="0"
-                                     Spacing="4">
 
-                <Label Text="Olá, Usuário!"
-                       FontFamily="Poppins"
-                       FontSize="32"
-                       FontAttributes="Bold"
-                       TextColor="{StaticResource TextDark}" />
+            <VerticalStackLayout
+                Spacing="4">
 
-                <Label Text="Como podemos ajudar?"
-                       FontFamily="Poppins"
-                       FontSize="20"
-                       TextColor="{StaticResource PrimaryBlue}" />
+                <Label
+                    Text="Olá, Usuário!"
+                    FontFamily="Poppins"
+                    FontSize="32"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    Text="Como podemos ajudar?"
+                    FontFamily="Poppins"
+                    FontSize="20"
+                    TextColor="{StaticResource PrimaryBlue}" />
 
             </VerticalStackLayout>
 
-            <!-- Pacientes / Notificações / Minhas Consultas / Agendar -->
-            <Grid RowDefinitions="Auto,Auto"
-                  ColumnDefinitions="*,*"
-                  RowSpacing="20"
-                  ColumnSpacing="20">
 
-                <!-- Agendar -->
-                <VerticalStackLayout Grid.Row="0" Grid.Column="0" 
-                                     Spacing="6" 
-                                     HorizontalOptions="Center">
+            <!-- ATALHOS -->
 
-                    <!-- VerticalStackLayout para o ícone -->
+            <Grid
+                RowDefinitions="Auto,Auto"
+                ColumnDefinitions="*,*"
+                RowSpacing="20"
+                ColumnSpacing="20">
+
+
+                <!-- AGENDAR -->
+
+                <VerticalStackLayout
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Spacing="6"
+                    HorizontalOptions="Center">
+
                     <VerticalStackLayout.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="AgendarConsultaButton_Clicked"/>
+
+                        <TapGestureRecognizer
+                            Tapped="AgendarConsultaButton_Clicked" />
+
                     </VerticalStackLayout.GestureRecognizers>
 
-                    <Image Source="agendar_icon.png"
-                           WidthRequest="90"
-                           HeightRequest="90"
-                           Aspect="AspectFit" />        
 
-                    <Label Text="Agendar"
-                           TextColor="Black"
-                           FontSize="16"
-                           HorizontalTextAlignment="Center" />
+                    <Image
+                        Source="agendar_icon.png"
+                        WidthRequest="90"
+                        HeightRequest="90"
+                        Aspect="AspectFit" />
+
+
+                    <Label
+                        Text="Agendar"
+                        TextColor="Black"
+                        FontSize="16"
+                        HorizontalTextAlignment="Center" />
+
                 </VerticalStackLayout>
 
-                <!-- Minhas Consultas -->
-                <VerticalStackLayout Grid.Row="0" Grid.Column="1" 
-                                     Spacing="6" 
-                                     HorizontalOptions="Center">
 
-                    <!-- VerticalStackLayout para o ícone -->
+                <!-- MINHAS CONSULTAS -->
+
+                <VerticalStackLayout
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Spacing="6"
+                    HorizontalOptions="Center">
+
                     <VerticalStackLayout.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="MinhasConsultasButton_Clicked" />
+
+                        <TapGestureRecognizer
+                            Tapped="MinhasConsultasButton_Clicked" />
+
                     </VerticalStackLayout.GestureRecognizers>
 
-                    <Image Source="consulta_icon.png"
-                           WidthRequest="90"
-                           HeightRequest="90"
-                           Aspect="AspectFit" />
 
-                    <Label Text="Minhas Consultas"
-                           TextColor="Black"
-                           FontSize="16"
-                           HorizontalTextAlignment="Center" />
+                    <Image
+                        Source="consulta_icon.png"
+                        WidthRequest="90"
+                        HeightRequest="90"
+                        Aspect="AspectFit" />
+
+
+                    <Label
+                        Text="Minhas Consultas"
+                        TextColor="Black"
+                        FontSize="16"
+                        HorizontalTextAlignment="Center" />
+
                 </VerticalStackLayout>
 
-                <!-- Pacientes -->
-                <VerticalStackLayout Grid.Row="1" Grid.Column="0" 
-                                      Spacing="6" 
-                                      HorizontalOptions="Center">
 
-                    <!-- VerticalStackLayout para o ícone -->
+                <!-- PACIENTES -->
+
+                <VerticalStackLayout
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Spacing="6"
+                    HorizontalOptions="Center">
+
                     <VerticalStackLayout.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="PacientesButton_Clicked" />
+
+                        <TapGestureRecognizer
+                            Tapped="PacientesButton_Clicked" />
+
                     </VerticalStackLayout.GestureRecognizers>
 
-                    <Image Source="paciente_icon.png"
-                            WidthRequest="90"
-                            HeightRequest="90"
-                            Aspect="AspectFit" />
 
-                    <Label Text="Pacientes"
-                            TextColor="Black"
-                            FontSize="16"
-                            HorizontalTextAlignment="Center" />
+                    <Image
+                        Source="paciente_icon.png"
+                        WidthRequest="90"
+                        HeightRequest="90"
+                        Aspect="AspectFit" />
+
+
+                    <Label
+                        Text="Pacientes"
+                        TextColor="Black"
+                        FontSize="16"
+                        HorizontalTextAlignment="Center" />
+
                 </VerticalStackLayout>
 
-                <!-- Notificações -->
-                <VerticalStackLayout Grid.Row="1" Grid.Column="1" 
-                                      Spacing="6" 
-                                      HorizontalOptions="Center">
 
-                    <!-- VerticalStackLayout para o ícone -->
+                <!-- NOTIFICAÇÕES -->
+
+                <VerticalStackLayout
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Spacing="6"
+                    HorizontalOptions="Center">
+
                     <VerticalStackLayout.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="NotificacoesButton_Clicked" />
+
+                        <TapGestureRecognizer
+                            Tapped="NotificacoesButton_Clicked" />
+
                     </VerticalStackLayout.GestureRecognizers>
 
-                    <Image Source="notificacao_icon.png"
-                           WidthRequest="90"
-                           HeightRequest="90"
-                           Aspect="AspectFit" />
 
-                    <Label Text="Notificações"
-                           TextColor="Black"
-                           FontSize="16"
-                           HorizontalTextAlignment="Center" />
+                    <Image
+                        Source="notificacao_icon.png"
+                        WidthRequest="90"
+                        HeightRequest="90"
+                        Aspect="AspectFit" />
+
+
+                    <Label
+                        Text="Notificações"
+                        TextColor="Black"
+                        FontSize="16"
+                        HorizontalTextAlignment="Center" />
+
                 </VerticalStackLayout>
 
             </Grid>
-            
 
-            <!-- Próxima Consulta - Preview -->
-            <VerticalStackLayout Spacing="10">
+
+            <!-- PRÓXIMA CONSULTA -->
+
+            <VerticalStackLayout
+                Spacing="10">
 
                 <Label
                     Text="Próxima consulta"
@@ -132,22 +186,30 @@
                     FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}" />
 
+
+                <!-- QUANDO EXISTE CONSULTA -->
+
                 <Border
+                    x:Name="ProximaConsultaCard"
                     BackgroundColor="{StaticResource White}"
                     StrokeThickness="0"
                     Padding="20"
                     StrokeShape="RoundRectangle 20">
 
-                    <VerticalStackLayout Spacing="15">
+                    <VerticalStackLayout
+                        Spacing="15">
 
-                        <!-- Médico -->
-                        <Grid ColumnDefinitions="Auto,*"
-                              ColumnSpacing="14">
 
-                            <!-- Ícone do médico -->
-                            <Border Grid.Column="0"
-                                    StrokeThickness="0"
-                                    StrokeShape="RoundRectangle 28">
+                        <!-- MÉDICO -->
+
+                        <Grid
+                            ColumnDefinitions="Auto,*"
+                            ColumnSpacing="14">
+
+                            <Border
+                                Grid.Column="0"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 28">
 
                                 <Image
                                     Source="user.png"
@@ -156,50 +218,82 @@
                                     Aspect="AspectFit"
                                     HorizontalOptions="Center"
                                     VerticalOptions="Center" />
+
                             </Border>
 
-                            <!-- Nome e especialidade do médico -->
-                            <VerticalStackLayout Grid.Column="1"
-                                                 VerticalOptions="Center"
-                                                 Spacing="2">
 
-                                <Label Text="Dra. Ana Oliveira"
-                                        FontSize="18"
-                                        FontAttributes="Bold"
-                                        TextColor="{StaticResource TextDark}" />
+                            <VerticalStackLayout
+                                Grid.Column="1"
+                                VerticalOptions="Center"
+                                Spacing="2">
 
-                                <Label Text="Pediatria"
-                                        FontSize="15"
-                                        TextColor="{StaticResource PrimaryBlue}" />
+                                <Label
+                                    x:Name="ProximoMedicoLabel"
+                                    FontSize="18"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource TextDark}" />
+
+                                <Label
+                                    x:Name="ProximaEspecialidadeLabel"
+                                    FontSize="15"
+                                    TextColor="{StaticResource PrimaryBlue}" />
+
                             </VerticalStackLayout>
 
                         </Grid>
 
 
-                        <!-- Informações da consulta-->
-                        <Grid ColumnDefinitions="*,*"
-                              RowDefinitions="Auto,Auto"
-                              ColumnSpacing="15"
-                              RowSpacing="12">
+                        <!-- PACIENTE -->
 
-                            <!-- Data -->
+                        <VerticalStackLayout
+                            Spacing="2">
+
+                            <Label
+                                Text="paciente"
+                                FontSize="13"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                            <Label
+                                x:Name="ProximoPacienteLabel"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+                        </VerticalStackLayout>
+
+
+                        <!-- INFORMAÇÕES -->
+
+                        <Grid
+                            ColumnDefinitions="*,*"
+                            RowDefinitions="Auto,Auto"
+                            ColumnSpacing="15"
+                            RowSpacing="12">
+
+
+                            <!-- DATA -->
+
                             <VerticalStackLayout
                                 Grid.Row="0"
                                 Grid.Column="0"
                                 Spacing="2">
 
-                                <Label Text="data"
-                                        FontSize="13"
-                                        TextColor="{StaticResource InputPlaceholder}" />
+                                <Label
+                                    Text="data"
+                                    FontSize="13"
+                                    TextColor="{StaticResource InputPlaceholder}" />
 
                                 <Label
-                                    Text="15/09/2026"
+                                    x:Name="ProximaDataLabel"
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="{StaticResource TextDark}" />
+
                             </VerticalStackLayout>
 
-                            <!-- Horário -->
+
+                            <!-- HORÁRIO -->
+
                             <VerticalStackLayout
                                 Grid.Row="0"
                                 Grid.Column="1"
@@ -211,13 +305,16 @@
                                     TextColor="{StaticResource InputPlaceholder}" />
 
                                 <Label
-                                    Text="14:30"
+                                    x:Name="ProximoHorarioLabel"
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="{StaticResource TextDark}" />
+
                             </VerticalStackLayout>
 
-                            <!-- Tipo de atendimento -->
+
+                            <!-- ATENDIMENTO -->
+
                             <VerticalStackLayout
                                 Grid.Row="1"
                                 Grid.Column="0"
@@ -229,13 +326,16 @@
                                     TextColor="{StaticResource InputPlaceholder}" />
 
                                 <Label
-                                    Text="Particular"
+                                    x:Name="ProximaModalidadeLabel"
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="{StaticResource TextDark}" />
+
                             </VerticalStackLayout>
-                            
-                            <!-- Status -->
+
+
+                            <!-- STATUS -->
+
                             <VerticalStackLayout
                                 Grid.Row="1"
                                 Grid.Column="1"
@@ -254,11 +354,13 @@
                                     HorizontalOptions="Start">
 
                                     <Label
-                                        Text="Confirmado"
+                                        x:Name="ProximoStatusLabel"
                                         FontSize="14"
                                         FontAttributes="Bold"
                                         TextColor="{StaticResource ResponsibleText}" />
+
                                 </Border>
+
                             </VerticalStackLayout>
 
                         </Grid>
@@ -267,9 +369,42 @@
 
                 </Border>
 
+
+                <!-- QUANDO NÃO EXISTE CONSULTA -->
+
+                <Border
+                    x:Name="SemConsultaCard"
+                    IsVisible="False"
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="20"
+                    StrokeShape="RoundRectangle 20">
+
+                    <VerticalStackLayout
+                        Spacing="5">
+
+                        <Label
+                            Text="Nenhuma consulta futura"
+                            FontSize="17"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Você não possui consultas agendadas no momento."
+                            FontSize="14"
+                            TextColor="{StaticResource InputPlaceholder}"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+
+                </Border>
+
             </VerticalStackLayout>
 
         </VerticalStackLayout>
+
     </ScrollView>
 
 </ContentPage>

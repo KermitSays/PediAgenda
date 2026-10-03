@@ -4,8 +4,10 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 
 [QueryProperty(nameof(PacienteId), "PacienteId")]
 [QueryProperty(nameof(Paciente), "Paciente")]
+[QueryProperty(nameof(MedicoId), "MedicoId")]
 [QueryProperty(nameof(Medico), "Medico")]
 [QueryProperty(nameof(Especialidade), "Especialidade")]
+[QueryProperty(nameof(HorarioId), "HorarioId")]
 [QueryProperty(nameof(Data), "Data")]
 [QueryProperty(nameof(Horario), "Horario")]
 [QueryProperty(nameof(TipoAtendimento), "TipoAtendimento")]
@@ -13,6 +15,10 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 public partial class AgendarConfirmacao : ContentPage
 {
     private int pacienteId;
+
+    private int medicoId;
+
+    private int horarioId;
 
     private string? paciente;
 
@@ -36,6 +42,22 @@ public partial class AgendarConfirmacao : ContentPage
         get => pacienteId;
 
         set => pacienteId = value;
+    }
+
+
+    public int MedicoId
+    {
+        get => medicoId;
+
+        set => medicoId = value;
+    }
+
+
+    public int HorarioId
+    {
+        get => horarioId;
+
+        set => horarioId = value;
     }
 
 
@@ -158,8 +180,6 @@ public partial class AgendarConfirmacao : ContentPage
         object sender,
         EventArgs e)
     {
-        // Evita cadastrar duas vezes
-        // caso o botão seja tocado rapidamente.
         if (agendamentoSalvo)
             return;
 
@@ -210,6 +230,33 @@ public partial class AgendarConfirmacao : ContentPage
         }
 
 
+        // Confere novamente antes de salvar.
+        // Isso simula a validação que futuramente
+        // será responsabilidade da API.
+
+        bool horarioReservado =
+            HorarioAgendamentoDados
+                .ReservarHorario(
+                    HorarioId);
+
+
+        if (!horarioReservado)
+        {
+            await DisplayAlertAsync(
+                "Horário indisponível",
+                "Este horário não está mais disponível. " +
+                "Selecione outro horário.",
+                "OK");
+
+
+            await Shell.Current.GoToAsync(
+                "..");
+
+
+            return;
+        }
+
+
         int novoId =
             ResponsavelDados.Pacientes
                 .SelectMany(p =>
@@ -252,6 +299,12 @@ public partial class AgendarConfirmacao : ContentPage
                 Id =
                     novoId,
 
+                IdMedico =
+                    MedicoId,
+
+                IdHorario =
+                    HorarioId,
+
                 Medico =
                     Medico,
 
@@ -279,7 +332,6 @@ public partial class AgendarConfirmacao : ContentPage
             novaConsulta);
 
 
-        // Gera notificação
         NotificacoesDados.Notificacoes.Add(
             new Notificacao
             {
