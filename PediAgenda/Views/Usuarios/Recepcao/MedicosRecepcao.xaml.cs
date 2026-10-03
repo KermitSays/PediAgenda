@@ -23,6 +23,13 @@ public partial class MedicosRecepcao : ContentPage
         CarregarAgenda();
     }
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        CarregarAgenda();
+    }
+
 
     private void CarregarMedicos()
     {
@@ -115,14 +122,8 @@ public partial class MedicosRecepcao : ContentPage
 
         if (horario.Status == "Agendado")
         {
-            await DisplayAlertAsync(
-                "Consulta",
-                $"Paciente: {horario.Paciente}\n" +
-                $"Médico: {horario.Medico}\n" +
-                $"Data: {horario.Data:dd/MM/yyyy}\n" +
-                $"Horário: {horario.HorarioFormatado}\n\n" +
-                "A tela de detalhes da consulta será conectada em seguida.",
-                "OK");
+            await Shell.Current.GoToAsync(
+                $"{nameof(DetalhesConsultaRecepcao)}?HorarioId={horario.Id}");
 
             return;
         }

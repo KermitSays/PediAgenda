@@ -9,6 +9,7 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 
     private PacienteRecepcaoItem? _paciente;
 
+
     public ObservableCollection<ConsultaPacienteRecepcaoItem>
         ConsultasPaciente
     { get; set; } = new();
@@ -21,6 +22,7 @@ public partial class DetalhesPacienteRecepcao : ContentPage
             if (int.TryParse(value, out int id))
             {
                 _pacienteId = id;
+
                 CarregarPaciente();
             }
         }
@@ -35,35 +37,54 @@ public partial class DetalhesPacienteRecepcao : ContentPage
     }
 
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (_pacienteId != 0)
+        {
+            CarregarPaciente();
+        }
+    }
+
+
     private void CarregarPaciente()
     {
         _paciente =
             PacientesRecepcaoDados.Pacientes
                 .FirstOrDefault(p => p.Id == _pacienteId);
 
+
         if (_paciente == null)
             return;
 
 
-        NomePacienteLabel.Text = _paciente.Nome;
+        NomePacienteLabel.Text =
+            _paciente.Nome;
+
 
         NascimentoLabel.Text =
             $"Nascimento: {_paciente.DataNascimento:dd/MM/yyyy}";
 
+
         StatusPacienteLabel.Text =
             $"Status: {_paciente.Status}";
+
 
         ResponsavelLabel.Text =
             _paciente.Responsavel;
 
+
         TelefoneLabel.Text =
             $"Telefone: {_paciente.TelefoneResponsavel}";
+
 
         EmailLabel.Text =
             $"E-mail: {_paciente.EmailResponsavel}";
 
 
         ConsultasPaciente.Clear();
+
 
         foreach (var consulta in
                  _paciente.Consultas
@@ -92,7 +113,8 @@ public partial class DetalhesPacienteRecepcao : ContentPage
             _paciente.Consultas
                 .Where(c =>
                     c.Data.Date >= DateTime.Today &&
-                    c.Status != "Cancelado")
+                    c.Status != "Cancelado" &&
+                    c.Status != "Realizado")
                 .OrderBy(c => c.Data)
                 .ThenBy(c => c.Horario)
                 .FirstOrDefault();
@@ -101,6 +123,7 @@ public partial class DetalhesPacienteRecepcao : ContentPage
         if (proxima == null)
         {
             ProximaConsultaCard.IsVisible = false;
+
             SemProximaConsultaLabel.IsVisible = true;
 
             return;
@@ -108,44 +131,78 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 
 
         ProximaConsultaCard.IsVisible = true;
+
         SemProximaConsultaLabel.IsVisible = false;
+
 
         ProximaConsultaDataLabel.Text =
             proxima.DataHoraFormatada;
 
+
         ProximaConsultaMedicoLabel.Text =
             proxima.Medico;
 
+
         ProximaConsultaEspecialidadeLabel.Text =
             $"{proxima.Especialidade} • {proxima.TipoAtendimento}";
+
 
         ProximaConsultaStatusLabel.Text =
             $"Status: {proxima.Status}";
     }
 
 
+    // ACESSAR CONSULTA PELO HISTÓRICO
+    private async void ConsultaHistorico_Tapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        if (sender is not TapGestureRecognizer gesto ||
+            gesto.CommandParameter is not ConsultaPacienteRecepcaoItem consulta)
+        {
+            return;
+        }
+
+
+        // Consultas antigas ou canceladas não possuem mais
+        // um horário ativo na agenda médica.
+        if (!consulta.HorarioId.HasValue)
+        {
+            await DisplayAlertAsync(
+                "Consulta do histórico",
+                $"Médico: {consulta.Medico}\n" +
+                $"Data: {consulta.Data:dd/MM/yyyy}\n" +
+                $"Horário: {consulta.Horario:hh\\:mm}\n" +
+                $"Status: {consulta.Status}\n\n" +
+                "Esta consulta não possui um horário ativo na agenda.",
+                "OK");
+
+            return;
+        }
+
+
+        await Shell.Current.GoToAsync(
+            $"{nameof(DetalhesConsultaRecepcao)}" +
+            $"?HorarioId={consulta.HorarioId.Value}");
+    }
+
+
+    // AGENDAR NOVA CONSULTA
     private async void AgendarConsultaButton_Clicked(
-        object sender,
-        EventArgs e)
+    object sender,
+    EventArgs e)
     {
-        await DisplayAlertAsync(
-            "Agendar consulta",
-            "O fluxo de agendamento da recepção será conectado em seguida.",
-            "OK");
+        if (_paciente == null)
+            return;
+
+
+        await Shell.Current.GoToAsync(
+            $"{nameof(AgendarConsultaRecepcao)}" +
+            $"?PacienteId={_paciente.Id}");
     }
 
 
-    private async void VerConsultasButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        await DisplayAlertAsync(
-            "Consultas",
-            "A tela de gerenciamento das consultas da recepção será implementada em seguida.",
-            "OK");
-    }
-
-
+    // VOLTAR
     private async void VoltarButton_Clicked(
         object sender,
         EventArgs e)

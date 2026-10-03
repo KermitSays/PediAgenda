@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Recepcao.DetalhesConsultaRecepcao"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Consulta"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="24,24"
+            Spacing="18">
+
+            <!-- CABEÇALHO -->
+            <VerticalStackLayout Spacing="4">
+
+                <Label
+                    Text="Detalhes da consulta"
+                    FontSize="26"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    Text="Consulte e gerencie o agendamento."
+                    FontSize="14"
+                    TextColor="{StaticResource InputPlaceholder}" />
+
+            </VerticalStackLayout>
+
+
+            <!-- PACIENTE -->
+            <Border
+                BackgroundColor="White"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 18">
+
+                <VerticalStackLayout Spacing="8">
+
+                    <Label
+                        Text="Paciente"
+                        FontSize="14"
+                        TextColor="{StaticResource InputPlaceholder}" />
+
+                    <Label
+                        x:Name="PacienteLabel"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        x:Name="ResponsavelLabel"
+                        FontSize="14"
+                        TextColor="{StaticResource TextDark}" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+
+            <!-- DADOS DA CONSULTA -->
+            <Border
+                BackgroundColor="White"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 18">
+
+                <VerticalStackLayout Spacing="13">
+
+                    <Label
+                        Text="Consulta"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Grid
+                        RowDefinitions="Auto,Auto,Auto,Auto"
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="15"
+                        RowSpacing="10">
+
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Text="Médico:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="MedicoLabel"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            TextColor="{StaticResource TextDark}" />
+
+
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Text="Data:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="DataLabel"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            TextColor="{StaticResource TextDark}" />
+
+
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Text="Horário:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="HorarioLabel"
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            TextColor="{StaticResource TextDark}" />
+
+
+                        <Label
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Text="Status:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="StatusLabel"
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource PrimaryBlue}" />
+
+                    </Grid>
+
+                </VerticalStackLayout>
+
+            </Border>
+
+
+            <!-- AÇÕES -->
+            <Label
+                Text="Ações"
+                FontSize="20"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+
+            <Button
+                x:Name="ConfirmarButton"
+                Text="CONFIRMAR CONSULTA"
+                HeightRequest="48"
+                CornerRadius="24"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="White"
+                FontAttributes="Bold"
+                Clicked="ConfirmarButton_Clicked" />
+
+
+            <Button
+                x:Name="ReagendarButton"
+                Text="REAGENDAR"
+                HeightRequest="48"
+                CornerRadius="24"
+                BackgroundColor="White"
+                BorderColor="{StaticResource PrimaryBlue}"
+                BorderWidth="1"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                Clicked="ReagendarButton_Clicked" />
+
+
+            <Button
+                x:Name="CancelarButton"
+                Text="CANCELAR CONSULTA"
+                HeightRequest="48"
+                CornerRadius="24"
+                BackgroundColor="White"
+                BorderColor="#D9534F"
+                BorderWidth="1"
+                TextColor="#D9534F"
+                FontAttributes="Bold"
+                Clicked="CancelarButton_Clicked" />
+
+
+            <Button
+                Text="← Voltar"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource TextDark}"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

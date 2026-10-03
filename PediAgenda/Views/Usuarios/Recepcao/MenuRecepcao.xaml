@@ -34,8 +34,8 @@
         <!-- MENU -->
         <Grid
             Grid.Row="1"
-            ColumnDefinitions="*,*,*"
-            ColumnSpacing="18"
+            ColumnDefinitions="*,*"
+            ColumnSpacing="28"
             Margin="0,0,0,24">
 
             <!-- PACIENTES -->
@@ -51,20 +51,21 @@
 
                 <Image
                     Source="paciente_icon.png"
-                    WidthRequest="85"
-                    HeightRequest="85"
+                    WidthRequest="95"
+                    HeightRequest="95"
                     Aspect="AspectFit" />
 
                 <Label
                     Text="Pacientes"
                     FontSize="15"
+                    FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}"
                     HorizontalTextAlignment="Center" />
 
             </VerticalStackLayout>
 
 
-            <!-- MEDICOS -->
+            <!-- MÉDICOS -->
             <VerticalStackLayout
                 Grid.Column="1"
                 Spacing="6"
@@ -77,39 +78,14 @@
 
                 <Image
                     Source="medico_icon.png"
-                    WidthRequest="85"
-                    HeightRequest="85"
+                    WidthRequest="95"
+                    HeightRequest="95"
                     Aspect="AspectFit" />
 
                 <Label
                     Text="Médicos"
                     FontSize="15"
-                    TextColor="{StaticResource TextDark}"
-                    HorizontalTextAlignment="Center" />
-
-            </VerticalStackLayout>
-
-
-            <!-- CONSULTAS -->
-            <VerticalStackLayout
-                Grid.Column="2"
-                Spacing="6"
-                HorizontalOptions="Center">
-
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer
-                        Tapped="ConsultasButton_Clicked" />
-                </VerticalStackLayout.GestureRecognizers>
-
-                <Image
-                    Source="consulta_icon.png"
-                    WidthRequest="85"
-                    HeightRequest="85"
-                    Aspect="AspectFit" />
-
-                <Label
-                    Text="Consultas"
-                    FontSize="15"
+                    FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}"
                     HorizontalTextAlignment="Center" />
 
@@ -153,6 +129,7 @@
 
 
                 <CollectionView.ItemTemplate>
+
                     <DataTemplate>
 
                         <Border
@@ -177,7 +154,7 @@
                                     HorizontalTextAlignment="Center" />
 
 
-                                <!-- PACIENTE -->
+                                <!-- PACIENTE / MÉDICO -->
                                 <VerticalStackLayout
                                     Grid.Column="1"
                                     Spacing="3"
@@ -219,6 +196,7 @@
                         </Border>
 
                     </DataTemplate>
+
                 </CollectionView.ItemTemplate>
 
 

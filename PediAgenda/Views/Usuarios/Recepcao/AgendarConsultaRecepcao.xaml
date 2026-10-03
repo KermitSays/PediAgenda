@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Recepcao.AgendarConsultaRecepcao"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Agendar Consulta"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="24"
+            Spacing="18">
+
+            <!-- CABEÇALHO -->
+            <VerticalStackLayout Spacing="4">
+
+                <Label
+                    x:Name="TituloLabel"
+                    Text="Agendar consulta"
+                    FontSize="26"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    Text="Selecione o médico, a data e um horário disponível."
+                    FontSize="14"
+                    TextColor="{StaticResource InputPlaceholder}" />
+
+            </VerticalStackLayout>
+
+
+            <!-- PACIENTE -->
+            <Border
+                BackgroundColor="White"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 18">
+
+                <VerticalStackLayout Spacing="5">
+
+                    <Label
+                        Text="Paciente"
+                        FontSize="13"
+                        TextColor="{StaticResource InputPlaceholder}" />
+
+                    <Label
+                        x:Name="PacienteLabel"
+                        FontSize="19"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        x:Name="ResponsavelLabel"
+                        FontSize="14"
+                        TextColor="{StaticResource InputPlaceholder}" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+
+            <!-- MÉDICO -->
+            <VerticalStackLayout Spacing="6">
+
+                <Label
+                    Text="Médico"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="White"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="10,3"
+                    StrokeShape="RoundRectangle 14">
+
+                    <Picker
+                        x:Name="MedicoPicker"
+                        Title="Selecione o médico"
+                        TitleColor="{StaticResource InputPlaceholder}"
+                        TextColor="{StaticResource TextDark}"
+                        SelectedIndexChanged="MedicoPicker_SelectedIndexChanged" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+
+            <!-- DATA -->
+            <VerticalStackLayout Spacing="6">
+
+                <Label
+                    Text="Data"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="White"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="10,3"
+                    StrokeShape="RoundRectangle 14">
+
+                    <DatePicker
+                        x:Name="DataPicker"
+                        Format="dd/MM/yyyy"
+                        TextColor="{StaticResource TextDark}"
+                        DateSelected="DataPicker_DateSelected" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+
+            <!-- HORÁRIOS -->
+            <Label
+                Text="Horários disponíveis"
+                FontSize="20"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+
+            <CollectionView
+                ItemsSource="{Binding HorariosDisponiveis}"
+                SelectionMode="Single"
+                SelectionChanged="Horario_SelectionChanged">
+
+                <CollectionView.ItemsLayout>
+
+                    <GridItemsLayout
+                        Orientation="Vertical"
+                        Span="3"
+                        HorizontalItemSpacing="10"
+                        VerticalItemSpacing="10" />
+
+                </CollectionView.ItemsLayout>
+
+
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Border
+                            BackgroundColor="White"
+                            Stroke="{StaticResource PrimaryBlue}"
+                            StrokeThickness="1"
+                            Padding="12"
+                            StrokeShape="RoundRectangle 14">
+
+                            <Label
+                                Text="{Binding HorarioFormatado}"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource PrimaryBlue}"
+                                HorizontalTextAlignment="Center" />
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </CollectionView.ItemTemplate>
+
+
+                <CollectionView.EmptyView>
+
+                    <VerticalStackLayout
+                        Padding="20"
+                        HorizontalOptions="Center">
+
+                        <Label
+                            Text="Nenhum horário disponível."
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Tente selecionar outro médico ou outra data."
+                            FontSize="13"
+                            TextColor="{StaticResource InputPlaceholder}"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+
+                </CollectionView.EmptyView>
+
+            </CollectionView>
+
+
+            <!-- HORÁRIO SELECIONADO -->
+            <Border
+                BackgroundColor="White"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="15"
+                StrokeShape="RoundRectangle 14">
+
+                <Grid ColumnDefinitions="*,Auto">
+
+                    <Label
+                        Text="Horário selecionado"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Label
+                        x:Name="HorarioSelecionadoLabel"
+                        Grid.Column="1"
+                        Text="Nenhum"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource PrimaryBlue}" />
+
+                </Grid>
+
+            </Border>
+
+
+            <!-- CONFIRMAR -->
+            <Button
+                x:Name="ConfirmarButton"
+                Text="CONFIRMAR AGENDAMENTO"
+                HeightRequest="50"
+                CornerRadius="25"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="White"
+                FontAttributes="Bold"
+                Clicked="ConfirmarButton_Clicked" />
+
+
+            <Button
+                Text="← Voltar"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource TextDark}"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

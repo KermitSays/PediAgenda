@@ -29,6 +29,10 @@ public class PacienteRecepcaoItem
 
 public class ConsultaPacienteRecepcaoItem
 {
+    // Liga a consulta do paciente ao horário da agenda médica.
+    // Pode ser nulo para consultas antigas ou canceladas.
+    public int? HorarioId { get; set; }
+
     public DateTime Data { get; set; }
 
     public TimeSpan Horario { get; set; }
@@ -44,4 +48,10 @@ public class ConsultaPacienteRecepcaoItem
 
     public string DataHoraFormatada =>
         $"{Data:dd/MM/yyyy} • {Horario:hh\\:mm}";
+
+
+    public string TextoAcesso =>
+        HorarioId.HasValue
+            ? "Toque para acessar"
+            : "Consulta do histórico";
 }

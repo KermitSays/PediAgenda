@@ -6,12 +6,14 @@ public partial class MenuRecepcao : ContentPage
 {
     public ObservableCollection<ConsultaRecepcaoResumo> ConsultasHoje { get; set; }
 
+
     public MenuRecepcao()
     {
         InitializeComponent();
 
         DataAtualLabel.Text =
             $"Hoje é {DateTime.Today:dd 'de' MMMM 'de' yyyy}";
+
 
         ConsultasHoje = new ObservableCollection<ConsultaRecepcaoResumo>
         {
@@ -48,8 +50,10 @@ public partial class MenuRecepcao : ContentPage
             }
         };
 
+
         QuantidadeConsultasLabel.Text =
             $"{ConsultasHoje.Count} consulta(s)";
+
 
         BindingContext = this;
     }
@@ -60,7 +64,8 @@ public partial class MenuRecepcao : ContentPage
         object sender,
         TappedEventArgs e)
     {
-        await Shell.Current.GoToAsync(nameof(PacientesRecepcao));
+        await Shell.Current.GoToAsync(
+            nameof(PacientesRecepcao));
     }
 
 
@@ -69,19 +74,8 @@ public partial class MenuRecepcao : ContentPage
         object sender,
         TappedEventArgs e)
     {
-        await Shell.Current.GoToAsync(nameof(MedicosRecepcao));
-    }
-
-
-    // CONSULTAS
-    private async void ConsultasButton_Clicked(
-        object sender,
-        TappedEventArgs e)
-    {
-        await DisplayAlertAsync(
-            "Consultas",
-            "Tela de gerenciamento de consultas será implementada em seguida.",
-            "OK");
+        await Shell.Current.GoToAsync(
+            nameof(MedicosRecepcao));
     }
 }
 

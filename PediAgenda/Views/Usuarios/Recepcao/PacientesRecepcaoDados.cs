@@ -16,8 +16,10 @@ public static class PacientesRecepcaoDados
 
             Consultas = new List<ConsultaPacienteRecepcaoItem>
             {
+                // Corresponde ao horário Id 2 da agenda médica
                 new ConsultaPacienteRecepcaoItem
                 {
+                    HorarioId = 2,
                     Data = new DateTime(2026, 10, 5),
                     Horario = new TimeSpan(9, 0, 0),
                     Medico = "Dr. Carlos Mendes",
@@ -26,8 +28,10 @@ public static class PacientesRecepcaoDados
                     Status = "Confirmado"
                 },
 
+                // Consulta antiga - não possui horário ativo na agenda
                 new ConsultaPacienteRecepcaoItem
                 {
+                    HorarioId = null,
                     Data = new DateTime(2026, 8, 18),
                     Horario = new TimeSpan(10, 0, 0),
                     Medico = "Dra. Fernanda Lima",
@@ -50,10 +54,12 @@ public static class PacientesRecepcaoDados
 
             Consultas = new List<ConsultaPacienteRecepcaoItem>
             {
+                // Corresponde ao horário Id 6 da agenda médica
                 new ConsultaPacienteRecepcaoItem
                 {
-                    Data = new DateTime(2026, 10, 6),
-                    Horario = new TimeSpan(14, 0, 0),
+                    HorarioId = 6,
+                    Data = new DateTime(2026, 10, 5),
+                    Horario = new TimeSpan(8, 0, 0),
                     Medico = "Dra. Fernanda Lima",
                     Especialidade = "Pediatria Geral",
                     TipoAtendimento = "Convênio",
@@ -74,10 +80,12 @@ public static class PacientesRecepcaoDados
 
             Consultas = new List<ConsultaPacienteRecepcaoItem>
             {
+                // Corresponde ao horário Id 5 da agenda médica
                 new ConsultaPacienteRecepcaoItem
                 {
-                    Data = new DateTime(2026, 10, 8),
-                    Horario = new TimeSpan(15, 0, 0),
+                    HorarioId = 5,
+                    Data = new DateTime(2026, 10, 5),
+                    Horario = new TimeSpan(14, 0, 0),
                     Medico = "Dr. Carlos Mendes",
                     Especialidade = "Pediatria Geral",
                     TipoAtendimento = "Particular",
@@ -98,8 +106,10 @@ public static class PacientesRecepcaoDados
 
             Consultas = new List<ConsultaPacienteRecepcaoItem>
             {
+                // Consulta cancelada - não ocupa mais horário na agenda
                 new ConsultaPacienteRecepcaoItem
                 {
+                    HorarioId = null,
                     Data = new DateTime(2026, 9, 30),
                     Horario = new TimeSpan(12, 0, 0),
                     Medico = "Dr. Carlos Mendes",

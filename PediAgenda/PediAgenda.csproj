@@ -129,6 +129,12 @@
 	  <MauiXaml Update="Views\Usuarios\Medico\RelatoriosMedico.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\Usuarios\Recepcao\AgendarConsultaRecepcao.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Usuarios\Recepcao\DetalhesConsultaRecepcao.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\Usuarios\Recepcao\MedicosRecepcao.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
