@@ -133,30 +133,7 @@
                 Style="{StaticResource PrimaryButton}"
                 Clicked="EntrarButton_Clicked" />
 
-            <!-- Cadastro -->
-            <HorizontalStackLayout
-                HorizontalOptions="Center"
-                Spacing="4"
-                Margin="0,25,0,0">
-
-                <Label
-                    Text="Ainda não possui conta?"
-                    FontSize="14"
-                    TextColor="{StaticResource TextDark}"
-                    VerticalOptions="Center" />
-
-                <Button
-                    Text="Cadastre-se"
-                    BackgroundColor="Transparent"
-                    TextColor="{StaticResource PrimaryBlue}"
-                    FontAttributes="Bold"
-                    FontSize="14"
-                    Padding="0"
-                    Clicked="CadastroButton_Clicked" />
-
-            </HorizontalStackLayout>
-
-        </VerticalStackLayout>
+           </VerticalStackLayout>
 
     </ScrollView>
 

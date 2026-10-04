@@ -48,6 +48,21 @@
                     Keyboard="Numeric"
                     MaxLength="14" />
             </Border>
+            
+            <!--/ Telefone-->
+            <Label
+                Text="Telefone com DDD"
+                FontSize="16"
+                TextColor="{StaticResource TextDark}" />
+
+            <Border Style="{StaticResource LoginBorder}">
+                <Entry
+                    x:Name="TelefoneEntry"
+                    Style="{StaticResource LoginEntry}"
+                    Placeholder="Ex.: 11999990000"
+                    Keyboard="Telephone"
+                    MaxLength="20" />
+            </Border>
 
             <!-- E-mail -->
             <Label

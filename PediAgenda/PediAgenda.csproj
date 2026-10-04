@@ -132,6 +132,9 @@
 	  <MauiXaml Update="Views\Usuarios\Recepcao\AgendarConsultaRecepcao.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\Usuarios\Recepcao\ConsultasHojeRecepcao.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\Usuarios\Recepcao\DetalhesConsultaRecepcao.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
