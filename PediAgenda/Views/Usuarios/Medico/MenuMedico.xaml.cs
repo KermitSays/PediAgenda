@@ -4,92 +4,157 @@ namespace PediAgenda.Views.Usuarios.Medico;
 
 public partial class MenuMedico : ContentPage
 {
-    public ObservableCollection<ConsultaHoje> ConsultasLista { get; set; }
+    public ObservableCollection<ConsultaHoje>
+        ConsultasLista
+    {
+        get;
+        set;
+    } = new();
+
 
     public MenuMedico()
     {
         InitializeComponent();
 
-        // Mostra a data atual
+
+        BindingContext =
+            this;
+    }
+
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+
+        AtualizarData();
+
+
+        CarregarConsultasHoje();
+    }
+
+
+    // =============================================
+    // DATA ATUAL
+    // =============================================
+
+    private void AtualizarData()
+    {
         DataAtualLabel.Text =
-            $"Hoje é {DateTime.Today:dd 'de' MMMM 'de' yyyy}";
+            $"Hoje é " +
+            $"{DateTime.Today:dd 'de' MMMM 'de' yyyy}";
+    }
 
-        // Consultas mockadas
-        ConsultasLista = new ObservableCollection<ConsultaHoje>
+
+    // =============================================
+    // CONSULTAS DE HOJE
+    // =============================================
+
+    private void CarregarConsultasHoje()
+    {
+        ConsultasLista.Clear();
+
+
+        List<ConsultaMedico>
+            consultasHoje =
+                ConsultasMedicoDados
+                    .ObterConsultasAtivasPorData(
+                        DateTime.Today);
+
+
+        foreach (
+            ConsultaMedico consulta
+            in consultasHoje)
         {
-            new ConsultaHoje
-            {
-                Horario = "08:00",
-                Paciente = "João Silva",
-                Status = "Confirmado"
-            },
+            ConsultasLista.Add(
+                new ConsultaHoje
+                {
+                    IdConsulta =
+                        consulta.Id,
 
-            new ConsultaHoje
-            {
-                Horario = "09:00",
-                Paciente = "Maria Alice",
-                Status = "Confirmado"
-            },
+                    Horario =
+                        consulta.HorarioTexto,
 
-            new ConsultaHoje
-            {
-                Horario = "10:00",
-                Paciente = "Renata Oliveira",
-                Status = "Confirmado"
-            },
+                    Paciente =
+                        consulta.Paciente,
 
-            new ConsultaHoje
-            {
-                Horario = "11:00",
-                Paciente = "João Pedro",
-                Status = "Confirmado"
-            },
-
-            new ConsultaHoje
-            {
-                Horario = "14:00",
-                Paciente = "Bianca",
-                Status = "Por Confirmar"
-            },
-
-            new ConsultaHoje
-            {
-                Horario = "15:00",
-                Paciente = "Thiago",
-                Status = "Por Confirmar"
-            }
-        };
-
-        BindingContext = this;
+                    Status =
+                        consulta.Status
+                });
+        }
     }
 
-    // Modelo das consultas de hoje
-    public class ConsultaHoje
-    {
-        public string Horario { get; set; } = string.Empty;
 
-        public string Paciente { get; set; } = string.Empty;
-
-        public string Status { get; set; } = string.Empty;
-    }
-
+    // =============================================
     // PACIENTES
-    private async void MedicoPacientesButton_Clicked(object sender, TappedEventArgs e)
+    // =============================================
+
+    private async void MedicoPacientesButton_Clicked(
+        object sender,
+        TappedEventArgs e)
     {
-        await Shell.Current.GoToAsync(nameof(PacientesMedico));
+        await Shell.Current.GoToAsync(
+            nameof(PacientesMedico));
     }
 
+
+    // =============================================
     // CONSULTAS
-    private async void MedicoConsultasButton_Clicked(object sender, TappedEventArgs e)
+    // =============================================
+
+    private async void MedicoConsultasButton_Clicked(
+        object sender,
+        TappedEventArgs e)
     {
         await Shell.Current.GoToAsync(
             nameof(ConsultasMedico));
     }
 
+
+    // =============================================
     // RELATÓRIOS
-    private async void MedicoRelatoriosButton_Clicked(object sender, TappedEventArgs e)
+    // =============================================
+
+    private async void MedicoRelatoriosButton_Clicked(
+        object sender,
+        TappedEventArgs e)
     {
         await Shell.Current.GoToAsync(
             nameof(RelatoriosMedico));
     }
+}
+
+
+// =============================================
+// MODELO VISUAL DO RESUMO
+// =============================================
+
+public class ConsultaHoje
+{
+    public Guid IdConsulta
+    {
+        get;
+        set;
+    }
+
+
+    public string Horario
+    {
+        get;
+        set;
+    } = string.Empty;
+
+
+    public string Paciente
+    {
+        get;
+        set;
+    } = string.Empty;
+
+
+    public string Status
+    {
+        get;
+        set;
+    } = string.Empty;
 }

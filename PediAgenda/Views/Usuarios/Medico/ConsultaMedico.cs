@@ -2,17 +2,70 @@
 
 public class ConsultaMedico
 {
-    public Guid Id { get; } = Guid.NewGuid();
+    public Guid Id { get; } =
+        Guid.NewGuid();
 
-    public DateTime Data { get; set; }
 
-    public TimeSpan Horario { get; set; }
+    // ID DO PACIENTE
+    //
+    // É nullable porque ainda existem alguns dados temporários
+    // que não estão vinculados aos pacientes cadastrados em MedicoDados.
+    //
+    // Quando a API estiver integrada, este campo será preenchido
+    // com o id real vindo do banco.
 
-    public string Paciente { get; set; } = string.Empty;
+    public int? IdPaciente
+    {
+        get;
+        set;
+    }
 
-    public string Status { get; set; } = string.Empty;
 
-    public string MotivoCancelamento { get; set; } = string.Empty;
+    public DateTime Data
+    {
+        get;
+        set;
+    }
 
-    public bool CanceladaPorBloqueio { get; set; }
+
+    public TimeSpan Horario
+    {
+        get;
+        set;
+    }
+
+
+    public string Paciente
+    {
+        get;
+        set;
+    } = string.Empty;
+
+
+    public string Status
+    {
+        get;
+        set;
+    } = string.Empty;
+
+
+    public string MotivoCancelamento
+    {
+        get;
+        set;
+    } = string.Empty;
+
+
+    public bool CanceladaPorBloqueio
+    {
+        get;
+        set;
+    }
+
+
+    // TEXTO DO HORÁRIO
+
+    public string HorarioTexto =>
+        Horario.ToString(
+            @"hh\:mm");
 }
