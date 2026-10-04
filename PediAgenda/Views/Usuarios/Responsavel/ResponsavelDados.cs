@@ -22,8 +22,7 @@ public static class ResponsavelDados
                         4,
                         12),
 
-                Foto =
-                    "lucas.png",
+                Foto = "lucas.png",
 
                 Consultas =
                     new ObservableCollection<ConsultaResponsavelItem>
@@ -116,8 +115,7 @@ public static class ResponsavelDados
                         8,
                         25),
 
-                Foto =
-                    "matheus.png",
+                Foto = "matheus.png",
 
                 Consultas =
                     new ObservableCollection<ConsultaResponsavelItem>
@@ -130,8 +128,7 @@ public static class ResponsavelDados
 
                             IdHorario = 0,
 
-                            Medico =
-                                "Dr. Carlos Mendes",
+                            Medico = "Dr. Carlos Mendes",
 
                             Especialidade =
                                 "Pediatria",
