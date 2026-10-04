@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Usuarios.Recepcao.ConsultasHojeRecepcao"
+    Title="Consultas de hoje"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <Grid
+        Padding="20,24"
+        RowDefinitions="Auto,*,Auto"
+        RowSpacing="20">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="5">
+            <Label
+                Text="Consultas de hoje"
+                FontSize="26"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                x:Name="ResumoLabel"
+                FontSize="14"
+                TextColor="{StaticResource InputPlaceholder}" />
+        </VerticalStackLayout>
+
+        <!-- Rolagem horizontal mantém todos os dados em uma linha. -->
+        <CollectionView
+             Grid.Row="1"
+             ItemsSource="{Binding ConsultasHoje}"
+             SelectionMode="None">
+
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout
+                    Orientation="Vertical"
+                    ItemSpacing="8" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border
+                         BackgroundColor="White"
+                         Stroke="{StaticResource InputBlue}"
+                         StrokeThickness="1"
+                         StrokeShape="RoundRectangle 10"
+                         Padding="10,12">
+
+                        <Grid
+                            ColumnDefinitions="45,*,1.3*,*"
+                            ColumnSpacing="6">
+
+                            <!-- HORÁRIO -->
+                            <Label
+                                 Text="{Binding Horario}"
+                                 FontSize="12"
+                                 FontAttributes="Bold"
+                                 TextColor="{StaticResource PrimaryBlue}"
+                                 VerticalOptions="Center" />
+
+                            <!-- PACIENTE -->
+                            <Label
+                                 Grid.Column="1"
+                                 Text="{Binding Paciente}"
+                                 FontSize="12"
+                                 LineBreakMode="WordWrap"
+                                 TextColor="{StaticResource TextDark}"
+                                 VerticalOptions="Center" />
+
+                            <!-- MÉDICO -->
+                            <Label
+                                 Grid.Column="2"
+                                 Text="{Binding Medico}"
+                                 FontSize="12"
+                                 LineBreakMode="WordWrap"
+                                 TextColor="{StaticResource TextDark}"
+                                 VerticalOptions="Center" />
+
+                            <!-- STATUS -->
+                            <Label
+                                 Grid.Column="3"
+                                 Text="{Binding Status}"
+                                 FontSize="11"
+                                 FontAttributes="Bold"
+                                 LineBreakMode="WordWrap"
+                                 TextColor="{StaticResource PrimaryBlue}"
+                                 VerticalOptions="Center" />
+
+                        </Grid>
+                    </Border>   
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <Label
+            Text="Nenhuma consulta hoje."
+            Margin="0,20"
+            TextColor="{StaticResource TextDark}" />
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+
+        <Button
+            Grid.Row="2"
+            Text="VOLTAR"
+            Style="{StaticResource PrimaryButton}"
+            Clicked="VoltarButton_Clicked" />
+
+    </Grid>
+</ContentPage>

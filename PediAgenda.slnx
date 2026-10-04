@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="api/PediAgenda.Api.csproj" />
+  <Project Path="nucleo/PediAgenda.Nucleo.csproj" />
   <Project Path="PediAgenda/PediAgenda.csproj">
     <Deploy Solution="Debug|*" />
   </Project>

@@ -106,28 +106,54 @@ app.MapGet("/api/auth/eu", (ClaimsPrincipal usuario) =>
         usuario.FindFirstValue("role")!)))
    .RequireAuthorization();
 
-// RF01 — cadastro do responsável. Médico e recepcionista são criados pela
-// clínica, não por aqui. Já devolve o token: quem acabou de se cadastrar
-// entra direto, sem precisar logar de novo.
-app.MapPost("/api/cadastro/responsavel", (CadastroRequisicao req, CadastroService cadastro, GeradorToken tokens) =>
-{
-    var resultado = cadastro.Cadastrar(new DadosResponsavel(
-        req.Nome, req.Cpf, req.Email, req.Telefone, req.Senha, req.AceiteTermos));
+// Cadastro de novos responsáveis: exclusivo da recepção.
+// Retorna os dados do cadastro, sem iniciar uma sessão
+// em nome do novo responsável.
+app.MapPost(
+    "/api/cadastro/responsavel",
+    (CadastroRequisicao req, CadastroService cadastro) =>
+    {
+        var resultado = cadastro.Cadastrar(new DadosResponsavel(
+            req.Nome,
+            req.Cpf,
+            req.Email,
+            req.Telefone,
+            req.Senha,
+            req.AceiteTermos));
 
-    if (resultado.Sucesso)
-        return Results.Json(Sessao(resultado.Usuario!, tokens),
-                            statusCode: StatusCodes.Status201Created);
+        if (resultado.Sucesso)
+        {
+            var responsavel = resultado.Usuario!;
 
-    if (resultado.Motivo == MotivoRecusa.DadosInvalidos)
-        return Results.Json(new ErroValidacao("DADOS_INVALIDOS", resultado.Mensagem, resultado.Campos!),
-                            statusCode: StatusCodes.Status400BadRequest);
+            return Results.Json(
+                new UsuarioLogado(
+                    responsavel.Id,
+                    responsavel.Nome,
+                    responsavel.Email,
+                    responsavel.Perfil.ToString().ToUpperInvariant()),
+                statusCode: StatusCodes.Status201Created);
+        }
 
-    var codigo = resultado.Motivo == MotivoRecusa.CpfJaCadastrado
-        ? "CPF_JA_CADASTRADO"
-        : "EMAIL_JA_CADASTRADO";
-    return Results.Json(new ErroApi(codigo, resultado.Mensagem),
-                        statusCode: StatusCodes.Status409Conflict);
-});
+        if (resultado.Motivo == MotivoRecusa.DadosInvalidos)
+        {
+            return Results.Json(
+                new ErroValidacao(
+                    "DADOS_INVALIDOS",
+                    resultado.Mensagem,
+                    resultado.Campos!),
+                statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        var codigo = resultado.Motivo == MotivoRecusa.CpfJaCadastrado
+            ? "CPF_JA_CADASTRADO"
+            : "EMAIL_JA_CADASTRADO";
+
+        return Results.Json(
+            new ErroApi(codigo, resultado.Mensagem),
+            statusCode: StatusCodes.Status409Conflict);
+    })
+.RequireAuthorization(politica =>
+    politica.RequireRole("RECEPCIONISTA"));
 
 app.Run();
 return 0;
