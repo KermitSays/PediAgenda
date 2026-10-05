@@ -6,46 +6,120 @@ public partial class MedicosRecepcao : ContentPage
 {
     public ObservableCollection<HorarioAgendaRecepcao>
         HorariosFiltrados
-    { get; set; } = new();
+    {
+        get;
+        set;
+    } = new();
+
+
+    private bool ajustandoData;
 
 
     public MedicosRecepcao()
     {
         InitializeComponent();
 
-        BindingContext = this;
+
+        BindingContext =
+            this;
+
 
         CarregarMedicos();
 
-        // Data dos mocks atuais
-        DataPicker.Date = new DateTime(2026, 10, 5);
+
+        DateTime primeiraDataDisponivel =
+            ProximoDiaUtil(
+                DateTime.Today);
+
+
+        DataPicker.MinimumDate =
+            primeiraDataDisponivel;
+
+
+        DataPicker.Date =
+            primeiraDataDisponivel;
+
 
         CarregarAgenda();
     }
+
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
 
+
         CarregarAgenda();
     }
 
+
+    // =============================================
+    // DIA ÚTIL
+    // =============================================
+
+    private bool EhDiaUtil(
+        DateTime data)
+    {
+        return
+            data.DayOfWeek !=
+                DayOfWeek.Saturday &&
+
+            data.DayOfWeek !=
+                DayOfWeek.Sunday;
+    }
+
+
+    // =============================================
+    // PRÓXIMO DIA ÚTIL
+    // =============================================
+
+    private DateTime ProximoDiaUtil(
+        DateTime data)
+    {
+        DateTime resultado =
+            data.Date;
+
+
+        while (!EhDiaUtil(resultado))
+        {
+            resultado =
+                resultado.AddDays(1);
+        }
+
+
+        return resultado;
+    }
+
+
+    // =============================================
+    // MÉDICOS
+    // =============================================
 
     private void CarregarMedicos()
     {
         MedicoPicker.Items.Clear();
 
-        foreach (var medico in AgendaMedicaRecepcaoDados.Medicos)
+
+        foreach (
+            string medico
+            in AgendaMedicaRecepcaoDados.Medicos)
         {
-            MedicoPicker.Items.Add(medico);
+            MedicoPicker.Items.Add(
+                medico);
         }
+
 
         if (MedicoPicker.Items.Count > 0)
         {
-            MedicoPicker.SelectedIndex = 0;
+            MedicoPicker.SelectedIndex =
+                0;
         }
     }
 
+
+    // =============================================
+    // ALTERAÇÃO DO MÉDICO
+    // =============================================
 
     private void Filtro_Changed(
         object sender,
@@ -55,37 +129,103 @@ public partial class MedicosRecepcao : ContentPage
     }
 
 
-    private void DataPicker_DateSelected(
+    // =============================================
+    // ALTERAÇÃO DA DATA
+    // =============================================
+
+    private async void DataPicker_DateSelected(
         object sender,
         DateChangedEventArgs e)
     {
+        if (ajustandoData)
+            return;
+
+
+        DateTime dataSelecionada =
+            e.NewDate
+            ?? DateTime.Today;
+
+
+        if (!EhDiaUtil(
+            dataSelecionada))
+        {
+            await DisplayAlertAsync(
+                "Data indisponível",
+                "A clínica não possui atendimento aos sábados e domingos.",
+                "OK");
+
+
+            ajustandoData =
+                true;
+
+
+            DataPicker.Date =
+                ProximoDiaUtil(
+                    dataSelecionada);
+
+
+            ajustandoData =
+                false;
+        }
+
+
         CarregarAgenda();
     }
 
 
+    // =============================================
+    // CARREGA A AGENDA
+    // =============================================
+
     private void CarregarAgenda()
     {
         string medicoSelecionado =
-            MedicoPicker.SelectedItem?.ToString() ?? string.Empty;
+            MedicoPicker.SelectedItem?
+                .ToString()
+            ?? string.Empty;
+
 
         DateTime dataSelecionada =
-            DataPicker.Date ?? DateTime.Today;
+            DataPicker.Date
+            ?? ProximoDiaUtil(
+                DateTime.Today);
+
+
+        HorariosFiltrados.Clear();
+
+
+        // FINAL DE SEMANA NÃO TEM AGENDA
+
+        if (!EhDiaUtil(
+            dataSelecionada))
+        {
+            QuantidadeHorariosLabel.Text =
+                "0 horário(s)";
+
+
+            return;
+        }
 
 
         var horarios =
             AgendaMedicaRecepcaoDados.Horarios
                 .Where(h =>
-                    h.Medico == medicoSelecionado &&
-                    h.Data.Date == dataSelecionada.Date)
-                .OrderBy(h => h.Horario)
+                    h.Medico ==
+                        medicoSelecionado &&
+
+                    h.Data.Date ==
+                        dataSelecionada.Date)
+                .OrderBy(h =>
+                    h.Horario)
                 .ToList();
 
 
-        HorariosFiltrados.Clear();
-
-        foreach (var horario in horarios)
+        foreach (
+            HorarioAgendaRecepcao horario
+            in horarios)
         {
-            HorariosFiltrados.Add(horario);
+            HorariosFiltrados.Add(
+                horario);
         }
 
 
@@ -94,48 +234,89 @@ public partial class MedicosRecepcao : ContentPage
     }
 
 
+    // =============================================
+    // HORÁRIO
+    // =============================================
+
     private async void HorarioButton_Clicked(
         object sender,
         EventArgs e)
     {
-        if (sender is not Button botao ||
-            botao.CommandParameter is not HorarioAgendaRecepcao horario)
+        if (
+            sender is not Button botao ||
+
+            botao.CommandParameter
+            is not HorarioAgendaRecepcao horario)
         {
             return;
         }
 
 
-        if (horario.Status == "Disponível")
+        // SEGURANÇA EXTRA:
+        // nunca permite ação em final de semana.
+
+        if (!EhDiaUtil(
+            horario.Data))
+        {
+            await DisplayAlertAsync(
+                "Data indisponível",
+                "Não é possível utilizar horários aos sábados ou domingos.",
+                "OK");
+
+
+            return;
+        }
+
+
+        if (
+            horario.Status ==
+            "Disponível")
         {
             await DisplayAlertAsync(
                 "Agendar consulta",
+
                 $"Horário selecionado:\n" +
                 $"{horario.HorarioFormatado}\n\n" +
+
                 $"Médico: {horario.Medico}\n" +
                 $"Data: {horario.Data:dd/MM/yyyy}\n\n" +
+
                 "O fluxo de agendamento será conectado em seguida.",
+
                 "OK");
 
+
             return;
         }
 
 
-        if (horario.Status == "Agendado")
+        if (
+            horario.Status ==
+            "Agendado")
         {
             await Shell.Current.GoToAsync(
-                $"{nameof(DetalhesConsultaRecepcao)}?HorarioId={horario.Id}");
+                $"{nameof(DetalhesConsultaRecepcao)}" +
+                $"?HorarioId={horario.Id}");
+
 
             return;
         }
 
 
-        if (horario.Status == "Bloqueado")
+        if (
+            horario.Status ==
+            "Bloqueado")
         {
             bool confirmar =
                 await DisplayAlertAsync(
                     "Liberar horário",
-                    $"Deseja liberar o horário das {horario.HorarioFormatado}?\n\n" +
-                    $"Motivo do bloqueio: {horario.MotivoBloqueio}",
+
+                    $"Deseja liberar o horário das " +
+                    $"{horario.HorarioFormatado}?\n\n" +
+
+                    $"Motivo do bloqueio: " +
+                    $"{horario.MotivoBloqueio}",
+
                     "LIBERAR",
                     "CANCELAR");
 
@@ -144,11 +325,14 @@ public partial class MedicosRecepcao : ContentPage
                 return;
 
 
-            horario.Status = "Disponível";
-            horario.MotivoBloqueio = string.Empty;
+            horario.Status =
+                "Disponível";
 
 
-            // Recarrega a lista para refletir a alteração
+            horario.MotivoBloqueio =
+                string.Empty;
+
+
             CarregarAgenda();
 
 

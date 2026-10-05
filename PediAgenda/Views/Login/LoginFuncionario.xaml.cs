@@ -12,12 +12,8 @@ public partial class LoginFuncionario : ContentPage
 
     private static readonly HttpClient http = new()
     {
-        BaseAddress = new Uri(
-            DeviceInfo.Platform == DevicePlatform.Android
-                ? "http://10.0.2.2:5000/"
-                : "http://localhost:5000/"),
-
-        Timeout = TimeSpan.FromSeconds(20)
+        BaseAddress = new Uri("https://pediagenda-api.onrender.com/"),
+        Timeout = TimeSpan.FromSeconds(90)
     };
 
     public LoginFuncionario()
@@ -190,5 +186,16 @@ public partial class LoginFuncionario : ContentPage
     {
         MensagemErroLabel.Text = mensagem;
         MensagemErroLabel.IsVisible = true;
+    }
+
+    // Botões de acesso rápido para entrar como médico ou recepcionista sem precisar digitar e-mail e senha.
+    private async void EntrarMedicoButton_Clicked(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync(nameof(Usuarios.Medico.MenuMedico));
+    }
+
+    private async void EntrarRecepcionistaButton_Clicked(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync(nameof(Usuarios.Recepcao.MenuRecepcao));
     }
 }

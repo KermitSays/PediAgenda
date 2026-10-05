@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Itens de Solução/">
+    <File Path="Dockerfile" />
+  </Folder>
   <Project Path="api/PediAgenda.Api.csproj" />
   <Project Path="nucleo/PediAgenda.Nucleo.csproj" />
   <Project Path="PediAgenda/PediAgenda.csproj">

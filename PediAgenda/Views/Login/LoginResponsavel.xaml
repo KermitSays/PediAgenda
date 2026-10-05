@@ -133,7 +133,15 @@
                 Style="{StaticResource PrimaryButton}"
                 Clicked="EntrarButton_Clicked" />
 
-           </VerticalStackLayout>
+            <!-- Entrar Direto -->
+            <Button
+                x:Name="EntrarDiretoButton"
+                Text="Entrar Direto"
+                Style="{StaticResource PrimaryButton}"
+                Clicked="EntrarDiretoButton_Clicked" />
+
+
+        </VerticalStackLayout>
 
     </ScrollView>
 

@@ -2,34 +2,75 @@ using PediAgenda.Nucleo.Modelos;
 
 namespace PediAgenda.Nucleo.Repositorios;
 
-/// <summary>
-/// Contrato de acesso a dados do usuário.
-///
-/// O serviço de autenticação depende desta interface, e não do MySQL
-/// diretamente. Assim o login já funciona e é testável antes de o banco
-/// estar pronto, e a troca por uma implementação real não muda a regra.
-/// </summary>
+
+/// Contrato de acesso aos dados dos usuários do PediAgenda.
 public interface IUsuarioRepositorio
 {
+    // Usado no login.
     Usuario? BuscarPorEmail(string email);
+
+    // Usado quando um responsável, já cadastrado pela clínica,
+    // decide criar seu acesso ao aplicativo.
+    Usuario? BuscarResponsavelPorCpf(string cpf);
+
+    bool CodigoAtivacaoResponsavelValido(
+    int usuarioId,
+    string codigo,
+    DateTime agora);
+
+    void MarcarCodigoAtivacaoComoUsado(
+        int usuarioId,
+        DateTime usadoEm);
+
+    bool ConfirmarEmailResponsavel(
+    byte[] tokenHash,
+    DateTime confirmadoEm);
+
     void Atualizar(Usuario usuario);
-    void RegistrarTentativa(string emailInformado, int? usuarioId, bool sucesso, string? motivo);
+
+    void RegistrarTentativa(
+        string emailInformado,
+        int? usuarioId,
+        bool sucesso,
+        string? motivo);
 
     bool ExisteEmail(string email);
+
+    bool ExisteEmailDeOutroUsuario(
+    string email,
+    int usuarioId);
+
     bool ExisteCpf(string cpf);
 
-    /// <summary>
-    /// Cria o usuário e a especialização do perfil. Lança
-    /// <see cref="CadastroDuplicadoException"/> se o e-mail ou o CPF já existirem.
-    /// </summary>
-    int Inserir(string nome, string cpf, string email, string senha, Perfil perfil,
-                string? telefone = null, string? crm = null);
+    
+    /// Completa o acesso de um responsável que já existe no banco.
+    ///
+    /// Não cria outro usuário: apenas adiciona e-mail e senha ao
+    /// registro que foi previamente criado pela clínica.
+    void CompletarCadastroResponsavel(
+        int usuarioId,
+        string email,
+        string senha,
+        byte[] tokenVerificacaoHash,
+        DateTime tokenExpiraEm);
+
+    
+    /// Cria uma conta completa.
+    ///
+    /// Continua sendo usado principalmente para contas criadas
+    /// pela própria clínica, como médico e recepcionista.
+    int Inserir(
+        string nome,
+        string cpf,
+        string email,
+        string senha,
+        Perfil perfil,
+        string? telefone = null,
+        string? crm = null);
 }
 
-/// <summary>
-/// E-mail ou CPF que já existe na base. Fica aqui, e não no MySqlException, para
-/// que a regra de cadastro não precise conhecer o banco que está por baixo.
-/// </summary>
+
+/// Exceção utilizada quando CPF ou e-mail já existem no banco.
 public class CadastroDuplicadoException(string campo)
     : Exception($"Já existe cadastro com esse {campo}.")
 {
