@@ -7,8 +7,9 @@
     Title="Menu Médico"
     BackgroundColor="{StaticResource PageBlue}">
 
-    <Grid RowDefinitions="Auto,Auto,*"
-          Padding="24,30,24,20">
+    <Grid
+        RowDefinitions="Auto,Auto,*"
+        Padding="24,30,24,20">
 
         <!-- CABEÇALHO -->
         <VerticalStackLayout
@@ -29,78 +30,95 @@
 
         </VerticalStackLayout>
 
+
         <!-- MENU -->
-        <Grid Grid.Row="1"
-              ColumnDefinitions="*,*,*"
-              ColumnSpacing="20"
-              Margin="0,0,0,20">
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,*,*"
+            ColumnSpacing="20"
+            Margin="0,0,0,20">
 
             <!-- PACIENTES -->
-            <VerticalStackLayout Grid.Column="0" 
-                                 Spacing="6" 
-                                 HorizontalOptions="Center">
+            <VerticalStackLayout
+                Grid.Column="0"
+                Spacing="6"
+                HorizontalOptions="Center">
 
-                <!-- VerticalStackLayout para o ícone -->
                 <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="MedicoPacientesButton_Clicked"/>
+                    <TapGestureRecognizer
+                        Tapped="MedicoPacientesButton_Clicked" />
                 </VerticalStackLayout.GestureRecognizers>
 
-                <Image Source="paciente_icon.png"
-                       WidthRequest="90"
-                       HeightRequest="90"
-                       Aspect="AspectFit" />
+                <Image
+                    Source="paciente_icon.png"
+                    WidthRequest="90"
+                    HeightRequest="90"
+                    Aspect="AspectFit" />
 
-                <Label Text="Pacientes"
-                       TextColor="Black"
-                       FontSize="16"
-                       HorizontalTextAlignment="Center" />
-                </VerticalStackLayout>
+                <Label
+                    Text="Pacientes"
+                    TextColor="Black"
+                    FontSize="16"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
 
             <!-- CONSULTAS -->
-            <VerticalStackLayout Grid.Column="1" 
-                                 Spacing="6" 
-                                 HorizontalOptions="Center">
+            <VerticalStackLayout
+                Grid.Column="1"
+                Spacing="6"
+                HorizontalOptions="Center">
 
-                <!-- VerticalStackLayout para o ícone -->
                 <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="MedicoConsultasButton_Clicked"/>
+                    <TapGestureRecognizer
+                        Tapped="MedicoConsultasButton_Clicked" />
                 </VerticalStackLayout.GestureRecognizers>
 
-                <Image Source="consulta_icon.png"
-                        WidthRequest="90"
-                        HeightRequest="90"
-                        Aspect="AspectFit" />
+                <Image
+                    Source="consulta_icon.png"
+                    WidthRequest="90"
+                    HeightRequest="90"
+                    Aspect="AspectFit" />
 
-                <Label Text="Consultas"
-                       TextColor="Black"
-                       FontSize="16"
-                       HorizontalTextAlignment="Center" />
+                <Label
+                    Text="Consultas"
+                    TextColor="Black"
+                    FontSize="16"
+                    HorizontalTextAlignment="Center" />
+
             </VerticalStackLayout>
-            
-            <!-- RELATORIOS -->
-            <VerticalStackLayout Grid.Column="2" 
-                                 Spacing="6" 
-                                 HorizontalOptions="Center">
 
-                <!-- VerticalStackLayout para o ícone -->
+
+            <!-- RELATÓRIOS -->
+            <VerticalStackLayout
+                Grid.Column="2"
+                Spacing="6"
+                HorizontalOptions="Center">
+
                 <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="MedicoRelatoriosButton_Clicked"/>
+                    <TapGestureRecognizer
+                        Tapped="MedicoRelatoriosButton_Clicked" />
                 </VerticalStackLayout.GestureRecognizers>
 
-                <Image Source="relatorios_icon.png"
-                       WidthRequest="90"
-                       HeightRequest="90"
-                       Aspect="AspectFit" />
+                <Image
+                    Source="relatorios_icon.png"
+                    WidthRequest="90"
+                    HeightRequest="90"
+                    Aspect="AspectFit" />
 
-                <Label Text="Relatórios"
-                       TextColor="Black"
-                       FontSize="16"
-                       HorizontalTextAlignment="Center" />
+                <Label
+                    Text="Relatórios"
+                    TextColor="Black"
+                    FontSize="16"
+                    HorizontalTextAlignment="Center" />
+
             </VerticalStackLayout>
 
         </Grid>
 
-        <!-- PREVIEW DE CONSULTAS -->
+
+        <!-- CONSULTAS DE HOJE -->
         <VerticalStackLayout
             Grid.Row="2"
             Spacing="14">
@@ -111,21 +129,50 @@
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />
 
+
+            <!-- ESTADO SEM CONSULTAS -->
+            <VerticalStackLayout
+                x:Name="SemConsultasContainer"
+                IsVisible="False"
+                Spacing="6"
+                Padding="20,20,20,10"
+                HorizontalOptions="Center">
+
+                <Label
+                    Text="Nenhuma consulta hoje"
+                    FontSize="17"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    Text="Você não possui consultas agendadas para hoje."
+                    FontSize="14"
+                    TextColor="{StaticResource InputPlaceholder}"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+
             <!-- LISTA DE CONSULTAS -->
             <CollectionView
+                x:Name="ConsultasCollectionView"
                 ItemsSource="{Binding ConsultasLista}"
                 SelectionMode="None">
 
                 <CollectionView.ItemsLayout>
+
                     <LinearItemsLayout
                         Orientation="Vertical"
                         ItemSpacing="12" />
+
                 </CollectionView.ItemsLayout>
 
+
                 <CollectionView.ItemTemplate>
+
                     <DataTemplate>
 
-                        <!-- CARD DA CONSULTA -->
                         <Border
                             BackgroundColor="{StaticResource White}"
                             Stroke="{StaticResource InputBlue}"
@@ -152,7 +199,8 @@
 
                                 </VerticalStackLayout>
 
-                                <!-- DADOS DO PACIENTE -->
+
+                                <!-- PACIENTE -->
                                 <VerticalStackLayout
                                     Grid.Column="1"
                                     Spacing="3"
@@ -165,6 +213,7 @@
                                         TextColor="{StaticResource TextDark}" />
 
                                 </VerticalStackLayout>
+
 
                                 <!-- STATUS -->
                                 <Border
@@ -188,37 +237,13 @@
                         </Border>
 
                     </DataTemplate>
+
                 </CollectionView.ItemTemplate>
-
-                <!-- CASO NÃO EXISTAM CONSULTAS -->
-                <CollectionView.EmptyView>
-
-                    <VerticalStackLayout
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center"
-                        Spacing="6">
-
-                        <Label
-                            Text="Nenhuma consulta hoje"
-                            FontSize="17"
-                            FontAttributes="Bold"
-                            TextColor="{StaticResource TextDark}"
-                            HorizontalTextAlignment="Center" />
-
-                        <Label
-                            Text="Você não possui consultas agendadas para hoje."
-                            FontSize="14"
-                            TextColor="{StaticResource InputPlaceholder}"
-                            HorizontalTextAlignment="Center" />
-
-                    </VerticalStackLayout>
-
-                </CollectionView.EmptyView>
 
             </CollectionView>
 
         </VerticalStackLayout>
-       
+
     </Grid>
 
 </ContentPage>

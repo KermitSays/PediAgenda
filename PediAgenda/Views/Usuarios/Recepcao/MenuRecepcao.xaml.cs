@@ -1,19 +1,65 @@
+using PediAgenda.Views.Usuarios.Medico;
+using System.Collections.ObjectModel;
+
 namespace PediAgenda.Views.Usuarios.Recepcao;
 
 public partial class MenuRecepcao : ContentPage
 {
+    public ObservableCollection<ConsultaRecepcaoResumo> ConsultasHoje { get; set; }
+
+
     public MenuRecepcao()
     {
         InitializeComponent();
-    }
-
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
 
         DataAtualLabel.Text =
             $"Hoje é {DateTime.Today:dd 'de' MMMM 'de' yyyy}";
+
+
+        ConsultasHoje = new ObservableCollection<ConsultaRecepcaoResumo>
+        {
+            new ConsultaRecepcaoResumo
+            {
+                Horario = "08:00",
+                Paciente = "Maria Alice",
+                Medico = "Dr. Carlos Mendes",
+                Status = "Confirmado"
+            },
+
+            new ConsultaRecepcaoResumo
+            {
+                Horario = "09:00",
+                Paciente = "João Pedro",
+                Medico = "Dra. Fernanda Lima",
+                Status = "Por Confirmar"
+            },
+
+            new ConsultaRecepcaoResumo
+            {
+                Horario = "10:00",
+                Paciente = "Bianca",
+                Medico = "Dr. Carlos Mendes",
+                Status = "Confirmado"
+            },
+
+            new ConsultaRecepcaoResumo
+            {
+                Horario = "11:00",
+                Paciente = "Isaac",
+                Medico = "Dra. Fernanda Lima",
+                Status = "Cancelado"
+            }
+        };
+
+
+        QuantidadeConsultasLabel.Text =
+            $"{ConsultasHoje.Count} consulta(s)";
+
+
+        BindingContext = this;
     }
+
+
 
     private async void PacientesButton_Clicked(
         object sender,
@@ -29,18 +75,14 @@ public partial class MenuRecepcao : ContentPage
         await Shell.Current.GoToAsync(nameof(MedicosRecepcao));
     }
 
-    private async void CadastrarResponsavelButton_Clicked(
+    private async void AdicionarPacienteButton_Clicked(
         object sender,
         TappedEventArgs e)
     {
-        await Shell.Current.GoToAsync(
-            nameof(PediAgenda.Views.Cadastro.CadastroCampo));
+        await DisplayAlertAsync(
+            "Adicionar Paciente",
+            "A funcionalidade de adicionar paciente será implementada no futuro.",
+            "OK");
     }
 
-    private async void ConsultasHojeButton_Clicked(
-        object sender,
-        TappedEventArgs e)
-    {
-        await Shell.Current.GoToAsync(nameof(ConsultasHojeRecepcao));
-    }
 }

@@ -82,6 +82,18 @@ public partial class MenuMedico : ContentPage
                         consulta.Status
                 });
         }
+
+
+        bool temConsultas =
+            ConsultasLista.Count > 0;
+
+
+        ConsultasCollectionView.IsVisible =
+            temConsultas;
+
+
+        SemConsultasContainer.IsVisible =
+            !temConsultas;
     }
 
 

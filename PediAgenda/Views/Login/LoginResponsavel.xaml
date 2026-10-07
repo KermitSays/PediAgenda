@@ -138,7 +138,8 @@
                 x:Name="EntrarDiretoButton"
                 Text="Entrar Direto"
                 Style="{StaticResource PrimaryButton}"
-                Clicked="EntrarDiretoButton_Clicked" />
+                Clicked="EntrarDiretoButton_Clicked" 
+                Margin="0,8,0,8"/>
 
 
         </VerticalStackLayout>

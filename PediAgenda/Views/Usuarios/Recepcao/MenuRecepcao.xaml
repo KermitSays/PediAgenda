@@ -7,144 +7,253 @@
     Title="Menu Recepção"
     BackgroundColor="{StaticResource PageBlue}">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Padding="24,30,24,20"
-            Spacing="28">
+    <Grid
+        RowDefinitions="Auto,Auto,*"
+        Padding="24,30,24,20">
 
-            <!-- CABEÇALHO -->
-            <VerticalStackLayout Spacing="4">
+        <!-- CABEÇALHO -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Spacing="4"
+            Margin="0,0,0,20">
+
+            <Label
+                Text="Olá, Recepção!"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                x:Name="DataAtualLabel"
+                FontSize="15"
+                TextColor="{StaticResource InputPlaceholder}" />
+
+        </VerticalStackLayout>
+
+
+        <!-- MENU -->
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,*,*"
+            ColumnSpacing="28"
+            Margin="0,0,0,24">
+
+            <!-- PACIENTES -->
+            <VerticalStackLayout
+                Grid.Column="0"
+                Spacing="6"
+                HorizontalOptions="Center">
+
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="PacientesButton_Clicked" />
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Image
+                    Source="paciente_icon.png"
+                    WidthRequest="95"
+                    HeightRequest="95"
+                    Aspect="AspectFit" />
+
                 <Label
-                    Text="Olá, Recepção!"
-                    FontSize="28"
+                    Text="Pacientes"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+
+            <!-- MÉDICOS -->
+            <VerticalStackLayout
+                Grid.Column="1"
+                Spacing="6"
+                HorizontalOptions="Center">
+
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="MedicosButton_Clicked" />
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Image
+                    Source="medico_icon.png"
+                    WidthRequest="95"
+                    HeightRequest="95"
+                    Aspect="AspectFit" />
+
+                <Label
+                    Text="Médicos"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+            <!-- ADICIONAR PACIENTE -->
+            <VerticalStackLayout
+                Grid.Column="2"
+                Spacing="6"
+                HorizontalOptions="Center">
+
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="AdicionarPacienteButton_Clicked" />
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Image
+                    Source="add_paciente_icon.png"
+                    WidthRequest="95"
+                    HeightRequest="95"
+                    Aspect="AspectFit" />
+
+                <Label
+                    Text="Consultas"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+        </Grid>
+
+
+        <!-- CONSULTAS DO DIA -->
+        <VerticalStackLayout
+            Grid.Row="2"
+            Spacing="14">
+
+            <Grid ColumnDefinitions="*,Auto">
+
+                <Label
+                    Text="Consultas de hoje"
+                    FontSize="20"
                     FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}" />
 
                 <Label
-                    x:Name="DataAtualLabel"
-                    FontSize="15"
-                    TextColor="{StaticResource InputPlaceholder}" />
-            </VerticalStackLayout>
-
-            <!-- MENU -->
-            <Grid
-                RowDefinitions="Auto,Auto"
-                ColumnDefinitions="*,*"
-                RowSpacing="28"
-                ColumnSpacing="20">
-
-                <!-- PACIENTES -->
-                <VerticalStackLayout
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Spacing="8"
-                    HorizontalOptions="Center">
-
-                    <VerticalStackLayout.GestureRecognizers>
-                        <TapGestureRecognizer
-                            Tapped="PacientesButton_Clicked" />
-                    </VerticalStackLayout.GestureRecognizers>
-
-                    <Image
-                        Source="paciente_icon.png"
-                        WidthRequest="95"
-                        HeightRequest="95"
-                        Aspect="AspectFit" />
-
-                    <Label
-                        Text="Pacientes"
-                        FontSize="15"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource TextDark}"
-                        HorizontalTextAlignment="Center" />
-                </VerticalStackLayout>
-
-                <!-- MÉDICOS -->
-                <VerticalStackLayout
-                    Grid.Row="0"
+                    x:Name="QuantidadeConsultasLabel"
                     Grid.Column="1"
-                    Spacing="8"
-                    HorizontalOptions="Center">
-
-                    <VerticalStackLayout.GestureRecognizers>
-                        <TapGestureRecognizer
-                            Tapped="MedicosButton_Clicked" />
-                    </VerticalStackLayout.GestureRecognizers>
-
-                    <Image
-                        Source="medico_icon.png"
-                        WidthRequest="95"
-                        HeightRequest="95"
-                        Aspect="AspectFit" />
-
-                    <Label
-                        Text="Médicos"
-                        FontSize="15"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource TextDark}"
-                        HorizontalTextAlignment="Center" />
-                </VerticalStackLayout>
-
-                <!-- CADASTRAR RESPONSÁVEL -->
-                <VerticalStackLayout
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Spacing="8"
-                    HorizontalOptions="Center">
-
-                    <VerticalStackLayout.GestureRecognizers>
-                        <TapGestureRecognizer
-                            Tapped="CadastrarResponsavelButton_Clicked" />
-                    </VerticalStackLayout.GestureRecognizers>
-
-                    <Border
-                        WidthRequest="95"
-                        HeightRequest="95"
-                        BackgroundColor="{StaticResource PrimaryBlue}"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 22"
-                        Padding="18">
-
-                        <Image
-                            Source="user.png"
-                            Aspect="AspectFit" />
-                    </Border>
-
-                    <Label
-                        Text="Cadastrar&#10;responsável"
-                        FontSize="15"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource TextDark}"
-                        HorizontalTextAlignment="Center" />
-                </VerticalStackLayout>
-
-                <!-- CONSULTAS DE HOJE -->
-                <VerticalStackLayout
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Spacing="8"
-                    HorizontalOptions="Center">
-
-                    <VerticalStackLayout.GestureRecognizers>
-                        <TapGestureRecognizer
-                            Tapped="ConsultasHojeButton_Clicked" />
-                    </VerticalStackLayout.GestureRecognizers>
-
-                    <Image
-                        Source="consulta_icon.png"
-                        WidthRequest="95"
-                        HeightRequest="95"
-                        Aspect="AspectFit" />
-
-                    <Label
-                        Text="Consultas de hoje"
-                        FontSize="15"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource TextDark}"
-                        HorizontalTextAlignment="Center" />
-                </VerticalStackLayout>
+                    FontSize="13"
+                    TextColor="{StaticResource InputPlaceholder}"
+                    VerticalOptions="Center" />
 
             </Grid>
+
+
+            <CollectionView
+                ItemsSource="{Binding ConsultasHoje}"
+                SelectionMode="None">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout
+                        Orientation="Vertical"
+                        ItemSpacing="12" />
+                </CollectionView.ItemsLayout>
+
+
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Border
+                            BackgroundColor="White"
+                            Stroke="{StaticResource InputBlue}"
+                            StrokeThickness="1"
+                            Padding="16"
+                            StrokeShape="RoundRectangle 16">
+
+                            <Grid
+                                ColumnDefinitions="70,*,Auto"
+                                ColumnSpacing="12">
+
+                                <!-- HORÁRIO -->
+                                <Label
+                                    Grid.Column="0"
+                                    Text="{Binding Horario}"
+                                    FontSize="17"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource PrimaryBlue}"
+                                    VerticalOptions="Center"
+                                    HorizontalTextAlignment="Center" />
+
+
+                                <!-- PACIENTE / MÉDICO -->
+                                <VerticalStackLayout
+                                    Grid.Column="1"
+                                    Spacing="3"
+                                    VerticalOptions="Center">
+
+                                    <Label
+                                        Text="{Binding Paciente}"
+                                        FontSize="17"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource TextDark}" />
+
+                                    <Label
+                                        Text="{Binding Medico}"
+                                        FontSize="13"
+                                        TextColor="{StaticResource InputPlaceholder}" />
+
+                                </VerticalStackLayout>
+
+
+                                <!-- STATUS -->
+                                <Border
+                                    Grid.Column="2"
+                                    BackgroundColor="{StaticResource PageBlue}"
+                                    StrokeThickness="0"
+                                    Padding="10,6"
+                                    StrokeShape="RoundRectangle 10"
+                                    VerticalOptions="Center">
+
+                                    <Label
+                                        Text="{Binding Status}"
+                                        FontSize="12"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource PrimaryBlue}" />
+
+                                </Border>
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </CollectionView.ItemTemplate>
+
+
+                <CollectionView.EmptyView>
+
+                    <VerticalStackLayout
+                        Padding="20"
+                        Spacing="6"
+                        HorizontalOptions="Center">
+
+                        <Label
+                            Text="Nenhuma consulta hoje"
+                            FontSize="17"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Não há consultas registradas para hoje."
+                            FontSize="14"
+                            TextColor="{StaticResource InputPlaceholder}"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+
+                </CollectionView.EmptyView>
+
+            </CollectionView>
+
         </VerticalStackLayout>
-    </ScrollView>
+
+    </Grid>
+
 </ContentPage>
