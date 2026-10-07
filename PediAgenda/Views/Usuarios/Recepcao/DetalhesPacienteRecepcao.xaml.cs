@@ -37,7 +37,10 @@ public partial class DetalhesPacienteRecepcao : ContentPage
                     id;
 
 
-                CarregarPaciente();
+                if (NomePacienteLabel != null)
+                {
+                    CarregarPaciente();
+                }
             }
         }
     }
@@ -110,7 +113,7 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 
 
         // =========================================
-        // HISTÓRICO
+        // CONSULTAS
         // =========================================
 
         ConsultasPaciente.Clear();
@@ -227,12 +230,12 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 
 
     // =============================================
-    // TOQUE NA PRÓXIMA CONSULTA
+    // PRÓXIMA CONSULTA - CLIQUE
     // =============================================
 
-    private async void ProximaConsulta_Tapped(
+    private async void ProximaConsultaButton_Clicked(
         object sender,
-        TappedEventArgs e)
+        EventArgs e)
     {
         if (_proximaConsulta == null)
             return;
@@ -244,20 +247,19 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 
 
     // =============================================
-    // TOQUE NO HISTÓRICO
+    // HISTÓRICO - CLIQUE
     // =============================================
 
-    private async void ConsultaHistorico_Tapped(
+    private async void ConsultaHistoricoButton_Clicked(
         object sender,
-        TappedEventArgs e)
+        EventArgs e)
     {
         if (
-            sender
-                is not TapGestureRecognizer gesto
+            sender is not Button botao
 
             ||
 
-            gesto.CommandParameter
+            botao.CommandParameter
                 is not ConsultaPacienteRecepcaoItem consulta)
         {
             return;
@@ -270,14 +272,15 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 
 
     // =============================================
-    // ABRE CONSULTA
+    // ABRIR CONSULTA
     // =============================================
 
     private async Task AbrirConsultaAsync(
         ConsultaPacienteRecepcaoItem consulta)
     {
-        // Consultas antigas ou canceladas
-        // podem não possuir horário ativo.
+        // =========================================
+        // CONSULTA SEM HORÁRIO ATIVO
+        // =========================================
 
         if (!consulta.HorarioId.HasValue)
         {
@@ -297,9 +300,20 @@ public partial class DetalhesPacienteRecepcao : ContentPage
         }
 
 
+        // =========================================
+        // CONSULTA ATIVA
+        // =========================================
+
         await Shell.Current.GoToAsync(
-            $"{nameof(DetalhesConsultaRecepcao)}" +
-            $"?HorarioId={consulta.HorarioId.Value}");
+            nameof(DetalhesConsultaRecepcao),
+
+            new Dictionary<string, object>
+            {
+                {
+                    "HorarioId",
+                    consulta.HorarioId.Value.ToString()
+                }
+            });
     }
 
 
@@ -308,16 +322,23 @@ public partial class DetalhesPacienteRecepcao : ContentPage
     // =============================================
 
     private async void AgendarConsultaButton_Clicked(
-        object sender,
-        EventArgs e)
+    object sender,
+    EventArgs e)
     {
         if (_paciente == null)
             return;
 
 
         await Shell.Current.GoToAsync(
-            $"{nameof(AgendarConsultaRecepcao)}" +
-            $"?PacienteId={_paciente.Id}");
+            nameof(AgendarConsultaRecepcao),
+
+            new Dictionary<string, object>
+            {
+            {
+                "PacienteId",
+                _paciente.Id.ToString()
+            }
+            });
     }
 
 

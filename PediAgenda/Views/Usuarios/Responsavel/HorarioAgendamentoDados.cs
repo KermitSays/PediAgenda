@@ -1,4 +1,6 @@
-﻿namespace PediAgenda.Views.Usuarios.Responsavel;
+﻿using PediAgenda.Views.Usuarios.Medico;
+
+namespace PediAgenda.Views.Usuarios.Responsavel;
 
 public class HorarioAgendamentoItem
 {
@@ -47,8 +49,8 @@ public class HorarioAgendamentoItem
 
     // Quantidade de bloqueios que atingem este horário.
     //
-    // Assim, se existirem dois bloqueios sobrepostos,
-    // liberar um deles não libera indevidamente o outro.
+    // Isso evita que bloqueios sobrepostos sejam
+    // liberados de forma incorreta.
     internal int QuantidadeBloqueios
     {
         get;
@@ -88,10 +90,25 @@ public static class HorarioAgendamentoDados
 
 
     // =============================================
+    // MÉDICO LOCAL TEMPORÁRIO
+    // =============================================
+    //
+    // ConsultasMedicoDados representa, nesta versão
+    // local, a agenda do médico de ID 1.
+    //
+    // Quando a API estiver integrada, essa associação
+    // será substituída pelo id_medico real.
+
+    private const int IdMedicoLocal =
+        1;
+
+
+    // =============================================
     // GRADE LOCAL TEMPORÁRIA
     // =============================================
     //
-    // Futuramente estes registros virão da API.
+    // Futuramente estes registros virão da API
+    // e da tabela horario do banco.
 
     private static readonly TimeSpan[]
         gradeHorarios =
@@ -294,10 +311,12 @@ public static class HorarioAgendamentoDados
         TimeSpan horarioInicial,
         TimeSpan horarioFinal)
     {
-        // Evita registrar duas vezes o mesmo bloqueio.
+        // Evita registrar duas vezes
+        // o mesmo bloqueio.
 
-        if (horariosPorBloqueio.ContainsKey(
-            idBloqueio))
+        if (
+            horariosPorBloqueio.ContainsKey(
+                idBloqueio))
         {
             LiberarBloqueio(
                 idBloqueio);
@@ -316,8 +335,6 @@ public static class HorarioAgendamentoDados
             dataAtual <=
             dataFinal.Date)
         {
-            // Finais de semana não possuem agenda.
-
             if (
                 dataAtual.DayOfWeek !=
                     DayOfWeek.Saturday
@@ -458,8 +475,20 @@ public static class HorarioAgendamentoDados
                     data);
 
 
+        // Mesmo que os horários já existam,
+        // sincronizamos novamente as consultas
+        // locais para manter a disponibilidade
+        // coerente.
+
         if (horariosJaCriados)
+        {
+            SincronizarConsultasLocaisDoMedico(
+                idMedico,
+                data);
+
+
             return;
+        }
 
 
         foreach (
@@ -489,6 +518,91 @@ public static class HorarioAgendamentoDados
                     Disponivel =
                         true
                 });
+        }
+
+
+        // Depois de criar a grade, marca como
+        // ocupados os horários das consultas
+        // de exemplo que já existem para o médico.
+
+        SincronizarConsultasLocaisDoMedico(
+            idMedico,
+            data);
+    }
+
+
+    // =============================================
+    // SINCRONIZA CONSULTAS DE EXEMPLO DO MÉDICO
+    // =============================================
+    //
+    // Esta é uma ponte LOCAL temporária.
+    //
+    // Serve apenas para impedir que uma consulta
+    // já existente em ConsultasMedicoDados apareça
+    // como horário livre para Recepção/Responsável.
+    //
+    // Quando a API assumir a agenda, este método
+    // deixa de ser necessário.
+
+    private static void SincronizarConsultasLocaisDoMedico(
+        int idMedico,
+        DateTime data)
+    {
+        if (
+            idMedico !=
+            IdMedicoLocal)
+        {
+            return;
+        }
+
+
+        List<ConsultaMedico>
+            consultasDoDia =
+                ConsultasMedicoDados.Consultas
+                    .Where(c =>
+                        c.Data.Date ==
+                            data.Date
+
+                        &&
+
+                        !c.Status.Equals(
+                            "Cancelado",
+                            StringComparison.OrdinalIgnoreCase)
+
+                        &&
+
+                        !c.Status.Equals(
+                            "Cancelada",
+                            StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+
+        foreach (
+            ConsultaMedico consulta
+            in consultasDoDia)
+        {
+            HorarioAgendamentoItem? horario =
+                horarios
+                    .FirstOrDefault(h =>
+                        h.IdMedico ==
+                            idMedico
+
+                        &&
+
+                        h.Data.Date ==
+                            data.Date
+
+                        &&
+
+                        h.HoraInicio ==
+                            consulta.Horario);
+
+
+            if (horario != null)
+            {
+                horario.Disponivel =
+                    false;
+            }
         }
     }
 }

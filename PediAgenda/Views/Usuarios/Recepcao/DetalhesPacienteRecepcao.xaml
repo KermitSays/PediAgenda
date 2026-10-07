@@ -121,42 +121,47 @@
                 Padding="18"
                 StrokeShape="RoundRectangle 18">
 
-                <!-- AGORA O CARD É CLICÁVEL -->
+                <Grid>
 
-                <Border.GestureRecognizers>
+                    <!-- CONTEÚDO VISUAL -->
 
-                    <TapGestureRecognizer
-                        Tapped="ProximaConsulta_Tapped" />
+                    <VerticalStackLayout
+                        Spacing="7">
 
-                </Border.GestureRecognizers>
+                        <Label
+                            x:Name="ProximaConsultaDataLabel"
+                            FontSize="17"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource PrimaryBlue}" />
+
+                        <Label
+                            x:Name="ProximaConsultaMedicoLabel"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="ProximaConsultaEspecialidadeLabel"
+                            FontSize="14"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label
+                            x:Name="ProximaConsultaStatusLabel"
+                            FontSize="14"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </VerticalStackLayout>
 
 
-                <VerticalStackLayout
-                    Spacing="7">
+                    <!-- ÁREA DE CLIQUE -->
 
-                    <Label
-                        x:Name="ProximaConsultaDataLabel"
-                        FontSize="17"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource PrimaryBlue}" />
+                    <Button
+                        BackgroundColor="Transparent"
+                        BorderWidth="0"
+                        Padding="0"
+                        Clicked="ProximaConsultaButton_Clicked" />
 
-                    <Label
-                        x:Name="ProximaConsultaMedicoLabel"
-                        FontSize="15"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource TextDark}" />
-
-                    <Label
-                        x:Name="ProximaConsultaEspecialidadeLabel"
-                        FontSize="14"
-                        TextColor="{StaticResource InputPlaceholder}" />
-
-                    <Label
-                        x:Name="ProximaConsultaStatusLabel"
-                        FontSize="14"
-                        TextColor="{StaticResource TextDark}" />
-
-                </VerticalStackLayout>
+                </Grid>
 
             </Border>
 
@@ -190,14 +195,6 @@
             </Grid>
 
 
-            <!--
-                NÃO USAMOS MAIS COLLECTIONVIEW AQUI.
-
-                Como toda a página já está dentro de um ScrollView,
-                usamos BindableLayout para evitar conflito
-                de toque/rolagem.
-            -->
-
             <VerticalStackLayout
                 Spacing="10"
                 BindableLayout.ItemsSource="{Binding ConsultasPaciente}">
@@ -212,15 +209,6 @@
                             StrokeThickness="1"
                             Padding="14"
                             StrokeShape="RoundRectangle 14">
-
-                            <Border.GestureRecognizers>
-
-                                <TapGestureRecognizer
-                                    Tapped="ConsultaHistorico_Tapped"
-                                    CommandParameter="{Binding .}" />
-
-                            </Border.GestureRecognizers>
-
 
                             <Grid
                                 RowDefinitions="Auto,Auto,Auto"
@@ -257,26 +245,44 @@
                                 </Border>
 
 
-                                <!-- DATA/HORA -->
+                                <!-- DATA E HORA -->
 
                                 <Label
                                     Grid.Row="1"
+                                    Grid.Column="0"
                                     Grid.ColumnSpan="2"
                                     Text="{Binding DataHoraFormatada}"
                                     FontSize="13"
                                     TextColor="{StaticResource InputPlaceholder}" />
 
 
-                                <!-- ACESSO -->
+                                <!-- INDICAÇÃO -->
 
                                 <Label
                                     Grid.Row="2"
+                                    Grid.Column="0"
                                     Grid.ColumnSpan="2"
                                     Text="{Binding TextoAcesso}"
                                     Margin="0,5,0,0"
                                     FontSize="12"
                                     FontAttributes="Bold"
                                     TextColor="{StaticResource PrimaryBlue}" />
+
+
+                                <!--
+                                    BOTÃO TRANSPARENTE SOBRE O CARD INTEIRO
+                                -->
+
+                                <Button
+                                    Grid.Row="0"
+                                    Grid.RowSpan="3"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    BackgroundColor="Transparent"
+                                    BorderWidth="0"
+                                    Padding="0"
+                                    CommandParameter="{Binding .}"
+                                    Clicked="ConsultaHistoricoButton_Clicked" />
 
                             </Grid>
 
