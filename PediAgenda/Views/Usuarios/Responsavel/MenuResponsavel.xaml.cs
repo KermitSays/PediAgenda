@@ -1,3 +1,5 @@
+using PediAgenda.Dados;
+
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
 public partial class MenuResponsavel : ContentPage
@@ -12,11 +14,36 @@ public partial class MenuResponsavel : ContentPage
     {
         base.OnAppearing();
 
+
+        AtualizarSaudacao();
+
+
         CarregarProximaConsulta();
     }
 
 
-    // CARREGA A PRÓXIMA CONSULTA
+    // =============================================
+    // SAUDAÇÃO
+    // =============================================
+
+    private void AtualizarSaudacao()
+    {
+        string nome =
+            SessaoUsuario.PrimeiroNome;
+
+
+        SaudacaoLabel.Text =
+            string.IsNullOrWhiteSpace(nome)
+
+                ? "Olá!"
+
+                : $"Olá, {nome}!";
+    }
+
+
+    // =============================================
+    // PRÓXIMA CONSULTA
+    // =============================================
 
     private void CarregarProximaConsulta()
     {
@@ -25,11 +52,15 @@ public partial class MenuResponsavel : ContentPage
                 .SelectMany(
                     paciente =>
                         paciente.Consultas.Select(
-                            consulta => new
-                            {
-                                Paciente = paciente,
-                                Consulta = consulta
-                            }))
+                            consulta =>
+                                new
+                                {
+                                    Paciente =
+                                        paciente,
+
+                                    Consulta =
+                                        consulta
+                                }))
                 .Where(item =>
                     item.Consulta.Data.Date >=
                         DateTime.Today
@@ -57,8 +88,10 @@ public partial class MenuResponsavel : ContentPage
             ProximaConsultaCard.IsVisible =
                 false;
 
+
             SemConsultaCard.IsVisible =
                 true;
+
 
             return;
         }
@@ -66,6 +99,7 @@ public partial class MenuResponsavel : ContentPage
 
         ProximaConsultaCard.IsVisible =
             true;
+
 
         SemConsultaCard.IsVisible =
             false;
@@ -100,7 +134,9 @@ public partial class MenuResponsavel : ContentPage
     }
 
 
+    // =============================================
     // PACIENTES
+    // =============================================
 
     private async void PacientesButton_Clicked(
         object sender,
@@ -111,7 +147,9 @@ public partial class MenuResponsavel : ContentPage
     }
 
 
+    // =============================================
     // NOTIFICAÇÕES
+    // =============================================
 
     private async void NotificacoesButton_Clicked(
         object sender,
@@ -122,7 +160,9 @@ public partial class MenuResponsavel : ContentPage
     }
 
 
+    // =============================================
     // MINHAS CONSULTAS
+    // =============================================
 
     private async void MinhasConsultasButton_Clicked(
         object sender,
@@ -133,7 +173,9 @@ public partial class MenuResponsavel : ContentPage
     }
 
 
+    // =============================================
     // AGENDAR CONSULTA
+    // =============================================
 
     private async void AgendarConsultaButton_Clicked(
         object sender,

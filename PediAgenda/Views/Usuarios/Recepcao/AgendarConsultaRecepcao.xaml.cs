@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using PediAgenda.Views.Usuarios.Responsavel;
 
 namespace PediAgenda.Views.Usuarios.Recepcao;
 
@@ -17,6 +18,8 @@ public partial class AgendarConsultaRecepcao : ContentPage
         _horarioSelecionado;
 
     private bool ajustandoData;
+
+    private bool operacaoConcluida;
 
 
     public ObservableCollection<HorarioAgendaRecepcao>
@@ -41,6 +44,12 @@ public partial class AgendarConsultaRecepcao : ContentPage
 
 
                 CarregarPaciente();
+
+
+                if (_horarioOriginalId.HasValue)
+                {
+                    PrepararReagendamento();
+                }
             }
         }
     }
@@ -91,6 +100,29 @@ public partial class AgendarConsultaRecepcao : ContentPage
     }
 
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+
+        if (operacaoConcluida)
+            return;
+
+
+        CarregarPaciente();
+
+
+        if (_horarioOriginalId.HasValue)
+        {
+            PrepararReagendamento();
+        }
+        else
+        {
+            CarregarHorariosDisponiveis();
+        }
+    }
+
+
     // =============================================
     // DIA ÚTIL
     // =============================================
@@ -100,7 +132,9 @@ public partial class AgendarConsultaRecepcao : ContentPage
     {
         return
             data.DayOfWeek !=
-                DayOfWeek.Saturday &&
+                DayOfWeek.Saturday
+
+            &&
 
             data.DayOfWeek !=
                 DayOfWeek.Sunday;
@@ -118,7 +152,8 @@ public partial class AgendarConsultaRecepcao : ContentPage
             data.Date;
 
 
-        while (!EhDiaUtil(resultado))
+        while (!EhDiaUtil(
+            resultado))
         {
             resultado =
                 resultado.AddDays(1);
@@ -135,6 +170,10 @@ public partial class AgendarConsultaRecepcao : ContentPage
 
     private void CarregarPaciente()
     {
+        if (_pacienteId <= 0)
+            return;
+
+
         _paciente =
             PacientesRecepcaoDados.Pacientes
                 .FirstOrDefault(p =>
@@ -167,7 +206,8 @@ public partial class AgendarConsultaRecepcao : ContentPage
 
         foreach (
             string medico
-            in AgendaMedicaRecepcaoDados.Medicos)
+            in AgendaMedicaRecepcaoDados
+                .MedicosCompartilhados)
         {
             MedicoPicker.Items.Add(
                 medico);
@@ -185,6 +225,43 @@ public partial class AgendarConsultaRecepcao : ContentPage
 
 
     // =============================================
+    // LOCALIZA CONSULTA ATUAL
+    // =============================================
+
+    private ConsultaPacienteRecepcaoItem?
+        ObterConsultaAtual()
+    {
+        if (!_horarioOriginalId.HasValue)
+            return null;
+
+
+        if (_paciente != null)
+        {
+            ConsultaPacienteRecepcaoItem?
+                consultaPaciente =
+                    _paciente.Consultas
+                        .FirstOrDefault(c =>
+                            c.HorarioId ==
+                            _horarioOriginalId.Value);
+
+
+            if (consultaPaciente != null)
+            {
+                return consultaPaciente;
+            }
+        }
+
+
+        return PacientesRecepcaoDados.Pacientes
+            .SelectMany(p =>
+                p.Consultas)
+            .FirstOrDefault(c =>
+                c.HorarioId ==
+                _horarioOriginalId.Value);
+    }
+
+
+    // =============================================
     // REAGENDAMENTO
     // =============================================
 
@@ -194,14 +271,12 @@ public partial class AgendarConsultaRecepcao : ContentPage
             return;
 
 
-        var horarioOriginal =
-            AgendaMedicaRecepcaoDados.Horarios
-                .FirstOrDefault(h =>
-                    h.Id ==
-                    _horarioOriginalId.Value);
+        ConsultaPacienteRecepcaoItem?
+            consultaAtual =
+                ObterConsultaAtual();
 
 
-        if (horarioOriginal == null)
+        if (consultaAtual == null)
             return;
 
 
@@ -214,9 +289,10 @@ public partial class AgendarConsultaRecepcao : ContentPage
 
 
         int indiceMedico =
-            AgendaMedicaRecepcaoDados.Medicos
+            AgendaMedicaRecepcaoDados
+                .MedicosCompartilhados
                 .IndexOf(
-                    horarioOriginal.Medico);
+                    consultaAtual.Medico);
 
 
         if (
@@ -228,18 +304,14 @@ public partial class AgendarConsultaRecepcao : ContentPage
         }
 
 
-        // SE ALGUM DADO ANTIGO ESTIVER EM
-        // FIM DE SEMANA, MOVE PARA O PRÓXIMO
-        // DIA ÚTIL.
-
         DataPicker.Date =
             EhDiaUtil(
-                horarioOriginal.Data)
+                consultaAtual.Data)
 
-                ? horarioOriginal.Data
+                ? consultaAtual.Data
 
                 : ProximoDiaUtil(
-                    horarioOriginal.Data);
+                    consultaAtual.Data);
 
 
         CarregarHorariosDisponiveis();
@@ -254,6 +326,10 @@ public partial class AgendarConsultaRecepcao : ContentPage
         object sender,
         EventArgs e)
     {
+        if (MedicoPicker.SelectedItem == null)
+            return;
+
+
         CarregarHorariosDisponiveis();
     }
 
@@ -308,18 +384,6 @@ public partial class AgendarConsultaRecepcao : ContentPage
 
     private void CarregarHorariosDisponiveis()
     {
-        string medico =
-            MedicoPicker.SelectedItem?
-                .ToString()
-            ?? string.Empty;
-
-
-        DateTime data =
-            DataPicker.Date
-            ?? ProximoDiaUtil(
-                DateTime.Today);
-
-
         HorariosDisponiveis.Clear();
 
 
@@ -331,36 +395,70 @@ public partial class AgendarConsultaRecepcao : ContentPage
             "Nenhum";
 
 
-        // NÃO CARREGA HORÁRIOS EM FIM DE SEMANA
+        string medico =
+            MedicoPicker.SelectedItem?
+                .ToString()
+            ?? string.Empty;
 
-        if (!EhDiaUtil(data))
+
+        if (
+            string.IsNullOrWhiteSpace(
+                medico))
         {
             return;
         }
 
 
-        var horarios =
-            AgendaMedicaRecepcaoDados.Horarios
-                .Where(h =>
-                    h.Medico ==
-                        medico &&
+        int idMedico =
+            AgendaMedicaRecepcaoDados
+                .ObterIdMedico(
+                    medico);
 
-                    h.Data.Date ==
-                        data.Date &&
 
-                    h.Status ==
-                        "Disponível")
-                .OrderBy(h =>
-                    h.Horario)
-                .ToList();
+        if (idMedico <= 0)
+            return;
+
+
+        DateTime data =
+            DataPicker.Date
+            ?? ProximoDiaUtil(
+                DateTime.Today);
+
+
+        if (!EhDiaUtil(data))
+            return;
+
+
+        List<HorarioAgendamentoItem>
+            horarios =
+                HorarioAgendamentoDados
+                    .ObterHorariosDisponiveis(
+                        idMedico,
+                        data);
 
 
         foreach (
-            HorarioAgendaRecepcao horario
+            HorarioAgendamentoItem horario
             in horarios)
         {
             HorariosDisponiveis.Add(
-                horario);
+                new HorarioAgendaRecepcao
+                {
+                    Id =
+                        horario.IdHorario,
+
+                    Medico =
+                        medico,
+
+                    Data =
+                        horario.Data,
+
+                    Horario =
+                        horario.HoraInicio,
+
+                    Status =
+                        "Disponível"
+                });
         }
     }
 
@@ -403,18 +501,26 @@ public partial class AgendarConsultaRecepcao : ContentPage
         object sender,
         EventArgs e)
     {
-        if (_paciente == null)
+        if (operacaoConcluida)
             return;
+
+
+        if (_paciente == null)
+        {
+            await DisplayAlertAsync(
+                "Paciente não encontrado",
+                "Não foi possível localizar o paciente.",
+                "OK");
+
+
+            return;
+        }
 
 
         DateTime dataSelecionada =
             DataPicker.Date
             ?? DateTime.Today;
 
-
-        // VALIDAÇÃO FINAL:
-        // MESMO QUE ALGO NA INTERFACE FALHE,
-        // NUNCA GRAVA CONSULTA NO FIM DE SEMANA.
 
         if (!EhDiaUtil(
             dataSelecionada))
@@ -463,7 +569,6 @@ public partial class AgendarConsultaRecepcao : ContentPage
 
                 $"{_paciente.Nome}\n" +
                 $"{_horarioSelecionado.Medico}\n" +
-
                 $"{_horarioSelecionado.Data:dd/MM/yyyy} às " +
                 $"{_horarioSelecionado.HorarioFormatado}",
 
@@ -475,14 +580,39 @@ public partial class AgendarConsultaRecepcao : ContentPage
             return;
 
 
+        bool sucesso;
+
+
         if (_horarioOriginalId.HasValue)
         {
-            ReagendarConsulta();
+            sucesso =
+                ReagendarConsulta();
         }
         else
         {
-            AgendarConsulta();
+            sucesso =
+                AgendarConsulta();
         }
+
+
+        if (!sucesso)
+        {
+            await DisplayAlertAsync(
+                "Horário indisponível",
+                "Este horário não está mais disponível. " +
+                "Escolha outro horário.",
+                "OK");
+
+
+            CarregarHorariosDisponiveis();
+
+
+            return;
+        }
+
+
+        operacaoConcluida =
+            true;
 
 
         await DisplayAlertAsync(
@@ -504,27 +634,41 @@ public partial class AgendarConsultaRecepcao : ContentPage
     // AGENDAR
     // =============================================
 
-    private void AgendarConsulta()
+    private bool AgendarConsulta()
     {
         if (
-            _paciente == null ||
+            _paciente == null
 
-            _horarioSelecionado == null ||
+            ||
+
+            _horarioSelecionado == null
+
+            ||
 
             !EhDiaUtil(
                 _horarioSelecionado.Data))
         {
-            return;
+            return false;
         }
 
 
-        _horarioSelecionado.Status =
-            "Agendado";
+        // =========================================
+        // RESERVA NA FONTE COMPARTILHADA
+        // =========================================
+
+        bool reservado =
+            HorarioAgendamentoDados
+                .ReservarHorario(
+                    _horarioSelecionado.Id);
 
 
-        _horarioSelecionado.Paciente =
-            _paciente.Nome;
+        if (!reservado)
+            return false;
 
+
+        // =========================================
+        // CRIA A CONSULTA LOCAL DA RECEPÇÃO
+        // =========================================
 
         _paciente.Consultas.Add(
             new ConsultaPacienteRecepcaoItem
@@ -550,6 +694,9 @@ public partial class AgendarConsultaRecepcao : ContentPage
                 Status =
                     "Por Confirmar"
             });
+
+
+        return true;
     }
 
 
@@ -557,83 +704,83 @@ public partial class AgendarConsultaRecepcao : ContentPage
     // REAGENDAR
     // =============================================
 
-    private void ReagendarConsulta()
+    private bool ReagendarConsulta()
     {
         if (
-            _paciente == null ||
+            _paciente == null
 
-            _horarioSelecionado == null ||
+            ||
 
-            !_horarioOriginalId.HasValue ||
+            _horarioSelecionado == null
+
+            ||
+
+            !_horarioOriginalId.HasValue
+
+            ||
 
             !EhDiaUtil(
                 _horarioSelecionado.Data))
         {
-            return;
+            return false;
         }
 
 
-        var horarioOriginal =
-            AgendaMedicaRecepcaoDados.Horarios
-                .FirstOrDefault(h =>
-                    h.Id ==
-                    _horarioOriginalId.Value);
+        ConsultaPacienteRecepcaoItem?
+            consulta =
+                ObterConsultaAtual();
 
 
-        if (horarioOriginal == null)
-            return;
+        if (consulta == null)
+            return false;
 
 
-        // LIBERA O HORÁRIO ANTERIOR
-
-        horarioOriginal.Status =
-            "Disponível";
+        int idHorarioAntigo =
+            _horarioOriginalId.Value;
 
 
-        horarioOriginal.Paciente =
-            string.Empty;
+        // PRIMEIRO RESERVA O NOVO HORÁRIO.
+
+        bool novoHorarioReservado =
+            HorarioAgendamentoDados
+                .ReservarHorario(
+                    _horarioSelecionado.Id);
 
 
-        // OCUPA O NOVO HORÁRIO
-
-        _horarioSelecionado.Status =
-            "Agendado";
+        if (!novoHorarioReservado)
+            return false;
 
 
-        _horarioSelecionado.Paciente =
-            _paciente.Nome;
+        // DEPOIS LIBERA O ANTIGO.
+
+        HorarioAgendamentoDados
+            .LiberarHorario(
+                idHorarioAntigo);
 
 
-        // ATUALIZA A CONSULTA DO PACIENTE
+        // ATUALIZA A CONSULTA.
 
-        var consulta =
-            _paciente.Consultas
-                .FirstOrDefault(c =>
-                    c.HorarioId ==
-                    _horarioOriginalId.Value);
+        consulta.HorarioId =
+            _horarioSelecionado.Id;
 
 
-        if (consulta != null)
-        {
-            consulta.HorarioId =
-                _horarioSelecionado.Id;
+        consulta.Data =
+            _horarioSelecionado.Data;
 
 
-            consulta.Data =
-                _horarioSelecionado.Data;
+        consulta.Horario =
+            _horarioSelecionado.Horario;
 
 
-            consulta.Horario =
-                _horarioSelecionado.Horario;
+        consulta.Medico =
+            _horarioSelecionado.Medico;
 
 
-            consulta.Medico =
-                _horarioSelecionado.Medico;
+        consulta.Status =
+            "Por Confirmar";
 
 
-            consulta.Status =
-                "Por Confirmar";
-        }
+        return true;
     }
 
 

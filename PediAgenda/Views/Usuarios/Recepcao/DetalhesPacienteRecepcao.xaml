@@ -14,7 +14,9 @@
             Spacing="18">
 
             <!-- CABEÇALHO -->
-            <VerticalStackLayout Spacing="4">
+
+            <VerticalStackLayout
+                Spacing="4">
 
                 <Label
                     x:Name="NomePacienteLabel"
@@ -31,6 +33,7 @@
 
 
             <!-- DADOS DO PACIENTE -->
+
             <Border
                 BackgroundColor="White"
                 Stroke="{StaticResource InputBlue}"
@@ -38,7 +41,8 @@
                 Padding="18"
                 StrokeShape="RoundRectangle 18">
 
-                <VerticalStackLayout Spacing="10">
+                <VerticalStackLayout
+                    Spacing="10">
 
                     <Label
                         Text="Paciente"
@@ -62,6 +66,7 @@
 
 
             <!-- RESPONSÁVEL -->
+
             <Border
                 BackgroundColor="White"
                 Stroke="{StaticResource InputBlue}"
@@ -69,7 +74,8 @@
                 Padding="18"
                 StrokeShape="RoundRectangle 18">
 
-                <VerticalStackLayout Spacing="10">
+                <VerticalStackLayout
+                    Spacing="10">
 
                     <Label
                         Text="Responsável"
@@ -99,11 +105,13 @@
 
 
             <!-- PRÓXIMA CONSULTA -->
+
             <Label
                 Text="Próxima consulta"
                 FontSize="20"
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />
+
 
             <Border
                 x:Name="ProximaConsultaCard"
@@ -113,7 +121,18 @@
                 Padding="18"
                 StrokeShape="RoundRectangle 18">
 
-                <VerticalStackLayout Spacing="7">
+                <!-- AGORA O CARD É CLICÁVEL -->
+
+                <Border.GestureRecognizers>
+
+                    <TapGestureRecognizer
+                        Tapped="ProximaConsulta_Tapped" />
+
+                </Border.GestureRecognizers>
+
+
+                <VerticalStackLayout
+                    Spacing="7">
 
                     <Label
                         x:Name="ProximaConsultaDataLabel"
@@ -151,7 +170,9 @@
 
 
             <!-- HISTÓRICO -->
-            <Grid ColumnDefinitions="*,Auto">
+
+            <Grid
+                ColumnDefinitions="*,Auto">
 
                 <Label
                     Text="Histórico de consultas"
@@ -169,20 +190,19 @@
             </Grid>
 
 
-            <CollectionView
-                ItemsSource="{Binding ConsultasPaciente}"
-                SelectionMode="None">
+            <!--
+                NÃO USAMOS MAIS COLLECTIONVIEW AQUI.
 
-                <CollectionView.ItemsLayout>
+                Como toda a página já está dentro de um ScrollView,
+                usamos BindableLayout para evitar conflito
+                de toque/rolagem.
+            -->
 
-                    <LinearItemsLayout
-                        Orientation="Vertical"
-                        ItemSpacing="10" />
+            <VerticalStackLayout
+                Spacing="10"
+                BindableLayout.ItemsSource="{Binding ConsultasPaciente}">
 
-                </CollectionView.ItemsLayout>
-
-
-                <CollectionView.ItemTemplate>
+                <BindableLayout.ItemTemplate>
 
                     <DataTemplate>
 
@@ -193,7 +213,6 @@
                             Padding="14"
                             StrokeShape="RoundRectangle 14">
 
-                            <!-- CARTÃO CLICÁVEL -->
                             <Border.GestureRecognizers>
 
                                 <TapGestureRecognizer
@@ -209,6 +228,7 @@
                                 RowSpacing="5">
 
                                 <!-- MÉDICO -->
+
                                 <Label
                                     Grid.Row="0"
                                     Grid.Column="0"
@@ -219,6 +239,7 @@
 
 
                                 <!-- STATUS -->
+
                                 <Border
                                     Grid.Row="0"
                                     Grid.Column="1"
@@ -237,6 +258,7 @@
 
 
                                 <!-- DATA/HORA -->
+
                                 <Label
                                     Grid.Row="1"
                                     Grid.ColumnSpan="2"
@@ -245,7 +267,8 @@
                                     TextColor="{StaticResource InputPlaceholder}" />
 
 
-                                <!-- INDICAÇÃO DE ACESSO -->
+                                <!-- ACESSO -->
+
                                 <Label
                                     Grid.Row="2"
                                     Grid.ColumnSpan="2"
@@ -261,12 +284,13 @@
 
                     </DataTemplate>
 
-                </CollectionView.ItemTemplate>
+                </BindableLayout.ItemTemplate>
 
-            </CollectionView>
+            </VerticalStackLayout>
 
 
             <!-- AÇÕES -->
+
             <Button
                 Text="AGENDAR CONSULTA"
                 HeightRequest="48"

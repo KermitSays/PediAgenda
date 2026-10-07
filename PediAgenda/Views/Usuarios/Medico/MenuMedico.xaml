@@ -18,7 +18,8 @@
             Margin="0,0,0,20">
 
             <Label
-                Text="Olá, Dr.!"
+                x:Name="SaudacaoLabel"
+                Text="Olá, Dr(a).!"
                 FontSize="28"
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />
@@ -179,6 +180,7 @@
                             StrokeThickness="1"
                             Padding="16"
                             StrokeShape="RoundRectangle 16">
+
 
                             <Grid
                                 ColumnDefinitions="70,*,Auto"

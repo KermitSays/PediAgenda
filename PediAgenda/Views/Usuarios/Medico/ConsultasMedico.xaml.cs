@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using PediAgenda.Views.Usuarios.Responsavel;
 
 namespace PediAgenda.Views.Usuarios.Medico;
 
@@ -13,6 +14,24 @@ public partial class ConsultasMedico : ContentPage
 
 
     private bool ajustandoData;
+
+
+    // =============================================
+    // MÉDICO LOCAL TEMPORÁRIO
+    // =============================================
+    //
+    // Enquanto a API ainda não devolve o id_medico
+    // associado ao usuário logado, usamos o médico
+    // local de ID 1.
+    //
+    // IMPORTANTE:
+    // id_usuario e id_medico NÃO são a mesma coisa.
+    //
+    // Quando a API de médicos/agenda estiver pronta,
+    // este valor será substituído pelo id_medico real.
+
+    private const int IdMedicoAgendaLocal =
+        1;
 
 
     public ConsultasMedico()
@@ -35,6 +54,10 @@ public partial class ConsultasMedico : ContentPage
 
         DataConsultaPicker.DateSelected +=
             DataConsultaPicker_DateSelected;
+
+
+        AgendaCollectionView.ItemsSource =
+            Agenda;
     }
 
 
@@ -55,7 +78,7 @@ public partial class ConsultasMedico : ContentPage
 
 
     // =============================================
-    // VERIFICA DIA ÚTIL
+    // DIA ÚTIL
     // =============================================
 
     private bool EhDiaUtil(
@@ -63,7 +86,9 @@ public partial class ConsultasMedico : ContentPage
     {
         return
             data.DayOfWeek !=
-                DayOfWeek.Saturday &&
+                DayOfWeek.Saturday
+
+            &&
 
             data.DayOfWeek !=
                 DayOfWeek.Sunday;
@@ -81,7 +106,8 @@ public partial class ConsultasMedico : ContentPage
             data.Date;
 
 
-        while (!EhDiaUtil(resultado))
+        while (!EhDiaUtil(
+            resultado))
         {
             resultado =
                 resultado.AddDays(1);
@@ -156,17 +182,13 @@ public partial class ConsultasMedico : ContentPage
         Agenda.Clear();
 
 
-        // FIM DE SEMANA NÃO POSSUI AGENDA
-
         if (!EhDiaUtil(data))
         {
-            AgendaCollectionView.ItemsSource =
-                Agenda;
-
-
             return;
         }
 
+
+        // CONSULTAS EXISTENTES DESTA DATA
 
         List<ConsultaMedico>
             consultasDoDia =
@@ -175,32 +197,35 @@ public partial class ConsultasMedico : ContentPage
                         data);
 
 
-        TimeSpan[] horariosAgenda =
-        {
-            new TimeSpan(8, 0, 0),
-            new TimeSpan(9, 0, 0),
-            new TimeSpan(10, 0, 0),
-            new TimeSpan(11, 0, 0),
+        // =========================================
+        // HORÁRIOS DA FONTE COMPARTILHADA
+        // =========================================
+        //
+        // Não existe mais uma grade fixa própria
+        // dentro da tela do Médico.
 
-            new TimeSpan(13, 0, 0),
-            new TimeSpan(14, 0, 0),
-            new TimeSpan(15, 0, 0),
-            new TimeSpan(16, 0, 0)
-        };
+        List<HorarioAgendamentoItem>
+            horariosDoDia =
+                HorarioAgendamentoDados
+                    .ObterHorariosDoDia(
+                        IdMedicoAgendaLocal,
+                        data);
 
 
         foreach (
-            TimeSpan horario
-            in horariosAgenda)
+            HorarioAgendamentoItem horario
+            in horariosDoDia)
         {
             ConsultaMedico? consulta =
                 consultasDoDia
                     .FirstOrDefault(c =>
                         c.Horario ==
-                        horario);
+                            horario.HoraInicio);
 
 
-            // EXISTE CONSULTA
+            // =====================================
+            // CONSULTA
+            // =====================================
 
             if (consulta != null)
             {
@@ -210,8 +235,11 @@ public partial class ConsultasMedico : ContentPage
                         IdConsulta =
                             consulta.Id,
 
+                        IdPaciente =
+                            consulta.IdPaciente,
+
                         Horario =
-                            consulta.HorarioTexto,
+                            horario.HoraTexto,
 
                         Paciente =
                             consulta.Paciente,
@@ -229,12 +257,14 @@ public partial class ConsultasMedico : ContentPage
             }
 
 
-            // VERIFICA BLOQUEIO
+            // =====================================
+            // BLOQUEIO DO MÉDICO
+            // =====================================
 
             BloqueioHorario? bloqueio =
                 EncontrarBloqueio(
                     data,
-                    horario);
+                    horario.HoraInicio);
 
 
             if (bloqueio != null)
@@ -245,9 +275,11 @@ public partial class ConsultasMedico : ContentPage
                         IdConsulta =
                             null,
 
+                        IdPaciente =
+                            null,
+
                         Horario =
-                            horario.ToString(
-                                @"hh\:mm"),
+                            horario.HoraTexto,
 
                         Paciente =
                             "-----------",
@@ -264,7 +296,45 @@ public partial class ConsultasMedico : ContentPage
             }
 
 
-            // HORÁRIO LIVRE
+            // =====================================
+            // HORÁRIO OCUPADO NA FONTE COMPARTILHADA
+            // =====================================
+            //
+            // Por exemplo: um horário que foi reservado
+            // pelo fluxo do Responsável.
+
+            if (!horario.Disponivel)
+            {
+                Agenda.Add(
+                    new ConsultaAgenda
+                    {
+                        IdConsulta =
+                            null,
+
+                        IdPaciente =
+                            null,
+
+                        Horario =
+                            horario.HoraTexto,
+
+                        Paciente =
+                            "-----------",
+
+                        Status =
+                            "Horário ocupado",
+
+                        StatusCor =
+                            Colors.Gray
+                    });
+
+
+                continue;
+            }
+
+
+            // =====================================
+            // HORÁRIO DISPONÍVEL
+            // =====================================
 
             Agenda.Add(
                 new ConsultaAgenda
@@ -272,9 +342,11 @@ public partial class ConsultasMedico : ContentPage
                     IdConsulta =
                         null,
 
+                    IdPaciente =
+                        null,
+
                     Horario =
-                        horario.ToString(
-                            @"hh\:mm"),
+                        horario.HoraTexto,
 
                     Paciente =
                         "-----------",
@@ -286,10 +358,137 @@ public partial class ConsultasMedico : ContentPage
                         Colors.Blue
                 });
         }
+    }
 
 
-        AgendaCollectionView.ItemsSource =
-            Agenda;
+    // =============================================
+    // CONSULTA SELECIONADA
+    // =============================================
+
+    private async void AgendaCollectionView_SelectionChanged(
+        object sender,
+        SelectionChangedEventArgs e)
+    {
+        if (
+            e.CurrentSelection.FirstOrDefault()
+            is not ConsultaAgenda item)
+        {
+            return;
+        }
+
+
+        AgendaCollectionView.SelectedItem =
+            null;
+
+
+        // DISPONÍVEL, OCUPADO OU BLOQUEADO
+
+        if (!item.IdConsulta.HasValue)
+        {
+            return;
+        }
+
+
+        ConsultaMedico? consulta =
+            ConsultasMedicoDados
+                .ObterConsultaPorId(
+                    item.IdConsulta.Value);
+
+
+        if (consulta == null)
+        {
+            await DisplayAlertAsync(
+                "Consulta não encontrada",
+                "Não foi possível localizar os dados desta consulta.",
+                "OK");
+
+
+            return;
+        }
+
+
+        // CANCELADA
+
+        if (
+            consulta.Status.Equals(
+                "Cancelado",
+                StringComparison.OrdinalIgnoreCase)
+
+            ||
+
+            consulta.Status.Equals(
+                "Cancelada",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            await DisplayAlertAsync(
+                "Consulta cancelada",
+                "Não é possível registrar atendimento em uma consulta cancelada.",
+                "OK");
+
+
+            return;
+        }
+
+
+        // REALIZADA
+
+        if (
+            consulta.Status.Equals(
+                "Realizada",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            await DisplayAlertAsync(
+                "Atendimento já realizado",
+                "Esta consulta já possui um atendimento registrado.",
+                "OK");
+
+
+            return;
+        }
+
+
+        // CONSULTA FUTURA
+
+        if (
+            consulta.Data.Date >
+            DateTime.Today)
+        {
+            await DisplayAlertAsync(
+                "Atendimento ainda indisponível",
+                "O atendimento só poderá ser registrado no dia da consulta.",
+                "OK");
+
+
+            return;
+        }
+
+
+        // PACIENTE NÃO VINCULADO
+
+        if (!consulta.IdPaciente.HasValue)
+        {
+            await DisplayAlertAsync(
+                "Paciente não vinculado",
+                "Esta consulta ainda não está vinculada a um paciente cadastrado.",
+                "OK");
+
+
+            return;
+        }
+
+
+        // REGISTRAR ATENDIMENTO
+
+        await Shell.Current.GoToAsync(
+            nameof(RegistrarAtendimento),
+
+            new Dictionary<string, object>
+            {
+                {
+                    "IdConsulta",
+                    consulta.Id.ToString()
+                }
+            });
     }
 
 
@@ -326,6 +525,9 @@ public partial class ConsultasMedico : ContentPage
             "Horário disponível" =>
                 Colors.Blue,
 
+            "Horário ocupado" =>
+                Colors.Gray,
+
             "Horário bloqueado" =>
                 Colors.Red,
 
@@ -336,7 +538,7 @@ public partial class ConsultasMedico : ContentPage
 
 
     // =============================================
-    // LOCALIZA BLOQUEIOS
+    // BLOQUEIOS
     // =============================================
 
     private BloqueioHorario? EncontrarBloqueio(
@@ -349,7 +551,9 @@ public partial class ConsultasMedico : ContentPage
         {
             bool dataDentroDoBloqueio =
                 data.Date >=
-                    bloqueio.DataInicial.Date &&
+                    bloqueio.DataInicial.Date
+
+                &&
 
                 data.Date <=
                     bloqueio.DataFinal.Date;
@@ -361,7 +565,9 @@ public partial class ConsultasMedico : ContentPage
 
             bool horarioDentroDoBloqueio =
                 horario >=
-                    bloqueio.HorarioInicial &&
+                    bloqueio.HorarioInicial
+
+                &&
 
                 horario <
                     bloqueio.HorarioFinal;
@@ -431,6 +637,13 @@ public class ConsultaAgenda
     }
 
 
+    public int? IdPaciente
+    {
+        get;
+        set;
+    }
+
+
     public string Horario
     {
         get;
@@ -456,5 +669,6 @@ public class ConsultaAgenda
     {
         get;
         set;
-    } = Colors.Black;
+    } =
+        Colors.Black;
 }

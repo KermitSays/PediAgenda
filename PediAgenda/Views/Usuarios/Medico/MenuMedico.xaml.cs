@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using PediAgenda.Dados;
 
 namespace PediAgenda.Views.Usuarios.Medico;
 
@@ -27,10 +28,32 @@ public partial class MenuMedico : ContentPage
         base.OnAppearing();
 
 
+        AtualizarSaudacao();
+
+
         AtualizarData();
 
 
         CarregarConsultasHoje();
+    }
+
+
+    // =============================================
+    // SAUDAÇÃO
+    // =============================================
+
+    private void AtualizarSaudacao()
+    {
+        string nome =
+            SessaoUsuario.PrimeiroNome;
+
+
+        SaudacaoLabel.Text =
+            string.IsNullOrWhiteSpace(nome)
+
+                ? "Olá, Dr(a).!"
+
+                : $"Olá, Dr(a). {nome}!";
     }
 
 
@@ -96,7 +119,7 @@ public partial class MenuMedico : ContentPage
             !temConsultas;
     }
 
-
+ 
     // =============================================
     // PACIENTES
     // =============================================
@@ -138,7 +161,7 @@ public partial class MenuMedico : ContentPage
 
 
 // =============================================
-// MODELO VISUAL DO RESUMO
+// MODELO VISUAL
 // =============================================
 
 public class ConsultaHoje

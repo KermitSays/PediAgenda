@@ -2,17 +2,19 @@
 
 public class ConsultaMedico
 {
-    public Guid Id { get; } =
-        Guid.NewGuid();
+    public Guid Id
+    {
+        get;
+    } = Guid.NewGuid();
 
 
     // ID DO PACIENTE
     //
     // É nullable porque ainda existem alguns dados temporários
-    // que não estão vinculados aos pacientes cadastrados em MedicoDados.
+    // que não estão vinculados aos pacientes cadastrados.
     //
     // Quando a API estiver integrada, este campo será preenchido
-    // com o id real vindo do banco.
+    // com o ID real vindo do banco.
 
     public int? IdPaciente
     {
@@ -42,6 +44,13 @@ public class ConsultaMedico
     } = string.Empty;
 
 
+    public string TipoConsulta
+    {
+        get;
+        set;
+    } = "Consulta pediátrica";
+
+
     public string Status
     {
         get;
@@ -62,8 +71,6 @@ public class ConsultaMedico
         set;
     }
 
-
-    // TEXTO DO HORÁRIO
 
     public string HorarioTexto =>
         Horario.ToString(

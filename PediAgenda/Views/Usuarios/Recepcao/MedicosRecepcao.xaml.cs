@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using PediAgenda.Views.Usuarios.Medico;
+using PediAgenda.Views.Usuarios.Responsavel;
 
 namespace PediAgenda.Views.Usuarios.Recepcao;
 
@@ -62,7 +64,9 @@ public partial class MedicosRecepcao : ContentPage
     {
         return
             data.DayOfWeek !=
-                DayOfWeek.Saturday &&
+                DayOfWeek.Saturday
+
+            &&
 
             data.DayOfWeek !=
                 DayOfWeek.Sunday;
@@ -80,7 +84,8 @@ public partial class MedicosRecepcao : ContentPage
             data.Date;
 
 
-        while (!EhDiaUtil(resultado))
+        while (!EhDiaUtil(
+            resultado))
         {
             resultado =
                 resultado.AddDays(1);
@@ -102,14 +107,17 @@ public partial class MedicosRecepcao : ContentPage
 
         foreach (
             string medico
-            in AgendaMedicaRecepcaoDados.Medicos)
+            in AgendaMedicaRecepcaoDados
+                .MedicosCompartilhados)
         {
             MedicoPicker.Items.Add(
                 medico);
         }
 
 
-        if (MedicoPicker.Items.Count > 0)
+        if (
+            MedicoPicker.Items.Count >
+            0)
         {
             MedicoPicker.SelectedIndex =
                 0;
@@ -194,8 +202,6 @@ public partial class MedicosRecepcao : ContentPage
         HorariosFiltrados.Clear();
 
 
-        // FINAL DE SEMANA NÃO TEM AGENDA
-
         if (!EhDiaUtil(
             dataSelecionada))
         {
@@ -207,17 +213,16 @@ public partial class MedicosRecepcao : ContentPage
         }
 
 
-        var horarios =
-            AgendaMedicaRecepcaoDados.Horarios
-                .Where(h =>
-                    h.Medico ==
-                        medicoSelecionado &&
+        // =========================================
+        // FONTE COMPARTILHADA
+        // =========================================
 
-                    h.Data.Date ==
-                        dataSelecionada.Date)
-                .OrderBy(h =>
-                    h.Horario)
-                .ToList();
+        List<HorarioAgendaRecepcao>
+            horarios =
+                AgendaMedicaRecepcaoDados
+                    .ObterHorariosCompartilhados(
+                        medicoSelecionado,
+                        dataSelecionada);
 
 
         foreach (
@@ -243,17 +248,16 @@ public partial class MedicosRecepcao : ContentPage
         EventArgs e)
     {
         if (
-            sender is not Button botao ||
+            sender is not Button botao
+
+            ||
 
             botao.CommandParameter
-            is not HorarioAgendaRecepcao horario)
+                is not HorarioAgendaRecepcao horario)
         {
             return;
         }
 
-
-        // SEGURANÇA EXTRA:
-        // nunca permite ação em final de semana.
 
         if (!EhDiaUtil(
             horario.Data))
@@ -268,9 +272,13 @@ public partial class MedicosRecepcao : ContentPage
         }
 
 
+        // =========================================
+        // DISPONÍVEL
+        // =========================================
+
         if (
             horario.Status ==
-            "Disponível")
+                "Disponível")
         {
             await DisplayAlertAsync(
                 "Agendar consulta",
@@ -281,7 +289,8 @@ public partial class MedicosRecepcao : ContentPage
                 $"Médico: {horario.Medico}\n" +
                 $"Data: {horario.Data:dd/MM/yyyy}\n\n" +
 
-                "O fluxo de agendamento será conectado em seguida.",
+                "O agendamento da Recepção será conectado " +
+                "à fonte compartilhada na próxima etapa.",
 
                 "OK");
 
@@ -290,32 +299,80 @@ public partial class MedicosRecepcao : ContentPage
         }
 
 
+        // =========================================
+        // AGENDADO
+        // =========================================
+
         if (
             horario.Status ==
-            "Agendado")
+                "Agendado")
         {
-            await Shell.Current.GoToAsync(
-                $"{nameof(DetalhesConsultaRecepcao)}" +
-                $"?HorarioId={horario.Id}");
+            await DisplayAlertAsync(
+                "Horário ocupado",
+
+                string.IsNullOrWhiteSpace(
+                    horario.Paciente)
+
+                    ? "Este horário já está ocupado."
+                    : $"Paciente: {horario.Paciente}",
+
+                "OK");
 
 
             return;
         }
 
 
+        // =========================================
+        // BLOQUEADO
+        // =========================================
+
         if (
             horario.Status ==
-            "Bloqueado")
+                "Bloqueado")
         {
+            BloqueioHorario? bloqueio =
+                AgendaMedicaRecepcaoDados
+                    .ObterBloqueioCompartilhado(
+                        horario.Medico,
+                        horario.Data,
+                        horario.Horario);
+
+
+            if (bloqueio == null)
+            {
+                await DisplayAlertAsync(
+                    "Horário bloqueado",
+                    "Este horário está indisponível.",
+                    "OK");
+
+
+                return;
+            }
+
+
+            string periodo =
+                bloqueio.DataInicial.Date ==
+                bloqueio.DataFinal.Date
+
+                    ? $"{bloqueio.DataInicial:dd/MM/yyyy} • " +
+                      $"{bloqueio.HorarioInicial:hh\\:mm} às " +
+                      $"{bloqueio.HorarioFinal:hh\\:mm}"
+
+                    : $"{bloqueio.DataInicial:dd/MM/yyyy} até " +
+                      $"{bloqueio.DataFinal:dd/MM/yyyy} • " +
+                      $"{bloqueio.HorarioInicial:hh\\:mm} às " +
+                      $"{bloqueio.HorarioFinal:hh\\:mm}";
+
+
             bool confirmar =
                 await DisplayAlertAsync(
-                    "Liberar horário",
+                    "Liberar bloqueio",
 
-                    $"Deseja liberar o horário das " +
-                    $"{horario.HorarioFormatado}?\n\n" +
-
-                    $"Motivo do bloqueio: " +
-                    $"{horario.MotivoBloqueio}",
+                    $"Este horário faz parte do bloqueio:\n\n" +
+                    $"{periodo}\n\n" +
+                    $"Motivo: {bloqueio.Motivo}\n\n" +
+                    "Deseja liberar todo este período?",
 
                     "LIBERAR",
                     "CANCELAR");
@@ -325,20 +382,24 @@ public partial class MedicosRecepcao : ContentPage
                 return;
 
 
-            horario.Status =
-                "Disponível";
+            // LIBERA A MESMA FONTE USADA PELO MÉDICO
+
+            HorarioAgendamentoDados
+                .LiberarBloqueio(
+                    bloqueio.Id);
 
 
-            horario.MotivoBloqueio =
-                string.Empty;
+            BloqueiosMedico.Bloqueios
+                .Remove(
+                    bloqueio);
 
 
             CarregarAgenda();
 
 
             await DisplayAlertAsync(
-                "Horário liberado",
-                "O horário foi liberado com sucesso.",
+                "Período liberado",
+                "O bloqueio foi liberado com sucesso.",
                 "OK");
         }
     }

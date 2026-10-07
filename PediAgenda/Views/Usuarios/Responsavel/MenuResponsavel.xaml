@@ -21,7 +21,8 @@
                 Spacing="4">
 
                 <Label
-                    Text="Olá, Usuário!"
+                    x:Name="SaudacaoLabel"
+                    Text="Olá!"
                     FontFamily="Poppins"
                     FontSize="32"
                     FontAttributes="Bold"

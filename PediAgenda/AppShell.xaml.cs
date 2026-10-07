@@ -98,6 +98,14 @@ public partial class AppShell : Shell
             typeof(Views.Usuarios.Medico.DetalhesProntuario));
 
         Routing.RegisterRoute(
+            nameof(Views.Usuarios.Medico.DetalhesProntuario),
+            typeof(Views.Usuarios.Medico.DetalhesProntuario));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Medico.RegistrarAtendimento),
+            typeof(Views.Usuarios.Medico.RegistrarAtendimento));
+
+        Routing.RegisterRoute(
             nameof(Views.Usuarios.Medico.ConsultasMedico),
             typeof(Views.Usuarios.Medico.ConsultasMedico));
 
@@ -117,15 +125,11 @@ public partial class AppShell : Shell
             nameof(Views.Usuarios.Medico.RelatoriosMedico),
             typeof(Views.Usuarios.Medico.RelatoriosMedico));
 
+        
         //ROTAS RECEPÇÃO
         Routing.RegisterRoute(
             nameof(Views.Usuarios.Recepcao.MenuRecepcao),
             typeof(Views.Usuarios.Recepcao.MenuRecepcao));
-
-        // NOVA ROTA: CONSULTAS DE HOJE
-        Routing.RegisterRoute(
-            nameof(Views.Usuarios.Recepcao.ConsultasHojeRecepcao),
-            typeof(Views.Usuarios.Recepcao.ConsultasHojeRecepcao));
 
         Routing.RegisterRoute(
             nameof(Views.Usuarios.Recepcao.PacientesRecepcao),

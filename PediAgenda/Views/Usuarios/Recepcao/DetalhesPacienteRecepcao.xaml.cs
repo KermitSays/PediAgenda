@@ -7,21 +7,35 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 {
     private int _pacienteId;
 
-    private PacienteRecepcaoItem? _paciente;
+
+    private PacienteRecepcaoItem?
+        _paciente;
+
+
+    private ConsultaPacienteRecepcaoItem?
+        _proximaConsulta;
 
 
     public ObservableCollection<ConsultaPacienteRecepcaoItem>
         ConsultasPaciente
-    { get; set; } = new();
+    {
+        get;
+        set;
+    } = new();
 
 
     public string PacienteId
     {
         set
         {
-            if (int.TryParse(value, out int id))
+            if (
+                int.TryParse(
+                    value,
+                    out int id))
             {
-                _pacienteId = id;
+                _pacienteId =
+                    id;
+
 
                 CarregarPaciente();
             }
@@ -33,13 +47,16 @@ public partial class DetalhesPacienteRecepcao : ContentPage
     {
         InitializeComponent();
 
-        BindingContext = this;
+
+        BindingContext =
+            this;
     }
 
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
+
 
         if (_pacienteId != 0)
         {
@@ -48,11 +65,17 @@ public partial class DetalhesPacienteRecepcao : ContentPage
     }
 
 
+    // =============================================
+    // CARREGA PACIENTE
+    // =============================================
+
     private void CarregarPaciente()
     {
         _paciente =
             PacientesRecepcaoDados.Pacientes
-                .FirstOrDefault(p => p.Id == _pacienteId);
+                .FirstOrDefault(p =>
+                    p.Id ==
+                    _pacienteId);
 
 
         if (_paciente == null)
@@ -64,7 +87,8 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 
 
         NascimentoLabel.Text =
-            $"Nascimento: {_paciente.DataNascimento:dd/MM/yyyy}";
+            $"Nascimento: " +
+            $"{_paciente.DataNascimento:dd/MM/yyyy}";
 
 
         StatusPacienteLabel.Text =
@@ -76,22 +100,32 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 
 
         TelefoneLabel.Text =
-            $"Telefone: {_paciente.TelefoneResponsavel}";
+            $"Telefone: " +
+            $"{_paciente.TelefoneResponsavel}";
 
 
         EmailLabel.Text =
-            $"E-mail: {_paciente.EmailResponsavel}";
+            $"E-mail: " +
+            $"{_paciente.EmailResponsavel}";
 
+
+        // =========================================
+        // HISTÓRICO
+        // =========================================
 
         ConsultasPaciente.Clear();
 
 
-        foreach (var consulta in
-                 _paciente.Consultas
-                     .OrderByDescending(c => c.Data)
-                     .ThenByDescending(c => c.Horario))
+        foreach (
+            ConsultaPacienteRecepcaoItem consulta
+            in _paciente.Consultas
+                .OrderByDescending(c =>
+                    c.Data)
+                .ThenByDescending(c =>
+                    c.Horario))
         {
-            ConsultasPaciente.Add(consulta);
+            ConsultasPaciente.Add(
+                consulta);
         }
 
 
@@ -103,79 +137,161 @@ public partial class DetalhesPacienteRecepcao : ContentPage
     }
 
 
+    // =============================================
+    // PRÓXIMA CONSULTA
+    // =============================================
+
     private void CarregarProximaConsulta()
     {
         if (_paciente == null)
             return;
 
 
-        var proxima =
+        _proximaConsulta =
             _paciente.Consultas
                 .Where(c =>
-                    c.Data.Date >= DateTime.Today &&
-                    c.Status != "Cancelado" &&
-                    c.Status != "Realizado")
-                .OrderBy(c => c.Data)
-                .ThenBy(c => c.Horario)
+                    c.Data.Date >=
+                        DateTime.Today
+
+                    &&
+
+                    !c.Status.Equals(
+                        "Cancelado",
+                        StringComparison.OrdinalIgnoreCase)
+
+                    &&
+
+                    !c.Status.Equals(
+                        "Cancelada",
+                        StringComparison.OrdinalIgnoreCase)
+
+                    &&
+
+                    !c.Status.Equals(
+                        "Realizado",
+                        StringComparison.OrdinalIgnoreCase)
+
+                    &&
+
+                    !c.Status.Equals(
+                        "Realizada",
+                        StringComparison.OrdinalIgnoreCase))
+                .OrderBy(c =>
+                    c.Data)
+                .ThenBy(c =>
+                    c.Horario)
                 .FirstOrDefault();
 
 
-        if (proxima == null)
+        if (_proximaConsulta == null)
         {
-            ProximaConsultaCard.IsVisible = false;
+            ProximaConsultaCard.IsVisible =
+                false;
 
-            SemProximaConsultaLabel.IsVisible = true;
+
+            SemProximaConsultaLabel.IsVisible =
+                true;
+
 
             return;
         }
 
 
-        ProximaConsultaCard.IsVisible = true;
+        ProximaConsultaCard.IsVisible =
+            true;
 
-        SemProximaConsultaLabel.IsVisible = false;
+
+        SemProximaConsultaLabel.IsVisible =
+            false;
 
 
         ProximaConsultaDataLabel.Text =
-            proxima.DataHoraFormatada;
+            _proximaConsulta
+                .DataHoraFormatada;
 
 
         ProximaConsultaMedicoLabel.Text =
-            proxima.Medico;
+            _proximaConsulta
+                .Medico;
 
 
         ProximaConsultaEspecialidadeLabel.Text =
-            $"{proxima.Especialidade} • {proxima.TipoAtendimento}";
+            $"{_proximaConsulta.Especialidade} • " +
+            $"{_proximaConsulta.TipoAtendimento}";
 
 
         ProximaConsultaStatusLabel.Text =
-            $"Status: {proxima.Status}";
+            $"Status: " +
+            $"{_proximaConsulta.Status}";
     }
 
 
-    // ACESSAR CONSULTA PELO HISTÓRICO
+    // =============================================
+    // TOQUE NA PRÓXIMA CONSULTA
+    // =============================================
+
+    private async void ProximaConsulta_Tapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        if (_proximaConsulta == null)
+            return;
+
+
+        await AbrirConsultaAsync(
+            _proximaConsulta);
+    }
+
+
+    // =============================================
+    // TOQUE NO HISTÓRICO
+    // =============================================
+
     private async void ConsultaHistorico_Tapped(
         object sender,
         TappedEventArgs e)
     {
-        if (sender is not TapGestureRecognizer gesto ||
-            gesto.CommandParameter is not ConsultaPacienteRecepcaoItem consulta)
+        if (
+            sender
+                is not TapGestureRecognizer gesto
+
+            ||
+
+            gesto.CommandParameter
+                is not ConsultaPacienteRecepcaoItem consulta)
         {
             return;
         }
 
 
-        // Consultas antigas ou canceladas não possuem mais
-        // um horário ativo na agenda médica.
+        await AbrirConsultaAsync(
+            consulta);
+    }
+
+
+    // =============================================
+    // ABRE CONSULTA
+    // =============================================
+
+    private async Task AbrirConsultaAsync(
+        ConsultaPacienteRecepcaoItem consulta)
+    {
+        // Consultas antigas ou canceladas
+        // podem não possuir horário ativo.
+
         if (!consulta.HorarioId.HasValue)
         {
             await DisplayAlertAsync(
                 "Consulta do histórico",
+
                 $"Médico: {consulta.Medico}\n" +
                 $"Data: {consulta.Data:dd/MM/yyyy}\n" +
                 $"Horário: {consulta.Horario:hh\\:mm}\n" +
                 $"Status: {consulta.Status}\n\n" +
                 "Esta consulta não possui um horário ativo na agenda.",
+
                 "OK");
+
 
             return;
         }
@@ -187,10 +303,13 @@ public partial class DetalhesPacienteRecepcao : ContentPage
     }
 
 
+    // =============================================
     // AGENDAR NOVA CONSULTA
+    // =============================================
+
     private async void AgendarConsultaButton_Clicked(
-    object sender,
-    EventArgs e)
+        object sender,
+        EventArgs e)
     {
         if (_paciente == null)
             return;
@@ -202,11 +321,15 @@ public partial class DetalhesPacienteRecepcao : ContentPage
     }
 
 
+    // =============================================
     // VOLTAR
+    // =============================================
+
     private async void VoltarButton_Clicked(
         object sender,
         EventArgs e)
     {
-        await Shell.Current.GoToAsync("..");
+        await Shell.Current.GoToAsync(
+            "..");
     }
 }

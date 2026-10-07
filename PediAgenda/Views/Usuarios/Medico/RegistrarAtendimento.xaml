@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Medico.RegistrarAtendimento"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Registrar Atendimento"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="24,30,24,30"
+            Spacing="18">
+
+            <!-- TÍTULO -->
+
+            <VerticalStackLayout
+                Spacing="4">
+
+                <Label
+                    Text="Registrar atendimento"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    Text="Registre as informações referentes à consulta realizada."
+                    FontSize="14"
+                    TextColor="{StaticResource InputPlaceholder}" />
+
+            </VerticalStackLayout>
+
+
+            <!-- DADOS DA CONSULTA -->
+
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="18"
+                StrokeShape="RoundRectangle 16">
+
+                <VerticalStackLayout
+                    Spacing="14">
+
+                    <Label
+                        Text="Dados da consulta"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+
+                    <Grid
+                        RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                        ColumnDefinitions="Auto,*"
+                        RowSpacing="10"
+                        ColumnSpacing="10">
+
+                        <!-- PACIENTE -->
+
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Text="Paciente:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="PacienteLabel"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Text="-"
+                            TextColor="{StaticResource TextDark}" />
+
+
+                        <!-- RESPONSÁVEL -->
+
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Text="Responsável:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="ResponsavelLabel"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Text="-"
+                            TextColor="{StaticResource TextDark}" />
+
+
+                        <!-- DATA -->
+
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Text="Data:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="DataLabel"
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Text="-"
+                            TextColor="{StaticResource TextDark}" />
+
+
+                        <!-- HORÁRIO -->
+
+                        <Label
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Text="Horário:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="HorarioLabel"
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Text="-"
+                            TextColor="{StaticResource TextDark}" />
+
+
+                        <!-- TIPO -->
+
+                        <Label
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            Text="Tipo:"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="TipoConsultaLabel"
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Text="-"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </Grid>
+
+                </VerticalStackLayout>
+
+            </Border>
+
+
+            <!-- OBSERVAÇÕES -->
+
+            <VerticalStackLayout
+                Spacing="8">
+
+                <Label
+                    Text="Observações do atendimento"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Border
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 16">
+
+                    <Editor
+                        x:Name="ObservacoesEditor"
+                        Placeholder="Digite as observações registradas durante o atendimento..."
+                        PlaceholderColor="{StaticResource InputPlaceholder}"
+                        TextColor="{StaticResource TextDark}"
+                        AutoSize="TextChanges"
+                        MinimumHeightRequest="160" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+
+            <!-- AVISO -->
+
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="14"
+                StrokeShape="RoundRectangle 14">
+
+                <Label
+                    Text="Ao finalizar, a consulta será marcada como realizada e este registro será adicionado ao prontuário do paciente."
+                    FontSize="13"
+                    TextColor="{StaticResource InputPlaceholder}"
+                    LineBreakMode="WordWrap" />
+
+            </Border>
+
+
+            <!-- FINALIZAR -->
+
+            <Button
+                x:Name="FinalizarAtendimentoButton"
+                Text="FINALIZAR ATENDIMENTO"
+                HeightRequest="52"
+                CornerRadius="16"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                IsEnabled="False"
+                Clicked="FinalizarAtendimentoButton_Clicked" />
+
+
+            <!-- VOLTAR -->
+
+            <Button
+                Text="← Voltar"
+                BackgroundColor="Transparent"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                FontSize="16"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

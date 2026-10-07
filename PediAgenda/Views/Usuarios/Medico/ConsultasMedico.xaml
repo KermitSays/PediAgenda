@@ -9,11 +9,12 @@
     BackgroundColor="{StaticResource PageBlue}">
 
     <Grid
-        RowDefinitions="Auto,Auto,*"
+        RowDefinitions="Auto,Auto,Auto,*,Auto"
         Padding="24,30,24,20"
-        RowSpacing="18">
+        RowSpacing="16">
 
         <!-- TÍTULO -->
+
         <Label
             Grid.Row="0"
             Text="Consultas"
@@ -21,7 +22,9 @@
             FontAttributes="Bold"
             TextColor="{StaticResource TextDark}" />
 
-        <!-- SELEÇÃO DA DATA -->
+
+        <!-- DATA -->
+
         <Border
             Grid.Row="1"
             BackgroundColor="{StaticResource White}"
@@ -47,141 +50,186 @@
                     FontSize="16"
                     TextColor="{StaticResource TextDark}"
                     MinimumDate="{x:Static sys:DateTime.Today}" />
+
             </Grid>
+
         </Border>
 
+
+        <!-- CABEÇALHO DA AGENDA -->
+
+        <VerticalStackLayout
+            Grid.Row="2"
+            Spacing="3">
+
+            <Label
+                Text="Agenda do dia"
+                FontSize="20"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                Text="Toque em uma consulta para registrar o atendimento."
+                FontSize="13"
+                TextColor="{StaticResource InputPlaceholder}" />
+
+        </VerticalStackLayout>
+
+
         <!-- AGENDA -->
-        <ScrollView Grid.Row="2">
 
-            <VerticalStackLayout Spacing="16">
+        <CollectionView
+            Grid.Row="3"
+            x:Name="AgendaCollectionView"
+            SelectionMode="Single"
+            SelectionChanged="AgendaCollectionView_SelectionChanged">
 
-                <Label
-                    Text="Agenda do dia"
-                    FontSize="20"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}" />
+            <CollectionView.ItemsLayout>
 
-                <CollectionView
-                    x:Name="AgendaCollectionView"
-                    SelectionMode="None">
+                <LinearItemsLayout
+                    Orientation="Vertical"
+                    ItemSpacing="10" />
 
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout
-                            Orientation="Vertical"
-                            ItemSpacing="10" />
-                    </CollectionView.ItemsLayout>
+            </CollectionView.ItemsLayout>
 
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
 
-                            <Border
-                                BackgroundColor="{StaticResource White}"
-                                Stroke="{StaticResource InputBlue}"
-                                StrokeThickness="1"
-                                StrokeShape="RoundRectangle 16"
-                                Padding="14">
+            <CollectionView.ItemTemplate>
 
-                                <Grid
-                                    ColumnDefinitions="65,*,Auto"
-                                    ColumnSpacing="12">
+                <DataTemplate>
 
-                                    <!-- HORÁRIO -->
-                                    <Label
-                                        Grid.Column="0"
-                                        Text="{Binding Horario}"
-                                        FontSize="18"
-                                        FontAttributes="Bold"
-                                        TextColor="{StaticResource TextDark}"
-                                        VerticalOptions="Center"
-                                        HorizontalOptions="Center" />
+                    <Border
+                        BackgroundColor="{StaticResource White}"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="14">
 
-                                    <!-- PACIENTE -->
-                                    <VerticalStackLayout
-                                        Grid.Column="1"
-                                        Spacing="3"
-                                        VerticalOptions="Center">
+                        <Grid
+                            ColumnDefinitions="65,*,Auto"
+                            ColumnSpacing="12">
 
-                                        <Label
-                                            Text="{Binding Paciente}"
-                                            FontSize="16"
-                                            FontAttributes="Bold"
-                                            TextColor="{StaticResource TextDark}" />
 
-                                        <Label
-                                            Text="{Binding Status}"
-                                            FontSize="14"
-                                            TextColor="{Binding StatusCor}" />
-                                    </VerticalStackLayout>
-
-                                    <!-- STATUS -->
-                                    <Label
-                                        Grid.Column="2"
-                                        Text="{Binding Status}"
-                                        FontSize="13"
-                                        FontAttributes="Bold"
-                                        TextColor="{Binding StatusCor}"
-                                        VerticalOptions="Center"
-                                        HorizontalTextAlignment="End" />
-
-                                </Grid>
-
-                            </Border>
-
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-
-                    <CollectionView.EmptyView>
-                        <VerticalStackLayout
-                            Padding="20"
-                            Spacing="8">
+                            <!-- HORÁRIO -->
 
                             <Label
-                                Text="Nenhum horário encontrado."
-                                FontSize="16"
-                                HorizontalTextAlignment="Center"
-                                TextColor="{StaticResource TextDark}" />
+                                Grid.Column="0"
+                                Text="{Binding Horario}"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center" />
 
-                        </VerticalStackLayout>
-                    </CollectionView.EmptyView>
 
-                </CollectionView>
+                            <!-- PACIENTE -->
 
-                <!-- BLOQUEAR HORÁRIO -->
-                <Button
-                    Text="BLOQUEAR HORÁRIO"
-                    HeightRequest="52"
-                    CornerRadius="16"
-                    BackgroundColor="{StaticResource PrimaryBlue}"
-                    TextColor="{StaticResource White}"
-                    FontAttributes="Bold"
-                    Clicked="BloquearHorarioButton_Clicked" />
+                            <VerticalStackLayout
+                                Grid.Column="1"
+                                Spacing="3"
+                                VerticalOptions="Center">
 
-                <!-- LIBERAR HORÁRIOS -->
-                <Button
-                    Text="LIBERAR HORÁRIOS"
-                    HeightRequest="52"
-                    CornerRadius="16"
-                    BackgroundColor="{StaticResource White}"
-                    TextColor="{StaticResource PrimaryBlue}"
-                    BorderColor="{StaticResource PrimaryBlue}"
-                    BorderWidth="1"
-                    FontAttributes="Bold"
-                    Clicked="LiberarHorariosButton_Clicked" />
+                                <Label
+                                    Text="{Binding Paciente}"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource TextDark}" />
 
-                <!-- VOLTAR -->
-                <Button
-                    Text="Voltar"
-                    HeightRequest="50"
-                    CornerRadius="16"
-                    BackgroundColor="{StaticResource White}"
-                    TextColor="{StaticResource PrimaryBlue}"
-                    BorderColor="{StaticResource PrimaryBlue}"
-                    BorderWidth="1"
-                    Clicked="VoltarButton_Clicked" />
+                                <Label
+                                    Text="{Binding Status}"
+                                    FontSize="14"
+                                    TextColor="{Binding StatusCor}" />
 
-            </VerticalStackLayout>
+                            </VerticalStackLayout>
 
-        </ScrollView>
+
+                            <!-- INDICAÇÃO -->
+
+                            <VerticalStackLayout
+                                Grid.Column="2"
+                                VerticalOptions="Center"
+                                HorizontalOptions="End"
+                                Spacing="2">
+
+                                <Label
+                                    Text="{Binding Status}"
+                                    FontSize="12"
+                                    FontAttributes="Bold"
+                                    TextColor="{Binding StatusCor}"
+                                    HorizontalTextAlignment="End" />
+
+                                <Label
+                                    Text="›"
+                                    FontSize="24"
+                                    TextColor="{StaticResource PrimaryBlue}"
+                                    HorizontalTextAlignment="End" />
+
+                            </VerticalStackLayout>
+
+                        </Grid>
+
+                    </Border>
+
+                </DataTemplate>
+
+            </CollectionView.ItemTemplate>
+
+
+            <CollectionView.EmptyView>
+
+                <VerticalStackLayout
+                    Padding="20"
+                    Spacing="8">
+
+                    <Label
+                        Text="Nenhum horário encontrado."
+                        FontSize="16"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource TextDark}" />
+
+                </VerticalStackLayout>
+
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+
+
+        <!-- BOTÕES -->
+
+        <VerticalStackLayout
+            Grid.Row="4"
+            Spacing="10">
+
+            <Button
+                Text="BLOQUEAR HORÁRIO"
+                HeightRequest="50"
+                CornerRadius="16"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="BloquearHorarioButton_Clicked" />
+
+            <Button
+                Text="LIBERAR HORÁRIOS"
+                HeightRequest="50"
+                CornerRadius="16"
+                BackgroundColor="{StaticResource White}"
+                TextColor="{StaticResource PrimaryBlue}"
+                BorderColor="{StaticResource PrimaryBlue}"
+                BorderWidth="1"
+                FontAttributes="Bold"
+                Clicked="LiberarHorariosButton_Clicked" />
+
+            <Button
+                Text="Voltar"
+                HeightRequest="48"
+                CornerRadius="16"
+                BackgroundColor="{StaticResource White}"
+                TextColor="{StaticResource PrimaryBlue}"
+                BorderColor="{StaticResource PrimaryBlue}"
+                BorderWidth="1"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
 
     </Grid>
 

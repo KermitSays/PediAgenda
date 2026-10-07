@@ -6,12 +6,15 @@ public static class MedicoDados
 {
     public static ObservableCollection<PacienteMedicoItem>
         Pacientes
-    { get; } =
+    {
+        get;
+    } =
         new()
         {
             new PacienteMedicoItem
             {
-                IdPaciente = 1,
+                IdPaciente =
+                    1,
 
                 Nome =
                     "João da Silva",
@@ -33,7 +36,11 @@ public static class MedicoDados
                     {
                         new ConsultaHistoricoMedicoItem
                         {
-                            IdHistorico = 1,
+                            IdHistorico =
+                                1,
+
+                            IdConsulta =
+                                null,
 
                             TipoConsulta =
                                 "Consulta pediátrica",
@@ -51,9 +58,14 @@ public static class MedicoDados
                                 "Orientações registradas conforme avaliação médica."
                         },
 
+
                         new ConsultaHistoricoMedicoItem
                         {
-                            IdHistorico = 2,
+                            IdHistorico =
+                                2,
+
+                            IdConsulta =
+                                null,
 
                             TipoConsulta =
                                 "Consulta pediátrica",
@@ -75,7 +87,8 @@ public static class MedicoDados
 
             new PacienteMedicoItem
             {
-                IdPaciente = 2,
+                IdPaciente =
+                    2,
 
                 Nome =
                     "Maria Alice",
@@ -97,7 +110,11 @@ public static class MedicoDados
                     {
                         new ConsultaHistoricoMedicoItem
                         {
-                            IdHistorico = 3,
+                            IdHistorico =
+                                3,
+
+                            IdConsulta =
+                                null,
 
                             TipoConsulta =
                                 "Consulta pediátrica",
@@ -119,7 +136,8 @@ public static class MedicoDados
 
             new PacienteMedicoItem
             {
-                IdPaciente = 3,
+                IdPaciente =
+                    3,
 
                 Nome =
                     "Renata Oliveira",
@@ -142,6 +160,10 @@ public static class MedicoDados
         };
 
 
+    // =============================================
+    // PACIENTE POR ID
+    // =============================================
+
     public static PacienteMedicoItem?
         ObterPacientePorId(
             int idPaciente)
@@ -152,6 +174,10 @@ public static class MedicoDados
                 idPaciente);
     }
 
+
+    // =============================================
+    // HISTÓRICO POR ID
+    // =============================================
 
     public static ConsultaHistoricoMedicoItem?
         ObterHistoricoPorId(
@@ -165,6 +191,27 @@ public static class MedicoDados
                 idHistorico);
     }
 
+
+    // =============================================
+    // HISTÓRICO POR CONSULTA
+    // =============================================
+
+    public static ConsultaHistoricoMedicoItem?
+        ObterHistoricoPorConsulta(
+            Guid idConsulta)
+    {
+        return Pacientes
+            .SelectMany(p =>
+                p.Historico)
+            .FirstOrDefault(h =>
+                h.IdConsulta ==
+                idConsulta);
+    }
+
+
+    // =============================================
+    // PRÓXIMO ID DO HISTÓRICO
+    // =============================================
 
     public static int ProximoIdHistorico()
     {
@@ -180,17 +227,31 @@ public static class MedicoDados
 }
 
 
+// =============================================
+// PACIENTE
+// =============================================
+
 public class PacienteMedicoItem
 {
-    public int IdPaciente { get; set; }
+    public int IdPaciente
+    {
+        get;
+        set;
+    }
 
 
-    public string Nome { get; set; } =
-        string.Empty;
+    public string Nome
+    {
+        get;
+        set;
+    } = string.Empty;
 
 
-    public string Foto { get; set; } =
-        string.Empty;
+    public string Foto
+    {
+        get;
+        set;
+    } = string.Empty;
 
 
     public DateTime DataNascimento
@@ -200,18 +261,25 @@ public class PacienteMedicoItem
     }
 
 
-    public string Responsavel { get; set; } =
-        string.Empty;
+    public string Responsavel
+    {
+        get;
+        set;
+    } = string.Empty;
 
 
     public ObservableCollection<ConsultaHistoricoMedicoItem>
         Historico
-    { get; set; } =
-            new();
+    {
+        get;
+        set;
+    } =
+        new();
 
 
     public bool PrimeiraConsulta =>
-        Historico.Count == 0;
+        Historico.Count ==
+        0;
 
 
     public DateTime? UltimaConsulta =>
@@ -227,10 +295,13 @@ public class PacienteMedicoItem
     {
         get
         {
-            if (PrimeiraConsulta ||
+            if (
+                PrimeiraConsulta ||
+
                 !UltimaConsulta.HasValue)
             {
-                return "Primeira consulta";
+                return
+                    "Primeira consulta";
             }
 
 
@@ -242,20 +313,51 @@ public class PacienteMedicoItem
 }
 
 
+// =============================================
+// REGISTRO DE PRONTUÁRIO
+// =============================================
+
 public class ConsultaHistoricoMedicoItem
 {
-    public int IdHistorico { get; set; }
+    public int IdHistorico
+    {
+        get;
+        set;
+    }
 
 
-    public string TipoConsulta { get; set; } =
-        string.Empty;
+    // LIGA O PRONTUÁRIO À CONSULTA QUE
+    // ORIGINOU O ATENDIMENTO.
+    //
+    // Os registros antigos permanecem null
+    // porque são apenas dados locais anteriores.
+
+    public Guid? IdConsulta
+    {
+        get;
+        set;
+    }
 
 
-    public DateTime Data { get; set; }
+    public string TipoConsulta
+    {
+        get;
+        set;
+    } = string.Empty;
 
 
-    public string Observacoes { get; set; } =
-        string.Empty;
+    public DateTime Data
+    {
+        get;
+        set;
+    }
+
+
+    public string Observacoes
+    {
+        get;
+        set;
+    } = string.Empty;
 
 
     public string DataTexto =>
