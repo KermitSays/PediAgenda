@@ -5,10 +5,12 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 
 public static class ResponsavelDados
 {
-    //A lista começa vazia, sem pacientes de exemplo.
+    // A lista começa vazia, sem pacientes de exemplo.
     public static ObservableCollection<PacienteResponsavelItem>
-        Pacientes { get; } = new();
+        Pacientes
+    { get; } = new();
 }
+
 
 public class PacienteResponsavelItem: INotifyPropertyChanged
 {

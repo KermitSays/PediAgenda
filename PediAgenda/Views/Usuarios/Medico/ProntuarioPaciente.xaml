@@ -20,6 +20,7 @@
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />
 
+
             <!-- DADOS DO PACIENTE -->
             <Border
                 BackgroundColor="{StaticResource White}"
@@ -37,12 +38,14 @@
                         FontAttributes="Bold"
                         TextColor="{StaticResource TextDark}" />
 
+
                     <Grid
                         RowDefinitions="Auto,Auto,Auto"
                         ColumnDefinitions="Auto,*"
                         RowSpacing="8"
                         ColumnSpacing="10">
 
+                        <!-- NOME -->
                         <Label
                             Grid.Row="0"
                             Grid.Column="0"
@@ -56,6 +59,8 @@
                             x:Name="NomePacienteLabel"
                             TextColor="{StaticResource TextDark}" />
 
+
+                        <!-- DATA DE NASCIMENTO -->
                         <Label
                             Grid.Row="1"
                             Grid.Column="0"
@@ -69,6 +74,8 @@
                             x:Name="DataNascimentoLabel"
                             TextColor="{StaticResource TextDark}" />
 
+
+                        <!-- RESPONSÁVEL -->
                         <Label
                             Grid.Row="2"
                             Grid.Column="0"
@@ -88,6 +95,7 @@
 
             </Border>
 
+
             <!-- HISTÓRICO -->
             <Label
                 Text="Histórico"
@@ -95,17 +103,34 @@
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />
 
+
+            <!-- MENSAGEM QUANDO NÃO EXISTE HISTÓRICO -->
+            <Label
+                x:Name="SemHistoricoLabel"
+                Text="Nenhuma consulta registrada."
+                FontSize="15"
+                TextColor="{StaticResource InputPlaceholder}"
+                HorizontalTextAlignment="Center"
+                Margin="0,5,0,10"
+                IsVisible="False" />
+
+
+            <!-- LISTA DO HISTÓRICO -->
             <CollectionView
                 x:Name="HistoricoCollectionView"
                 SelectionMode="None">
 
                 <CollectionView.ItemsLayout>
+
                     <LinearItemsLayout
                         Orientation="Vertical"
                         ItemSpacing="12" />
+
                 </CollectionView.ItemsLayout>
 
+
                 <CollectionView.ItemTemplate>
+
                     <DataTemplate>
 
                         <Border
@@ -116,8 +141,12 @@
                             StrokeShape="RoundRectangle 16">
 
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="ConsultaHistorico_Clicked" />
+
+                                <TapGestureRecognizer
+                                    Tapped="ConsultaHistorico_Clicked" />
+
                             </Border.GestureRecognizers>
+
 
                             <Grid
                                 ColumnDefinitions="*,Auto"
@@ -140,6 +169,7 @@
 
                                 </VerticalStackLayout>
 
+
                                 <Label
                                     Grid.Column="1"
                                     Text="›"
@@ -152,20 +182,11 @@
                         </Border>
 
                     </DataTemplate>
+
                 </CollectionView.ItemTemplate>
 
-                <CollectionView.EmptyView>
-
-                    <Label
-                        Text="Nenhuma consulta registrada."
-                        FontSize="15"
-                        TextColor="{StaticResource InputPlaceholder}"
-                        HorizontalTextAlignment="Center"
-                        Margin="0,5,0,10" />
-
-                </CollectionView.EmptyView>
-
             </CollectionView>
+
 
             <!-- VOLTAR -->
             <Button

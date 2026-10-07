@@ -10,11 +10,8 @@ public partial class LoginResponsavel : ContentPage
     private bool entrando = false;
     private static readonly HttpClient http = new()
     {
-        BaseAddress = new Uri(
-            DeviceInfo.Platform == DevicePlatform.Android
-                ? "http://10.0.2.2:5000/"
-                : "http://localhost:5000/"),
-        Timeout = TimeSpan.FromSeconds(20)
+        BaseAddress = new Uri("https://pediagenda-api.onrender.com/"),
+        Timeout = TimeSpan.FromSeconds(90)
     };
 
     public LoginResponsavel()
@@ -50,7 +47,7 @@ public partial class LoginResponsavel : ContentPage
             "OK");
     }
 
-   //Botão de login, Precisa das validação dos campos e exibição de mensagens de erro
+    //Botão de login, Precisa das validação dos campos e exibição de mensagens de erro
     private async void EntrarButton_Clicked(object sender, EventArgs e)
     {
         if (entrando)
@@ -150,6 +147,13 @@ public partial class LoginResponsavel : ContentPage
             entrando = false;
             EntrarButton.IsEnabled = true;
         }
+
+    }
+
+        // Botão para entrar direto no menu do responsável, sem login
+        private async void EntrarDiretoButton_Clicked(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync(nameof(Usuarios.Responsavel.MenuResponsavel));
     }
 }
 

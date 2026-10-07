@@ -13,11 +13,8 @@ public partial class CadastroCampo : ContentPage
 
     private static readonly HttpClient http = new()
     {
-        BaseAddress = new Uri(
-            DeviceInfo.Platform == DevicePlatform.Android
-                ? "http://10.0.2.2:5000/"
-                : "http://localhost:5000/"),
-        Timeout = TimeSpan.FromSeconds(20)
+        BaseAddress = new Uri("https://pediagenda-api.onrender.com/"),
+        Timeout = TimeSpan.FromSeconds(90)
     };
 
     public CadastroCampo()

@@ -10,116 +10,247 @@ public enum MotivoRecusa
     Nenhum,
     DadosInvalidos,
     EmailJaCadastrado,
-    CpfJaCadastrado
+    ResponsavelNaoEncontrado,
+    CodigoAtivacaoInvalido,
+    CadastroJaIniciado
 }
 
-public record DadosResponsavel(string? Nome, string? Cpf, string? Email,
-                               string? Telefone, string? Senha, bool AceiteTermos);
+public record DadosResponsavel(
+    string? Cpf,
+    string? CodigoAtivacao,
+    string? Email,
+    string? Senha,
+    bool AceiteTermos);
 
-public record ResultadoCadastro(bool Sucesso, string Mensagem, MotivoRecusa Motivo,
-                                Usuario? Usuario = null,
-                                IReadOnlyDictionary<string, string>? Campos = null)
+public record ResultadoCadastro(
+    bool Sucesso,
+    string Mensagem,
+    MotivoRecusa Motivo,
+    Usuario? Usuario = null,
+    IReadOnlyDictionary<string, string>? Campos = null,
+
+    // Será utilizado depois pelo serviço responsável
+    // por enviar a mensagem de confirmação por e-mail.
+    string? TokenVerificacaoEmail = null)
 {
-    public static ResultadoCadastro Ok(Usuario u) =>
-        new(true, $"Cadastro criado para {u.Nome}.", MotivoRecusa.Nenhum, u);
+    public static ResultadoCadastro Ok(
+        Usuario usuario,
+        string token) =>
+        new(
+            true,
+            $"Cadastro iniciado para {usuario.Nome}. Confirme o e-mail para ativar a conta.",
+            MotivoRecusa.Nenhum,
+            usuario,
+            TokenVerificacaoEmail: token);
 
-    public static ResultadoCadastro Invalido(IReadOnlyDictionary<string, string> campos) =>
-        new(false, "Verifique os campos destacados.", MotivoRecusa.DadosInvalidos, Campos: campos);
+    public static ResultadoCadastro Invalido(
+        IReadOnlyDictionary<string, string> campos) =>
+        new(
+            false,
+            "Verifique os campos destacados.",
+            MotivoRecusa.DadosInvalidos,
+            Campos: campos);
 
-    public static ResultadoCadastro Duplicado(MotivoRecusa motivo, string mensagem) =>
-        new(false, mensagem, motivo);
+    public static ResultadoCadastro Falha(
+        MotivoRecusa motivo,
+        string mensagem) =>
+        new(
+            false,
+            mensagem,
+            motivo);
 }
 
-/// <summary>
-/// Cadastro de responsável (H1).
+
+/// Conclusão do cadastro de acesso do responsável.
 ///
-/// Médico e recepcionista não se cadastram sozinhos: essas contas são criadas
-/// pela clínica. Por isso aqui só existe o responsável.
-///
-/// A regra de senha é a mesma do login, vinda de PoliticaSenha — se cada módulo
-/// validasse por conta própria, as duas validações divergiriam com o tempo.
-/// </summary>
-public partial class CadastroService(IUsuarioRepositorio repositorio)
+/// O responsável já deve ter sido previamente cadastrado
+/// pela clínica. O aplicativo não cria uma nova pessoa:
+/// ele localiza o cadastro existente pelo CPF e completa
+/// as credenciais de acesso.
+public partial class CadastroService(
+    IUsuarioRepositorio repositorio)
 {
-    public const int TamanhoMaximoNome = 120;
     public const int TamanhoMaximoEmail = 160;
-    public const int TamanhoMaximoTelefone = 20;
 
-    private readonly IUsuarioRepositorio _repo = repositorio;
+    public static readonly TimeSpan DuracaoTokenEmail =
+        TimeSpan.FromHours(24);
 
-    public ResultadoCadastro Cadastrar(DadosResponsavel dados)
+    private readonly IUsuarioRepositorio _repo =
+        repositorio;
+
+    public ResultadoCadastro Cadastrar(
+        DadosResponsavel dados)
     {
-        var nome = (dados.Nome ?? "").Trim();
-        var email = (dados.Email ?? "").Trim();
-        var telefone = (dados.Telefone ?? "").Trim();
-        var cpf = SoDigitos(dados.Cpf ?? "");
+        var cpf =
+            SoDigitos(dados.Cpf ?? "");
 
-        var campos = new Dictionary<string, string>();
+        var codigoAtivacao =
+            (dados.CodigoAtivacao ?? "").Trim();
 
-        if (string.IsNullOrWhiteSpace(nome))
-            campos["nome"] = "O nome é obrigatório.";
-        else if (nome.Length > TamanhoMaximoNome)
-            campos["nome"] = $"O nome deve ter no máximo {TamanhoMaximoNome} caracteres.";
+        var email =
+            (dados.Email ?? "").Trim();
 
+        var campos =
+            new Dictionary<string, string>();
+
+        // CPF
         if (cpf.Length != 11)
-            campos["cpf"] = "O CPF deve ter 11 dígitos.";
+        {
+            campos["cpf"] =
+                "O CPF deve ter 11 dígitos.";
+        }
 
+        // Código entregue pela clínica
+        if (string.IsNullOrWhiteSpace(codigoAtivacao))
+        {
+            campos["codigoAtivacao"] =
+                "Informe o código de ativação fornecido pela clínica.";
+        }
+
+        // E-mail
         if (string.IsNullOrWhiteSpace(email))
-            campos["email"] = "O e-mail é obrigatório.";
+        {
+            campos["email"] =
+                "O e-mail é obrigatório.";
+        }
         else if (email.Length > TamanhoMaximoEmail)
-            campos["email"] = $"O e-mail deve ter no máximo {TamanhoMaximoEmail} caracteres.";
+        {
+            campos["email"] =
+                $"O e-mail deve ter no máximo {TamanhoMaximoEmail} caracteres.";
+        }
         else if (!EmailValido().IsMatch(email))
-            campos["email"] = "E-mail inválido.";
+        {
+            campos["email"] =
+                "E-mail inválido.";
+        }
 
-        // A coluna responsavel.telefone é NOT NULL: é por ele que a clínica
-        // confirma a consulta.
-        if (string.IsNullOrWhiteSpace(telefone))
-            campos["telefone"] = "O telefone é obrigatório.";
-        else if (telefone.Length > TamanhoMaximoTelefone)
-            campos["telefone"] = $"O telefone deve ter no máximo {TamanhoMaximoTelefone} caracteres.";
+        // Senha
+        if (!PoliticaSenha.Valida(
+            dados.Senha,
+            out var erroSenha))
+        {
+            campos["senha"] =
+                erroSenha;
+        }
 
-        if (!PoliticaSenha.Valida(dados.Senha, out var erroSenha))
-            campos["senha"] = erroSenha;
-
+        // Termos
         if (!dados.AceiteTermos)
-            campos["aceiteTermos"] = "É preciso aceitar os termos de uso.";
+        {
+            campos["aceiteTermos"] =
+                "É preciso aceitar os termos de uso.";
+        }
 
         if (campos.Count > 0)
-            return ResultadoCadastro.Invalido(campos);
+        {
+            return ResultadoCadastro.Invalido(
+                campos);
+        }
 
-        // Conferir antes permite dizer qual campo está repetido; a garantia de
-        // verdade é a restrição UNIQUE do banco, tratada logo abaixo.
-        if (_repo.ExisteEmail(email))
-            return ResultadoCadastro.Duplicado(MotivoRecusa.EmailJaCadastrado,
-                                               "Já existe uma conta com esse e-mail.");
-        if (_repo.ExisteCpf(cpf))
-            return ResultadoCadastro.Duplicado(MotivoRecusa.CpfJaCadastrado,
-                                               "Já existe uma conta com esse CPF.");
+        // O CPF precisa pertencer a um RESPONSÁVEL que
+        // já tenha sido cadastrado pela clínica.
+        var responsavel =
+            _repo.BuscarResponsavelPorCpf(cpf);
 
-        int id;
+        if (responsavel is null)
+        {
+            return ResultadoCadastro.Falha(
+                MotivoRecusa.ResponsavelNaoEncontrado,
+                "Não foi encontrado um responsável cadastrado pela clínica com esse CPF.");
+        }
+
+        // Se a conta já foi efetivamente ativada, não permite
+        // iniciar o cadastro novamente.
+        //
+        // Se ela apenas possui e-mail/senha, mas ainda não confirmou
+        // o e-mail, permitimos uma nova tentativa. Isso é importante
+        // caso o envio do e-mail tenha falhado ou não tenha chegado.
+        if (responsavel.EmailVerificado || responsavel.Ativo)
+        {
+            return ResultadoCadastro.Falha(
+                MotivoRecusa.CadastroJaIniciado,
+                "O acesso deste responsável já está ativo.");
+        }
+
+        // Não permite utilizar um e-mail que já pertence
+        // a outro usuário do sistema.
+        if (_repo.ExisteEmailDeOutroUsuario(
+            email,
+            responsavel.Id))
+        {
+            return ResultadoCadastro.Falha(
+                MotivoRecusa.EmailJaCadastrado,
+                "Já existe outra conta utilizando esse e-mail.");
+        }
+
+        var agora =
+            DateTime.UtcNow;
+
+        // CPF sozinho não é suficiente.
+        // Também precisa apresentar o código entregue
+        // pela clínica no momento do pré-cadastro.
+        if (!_repo.CodigoAtivacaoResponsavelValido(
+            responsavel.Id,
+            codigoAtivacao,
+            agora))
+        {
+            return ResultadoCadastro.Falha(
+                MotivoRecusa.CodigoAtivacaoInvalido,
+                "Código de ativação inválido, expirado ou já utilizado.");
+        }
+
+        // Token aleatório que depois será enviado para
+        // o endereço de e-mail informado pelo responsável.
+        var (tokenEmail, tokenEmailHash) =
+            TokenVerificacaoEmail.Gerar();
+
+        var tokenExpiraEm =
+            agora.Add(DuracaoTokenEmail);
+
         try
         {
-            id = _repo.Inserir(nome, cpf, email, dados.Senha!, Perfil.Responsavel, telefone: telefone);
+            // Preenche e-mail + senha no MESMO usuário
+            // anteriormente cadastrado pela clínica.
+            _repo.CompletarCadastroResponsavel(
+                responsavel.Id,
+                email,
+                dados.Senha!,
+                tokenEmailHash,
+                tokenExpiraEm);
         }
-        catch (CadastroDuplicadoException e)
+        catch (CadastroDuplicadoException)
         {
-            var motivo = e.Campo == "CPF" ? MotivoRecusa.CpfJaCadastrado : MotivoRecusa.EmailJaCadastrado;
-            return ResultadoCadastro.Duplicado(motivo, $"Já existe uma conta com esse {e.Campo}.");
+            return ResultadoCadastro.Falha(
+                MotivoRecusa.EmailJaCadastrado,
+                "Já existe uma conta utilizando esse e-mail.");
         }
 
-        return ResultadoCadastro.Ok(new Usuario
-        {
-            Id = id,
-            Nome = nome,
-            Cpf = cpf,
-            Email = email,
-            Perfil = Perfil.Responsavel
-        });
+        responsavel.Email =
+            email;
+
+        // Continua inativo até a confirmação do e-mail.
+        responsavel.Ativo =
+            false;
+
+        responsavel.EmailVerificado =
+            false;
+
+        responsavel.TokenVerificacaoHash =
+            tokenEmailHash;
+
+        responsavel.TokenVerificacaoExpiraEm =
+            tokenExpiraEm;
+
+        return ResultadoCadastro.Ok(
+            responsavel,
+            tokenEmail);
     }
 
-    private static string SoDigitos(string valor) =>
-        new([.. valor.Where(char.IsDigit)]);
+    private static string SoDigitos(
+        string valor) =>
+        new(
+            [.. valor.Where(char.IsDigit)]);
 
-    [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+    [GeneratedRegex(
+        @"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
     private static partial Regex EmailValido();
 }

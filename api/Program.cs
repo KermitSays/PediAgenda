@@ -6,6 +6,7 @@ using PediAgenda.Nucleo;
 using PediAgenda.Nucleo.Modelos;
 using PediAgenda.Nucleo.Repositorios;
 using PediAgenda.Nucleo.Servicos;
+using PediAgenda.Api.Servicos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,8 @@ builder.Services.AddSingleton<IUsuarioRepositorio>(
     _ => new UsuarioRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<AutenticacaoService>();
 builder.Services.AddScoped<CadastroService>();
+builder.Services.AddScoped<ConfirmacaoEmailService>();
+builder.Services.AddHttpClient<EmailService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<GeradorToken>();
 
@@ -106,54 +109,185 @@ app.MapGet("/api/auth/eu", (ClaimsPrincipal usuario) =>
         usuario.FindFirstValue("role")!)))
    .RequireAuthorization();
 
-// Cadastro de novos responsáveis: exclusivo da recepção.
-// Retorna os dados do cadastro, sem iniciar uma sessão
-// em nome do novo responsável.
+// Conclusão do cadastro de acesso do responsável.
+//
+// O responsável já foi previamente cadastrado pela clínica.
+// Aqui ele informa CPF + código de ativação e escolhe
+// o e-mail e a senha que usará no aplicativo.
+//
+// Esta rota não exige login, porque o responsável ainda
+// está justamente criando o acesso dele.
 app.MapPost(
     "/api/cadastro/responsavel",
-    (CadastroRequisicao req, CadastroService cadastro) =>
+    async (
+        CadastroRequisicao req,
+        CadastroService cadastro,
+        EmailService emailService) =>
     {
-        var resultado = cadastro.Cadastrar(new DadosResponsavel(
-            req.Nome,
-            req.Cpf,
-            req.Email,
-            req.Telefone,
-            req.Senha,
-            req.AceiteTermos));
+        var resultado =
+            cadastro.Cadastrar(
+                new DadosResponsavel(
+                    req.Cpf,
+                    req.CodigoAtivacao,
+                    req.Email,
+                    req.Senha,
+                    req.AceiteTermos));
 
         if (resultado.Sucesso)
         {
-            var responsavel = resultado.Usuario!;
+            var responsavel =
+                resultado.Usuario!;
 
+            try
+            {
+                await emailService
+                    .EnviarConfirmacaoCadastroAsync(
+                        responsavel.Email!,
+                        responsavel.Nome,
+                        resultado.TokenVerificacaoEmail!);
+            }
+            catch (Exception e)
+                when (
+                    e is HttpRequestException
+                    or TaskCanceledException
+                    or InvalidOperationException)
+            {
+                // O cadastro fica pendente no banco.
+                // Como o código da clínica ainda não foi marcado
+                // como utilizado, o responsável poderá tentar
+                // novamente e receber um novo link.
+                Console.Error.WriteLine(
+                    $"Falha ao enviar e-mail de confirmação: {e.Message}");
+
+                return Results.Json(
+                    new ErroApi(
+                        "EMAIL_NAO_ENVIADO",
+                        "Não foi possível enviar o e-mail de confirmação. Tente novamente em alguns instantes."),
+                    statusCode:
+                        StatusCodes.Status502BadGateway);
+            }
+
+            // O token verdadeiro não é devolvido ao aplicativo.
+            // Ele é enviado exclusivamente por e-mail.
             return Results.Json(
-                new UsuarioLogado(
-                    responsavel.Id,
-                    responsavel.Nome,
-                    responsavel.Email,
-                    responsavel.Perfil.ToString().ToUpperInvariant()),
-                statusCode: StatusCodes.Status201Created);
+                new
+                {
+                    mensagem =
+                        "Cadastro iniciado. Enviamos um link de confirmação para o e-mail informado.",
+
+                    usuario = new
+                    {
+                        id = responsavel.Id,
+                        nome = responsavel.Nome,
+                        email = responsavel.Email
+                    }
+                },
+                statusCode:
+                    StatusCodes.Status202Accepted);
         }
 
-        if (resultado.Motivo == MotivoRecusa.DadosInvalidos)
+        if (resultado.Motivo
+            == MotivoRecusa.DadosInvalidos)
         {
             return Results.Json(
                 new ErroValidacao(
                     "DADOS_INVALIDOS",
                     resultado.Mensagem,
                     resultado.Campos!),
-                statusCode: StatusCodes.Status400BadRequest);
+                statusCode:
+                    StatusCodes.Status400BadRequest);
         }
 
-        var codigo = resultado.Motivo == MotivoRecusa.CpfJaCadastrado
-            ? "CPF_JA_CADASTRADO"
-            : "EMAIL_JA_CADASTRADO";
+        if (resultado.Motivo
+            == MotivoRecusa.ResponsavelNaoEncontrado)
+        {
+            return Results.Json(
+                new ErroApi(
+                    "RESPONSAVEL_NAO_ENCONTRADO",
+                    resultado.Mensagem),
+                statusCode:
+                    StatusCodes.Status404NotFound);
+        }
+
+        if (resultado.Motivo
+            == MotivoRecusa.CodigoAtivacaoInvalido)
+        {
+            return Results.Json(
+                new ErroApi(
+                    "CODIGO_ATIVACAO_INVALIDO",
+                    resultado.Mensagem),
+                statusCode:
+                    StatusCodes.Status400BadRequest);
+        }
+
+        if (resultado.Motivo
+            == MotivoRecusa.EmailJaCadastrado)
+        {
+            return Results.Json(
+                new ErroApi(
+                    "EMAIL_JA_CADASTRADO",
+                    resultado.Mensagem),
+                statusCode:
+                    StatusCodes.Status409Conflict);
+        }
+
+        if (resultado.Motivo
+            == MotivoRecusa.CadastroJaIniciado)
+        {
+            return Results.Json(
+                new ErroApi(
+                    "CADASTRO_JA_INICIADO",
+                    resultado.Mensagem),
+                statusCode:
+                    StatusCodes.Status409Conflict);
+        }
 
         return Results.Json(
-            new ErroApi(codigo, resultado.Mensagem),
-            statusCode: StatusCodes.Status409Conflict);
-    })
-.RequireAuthorization(politica =>
-    politica.RequireRole("RECEPCIONISTA"));
+            new ErroApi(
+                "ERRO_CADASTRO",
+                resultado.Mensagem),
+            statusCode:
+                StatusCodes.Status400BadRequest);
+    });
+
+// Confirma o e-mail do responsável por meio do token
+// enviado no link de verificação.
+app.MapGet(
+    "/api/cadastro/confirmar-email",
+    (
+        string? token,
+        ConfirmacaoEmailService confirmacao) =>
+    {
+        var resultado =
+            confirmacao.Confirmar(token);
+
+        if (resultado.Sucesso)
+        {
+            return Results.Ok(
+                new
+                {
+                    mensagem = resultado.Mensagem
+                });
+        }
+
+        if (resultado.Motivo
+            == MotivoFalhaConfirmacaoEmail.TokenAusente)
+        {
+            return Results.Json(
+                new ErroApi(
+                    "TOKEN_NAO_INFORMADO",
+                    resultado.Mensagem),
+                statusCode:
+                    StatusCodes.Status400BadRequest);
+        }
+
+        return Results.Json(
+            new ErroApi(
+                "TOKEN_INVALIDO_OU_EXPIRADO",
+                resultado.Mensagem),
+            statusCode:
+                StatusCodes.Status400BadRequest);
+    });
 
 app.Run();
 return 0;
@@ -185,8 +319,7 @@ static string Codigo(MotivoFalha motivo) => motivo switch
 
 // O que a tela manda e o que ela recebe. A senha só entra; nunca sai.
 record LoginRequisicao(string? Email, string? Senha);
-record CadastroRequisicao(string? Nome, string? Cpf, string? Email,
-                          string? Telefone, string? Senha, bool AceiteTermos);
+record CadastroRequisicao(  string? Cpf, string? CodigoAtivacao, string? Email, string? Senha, bool AceiteTermos);
 record UsuarioLogado(int Id, string Nome, string Email, string Perfil);
 record SessaoIniciada(int Id, string Nome, string Email, string Perfil, string Token, DateTime ExpiraEm);
 record ErroApi(string Codigo, string Mensagem);
