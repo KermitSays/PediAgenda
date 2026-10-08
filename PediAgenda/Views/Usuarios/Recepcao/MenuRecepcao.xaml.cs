@@ -118,7 +118,8 @@ public partial class MenuRecepcao : ContentPage
 
 
         SaudacaoLabel.Text =
-            string.IsNullOrWhiteSpace(nome)
+            string.IsNullOrWhiteSpace(
+                nome)
 
                 ? "Olá!"
 
@@ -139,7 +140,7 @@ public partial class MenuRecepcao : ContentPage
 
 
     // =============================================
-    // QUANTIDADE DE CONSULTAS
+    // QUANTIDADE
     // =============================================
 
     private void AtualizarQuantidadeConsultas()
@@ -158,7 +159,8 @@ public partial class MenuRecepcao : ContentPage
         TappedEventArgs e)
     {
         await Shell.Current.GoToAsync(
-            nameof(PacientesRecepcao));
+            nameof(
+                PacientesRecepcao));
     }
 
 
@@ -171,21 +173,21 @@ public partial class MenuRecepcao : ContentPage
         TappedEventArgs e)
     {
         await Shell.Current.GoToAsync(
-            nameof(MedicosRecepcao));
+            nameof(
+                MedicosRecepcao));
     }
 
 
     // =============================================
-    // BOTÃO ATUAL DA TERCEIRA OPÇÃO
+    // ADICIONAR PACIENTE
     // =============================================
 
     private async void AdicionarPacienteButton_Clicked(
         object sender,
         TappedEventArgs e)
     {
-        await DisplayAlertAsync(
-            "Adicionar Paciente",
-            "A funcionalidade de adicionar paciente será implementada no futuro.",
-            "OK");
+        await Shell.Current.GoToAsync(
+            nameof(
+                AdicionarPacienteRecepcao));
     }
 }

@@ -193,7 +193,7 @@ public partial class ConsultasMedico : ContentPage
         List<ConsultaMedico>
             consultasDoDia =
                 ConsultasMedicoDados
-                    .ObterConsultasPorData(
+                    .ObterConsultasAtivasPorData(
                         data);
 
 

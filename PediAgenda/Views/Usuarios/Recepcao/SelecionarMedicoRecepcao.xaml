@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Recepcao.SelecionarMedicoRecepcao"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <Grid
+        RowDefinitions="Auto,Auto,*,Auto"
+        Padding="20,26,20,20"
+        RowSpacing="16">
+
+        <!-- TÍTULO -->
+
+        <VerticalStackLayout
+            Grid.Row="0"
+            Spacing="4">
+
+            <Label
+                Text="Selecionar médico"
+                FontSize="26"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                Text="Escolha o médico cuja agenda deseja consultar."
+                FontSize="14"
+                TextColor="{StaticResource InputPlaceholder}" />
+
+        </VerticalStackLayout>
+
+
+        <!-- BUSCA -->
+
+        <Border
+            Grid.Row="1"
+            BackgroundColor="White"
+            Stroke="{StaticResource InputBlue}"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 16"
+            Padding="6,0">
+
+            <SearchBar
+                x:Name="BuscaMedicoSearchBar"
+                Placeholder="Buscar médico ou especialidade..."
+                PlaceholderColor="{StaticResource InputPlaceholder}"
+                TextColor="{StaticResource TextDark}"
+                BackgroundColor="Transparent"
+                TextChanged="BuscaMedicoSearchBar_TextChanged" />
+
+        </Border>
+
+
+        <!-- LISTA -->
+
+        <CollectionView
+            Grid.Row="2"
+            x:Name="MedicosCollectionView"
+            SelectionMode="Single"
+            SelectionChanged="MedicosCollectionView_SelectionChanged">
+
+            <CollectionView.ItemsLayout>
+
+                <LinearItemsLayout
+                    Orientation="Vertical"
+                    ItemSpacing="10" />
+
+            </CollectionView.ItemsLayout>
+
+
+            <CollectionView.ItemTemplate>
+
+                <DataTemplate>
+
+                    <Border
+                        BackgroundColor="White"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="16">
+
+                        <Grid
+                            ColumnDefinitions="*,Auto"
+                            ColumnSpacing="12">
+
+                            <VerticalStackLayout
+                                Grid.Column="0"
+                                Spacing="5">
+
+                                <Label
+                                    Text="{Binding Nome}"
+                                    FontSize="17"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource TextDark}" />
+
+                                <Label
+                                    Text="{Binding Especialidade}"
+                                    FontSize="14"
+                                    TextColor="{StaticResource InputPlaceholder}" />
+
+                            </VerticalStackLayout>
+
+
+                            <Label
+                                Grid.Column="1"
+                                Text="›"
+                                FontSize="28"
+                                TextColor="{StaticResource PrimaryBlue}"
+                                VerticalOptions="Center"
+                                HorizontalOptions="End" />
+
+                        </Grid>
+
+                    </Border>
+
+                </DataTemplate>
+
+            </CollectionView.ItemTemplate>
+
+
+            <CollectionView.EmptyView>
+
+                <VerticalStackLayout
+                    Padding="30"
+                    Spacing="8"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center">
+
+                    <Label
+                        Text="Nenhum médico encontrado."
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}"
+                        HorizontalTextAlignment="Center" />
+
+                    <Label
+                        Text="Tente pesquisar por outro nome ou especialidade."
+                        FontSize="13"
+                        TextColor="{StaticResource InputPlaceholder}"
+                        HorizontalTextAlignment="Center" />
+
+                </VerticalStackLayout>
+
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+
+
+        <!-- CANCELAR -->
+
+        <Button
+            Grid.Row="3"
+            Text="CANCELAR"
+            HeightRequest="48"
+            CornerRadius="16"
+            BackgroundColor="White"
+            TextColor="{StaticResource PrimaryBlue}"
+            BorderColor="{StaticResource PrimaryBlue}"
+            BorderWidth="1"
+            FontAttributes="Bold"
+            Clicked="CancelarButton_Clicked" />
+
+    </Grid>
+
+</ContentPage>

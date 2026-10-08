@@ -8,18 +8,19 @@
     BackgroundColor="{StaticResource PageBlue}">
 
     <Grid
-        RowDefinitions="Auto,*"
-        Padding="24,24,24,20">
+        RowDefinitions="Auto,*,Auto"
+        Padding="20,24,20,18"
+        RowSpacing="16">
 
-        <!-- CABEÇALHO E FILTROS -->
+        <!-- CABEÇALHO -->
+
         <VerticalStackLayout
             Grid.Row="0"
-            Spacing="14"
-            Margin="0,0,0,18">
+            Spacing="12">
 
             <Label
-                Text="Agenda Médica"
-                FontSize="26"
+                Text="Médicos"
+                FontSize="28"
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />
 
@@ -30,7 +31,9 @@
 
 
             <!-- MÉDICO -->
-            <VerticalStackLayout Spacing="6">
+
+            <VerticalStackLayout
+                Spacing="6">
 
                 <Label
                     Text="Médico"
@@ -38,19 +41,52 @@
                     FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}" />
 
+
                 <Border
                     BackgroundColor="White"
                     Stroke="{StaticResource InputBlue}"
                     StrokeThickness="1"
-                    Padding="10,3"
+                    Padding="14"
                     StrokeShape="RoundRectangle 14">
 
-                    <Picker
-                        x:Name="MedicoPicker"
-                        Title="Selecione o médico"
-                        TextColor="{StaticResource TextDark}"
-                        TitleColor="{StaticResource InputPlaceholder}"
-                        SelectedIndexChanged="Filtro_Changed" />
+                    <Grid
+                        ColumnDefinitions="*,Auto">
+
+                        <VerticalStackLayout
+                            Grid.Column="0"
+                            Spacing="2">
+
+                            <Label
+                                x:Name="MedicoSelecionadoLabel"
+                                FontSize="15"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextDark}" />
+
+                            <Label
+                                Text="Toque para selecionar outro médico"
+                                FontSize="11"
+                                TextColor="{StaticResource InputPlaceholder}" />
+
+                        </VerticalStackLayout>
+
+
+                        <Label
+                            Grid.Column="1"
+                            Text="⌕"
+                            FontSize="25"
+                            TextColor="{StaticResource PrimaryBlue}"
+                            VerticalOptions="Center" />
+
+
+                        <!-- Botão transparente sobre o campo inteiro -->
+
+                        <Button
+                            Grid.ColumnSpan="2"
+                            BackgroundColor="Transparent"
+                            Opacity="0.01"
+                            Clicked="SelecionarMedicoButton_Clicked" />
+
+                    </Grid>
 
                 </Border>
 
@@ -58,7 +94,9 @@
 
 
             <!-- DATA -->
-            <VerticalStackLayout Spacing="6">
+
+            <VerticalStackLayout
+                Spacing="6">
 
                 <Label
                     Text="Data"
@@ -84,38 +122,45 @@
             </VerticalStackLayout>
 
 
-            <!-- RESUMO -->
+            <!-- HORÁRIOS -->
+
             <Grid
-                ColumnDefinitions="*,Auto">
+                ColumnDefinitions="*,Auto"
+                Margin="0,4,0,0">
 
                 <Label
                     Text="Horários"
-                    FontSize="20"
+                    FontSize="22"
                     FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}" />
 
                 <Label
                     x:Name="QuantidadeHorariosLabel"
                     Grid.Column="1"
+                    VerticalOptions="Center"
                     FontSize="13"
-                    TextColor="{StaticResource InputPlaceholder}"
-                    VerticalOptions="Center" />
+                    TextColor="{StaticResource PrimaryBlue}" />
 
             </Grid>
 
         </VerticalStackLayout>
 
 
-        <!-- LISTA DE HORÁRIOS -->
+        <!-- AGENDA -->
+
         <CollectionView
             Grid.Row="1"
+            x:Name="AgendaCollectionView"
             ItemsSource="{Binding HorariosFiltrados}"
-            SelectionMode="None">
+            SelectionMode="Single"
+            SelectionChanged="AgendaCollectionView_SelectionChanged">
 
             <CollectionView.ItemsLayout>
+
                 <LinearItemsLayout
                     Orientation="Vertical"
-                    ItemSpacing="12" />
+                    ItemSpacing="10" />
+
             </CollectionView.ItemsLayout>
 
 
@@ -127,62 +172,62 @@
                         BackgroundColor="White"
                         Stroke="{StaticResource InputBlue}"
                         StrokeThickness="1"
-                        Padding="16"
-                        StrokeShape="RoundRectangle 16">
+                        StrokeShape="RoundRectangle 16"
+                        Padding="14">
 
                         <Grid
-                            RowDefinitions="Auto,Auto,Auto"
-                            ColumnDefinitions="70,*,Auto"
-                            ColumnSpacing="12"
-                            RowSpacing="6">
+                            ColumnDefinitions="65,*,Auto"
+                            ColumnSpacing="12">
 
-                            <!-- HORÁRIO -->
                             <Label
-                                Grid.Row="0"
-                                Grid.RowSpan="2"
                                 Grid.Column="0"
                                 Text="{Binding HorarioFormatado}"
                                 FontSize="18"
                                 FontAttributes="Bold"
-                                TextColor="{StaticResource PrimaryBlue}"
+                                TextColor="{StaticResource TextDark}"
                                 VerticalOptions="Center"
-                                HorizontalTextAlignment="Center" />
+                                HorizontalOptions="Center" />
 
 
-                            <!-- STATUS -->
-                            <Label
-                                Grid.Row="0"
+                            <VerticalStackLayout
                                 Grid.Column="1"
-                                Text="{Binding Status}"
-                                FontSize="16"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource TextDark}" />
+                                Spacing="3"
+                                VerticalOptions="Center">
+
+                                <Label
+                                    Text="{Binding PacienteExibicao}"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource TextDark}" />
+
+                                <Label
+                                    Text="{Binding Descricao}"
+                                    FontSize="13"
+                                    TextColor="{Binding StatusCor}" />
+
+                            </VerticalStackLayout>
 
 
-                            <!-- DESCRIÇÃO -->
-                            <Label
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Grid.ColumnSpan="2"
-                                Text="{Binding Descricao}"
-                                FontSize="13"
-                                TextColor="{StaticResource InputPlaceholder}" />
+                            <VerticalStackLayout
+                                Grid.Column="2"
+                                VerticalOptions="Center"
+                                HorizontalOptions="End"
+                                Spacing="2">
 
+                                <Label
+                                    Text="{Binding StatusVisual}"
+                                    FontSize="12"
+                                    FontAttributes="Bold"
+                                    TextColor="{Binding StatusCor}"
+                                    HorizontalTextAlignment="End" />
 
-                            <!-- AÇÃO -->
-                            <Button
-                                Grid.Row="2"
-                                Grid.Column="1"
-                                Grid.ColumnSpan="2"
-                                Text="{Binding TextoAcao}"
-                                Margin="0,8,0,0"
-                                HeightRequest="42"
-                                CornerRadius="21"
-                                BackgroundColor="{StaticResource PrimaryBlue}"
-                                TextColor="White"
-                                FontAttributes="Bold"
-                                CommandParameter="{Binding .}"
-                                Clicked="HorarioButton_Clicked" />
+                                <Label
+                                    Text="›"
+                                    FontSize="24"
+                                    TextColor="{StaticResource PrimaryBlue}"
+                                    HorizontalTextAlignment="End" />
+
+                            </VerticalStackLayout>
 
                         </Grid>
 
@@ -196,28 +241,67 @@
             <CollectionView.EmptyView>
 
                 <VerticalStackLayout
-                    Padding="30"
-                    Spacing="6"
+                    Padding="24"
+                    Spacing="8"
                     HorizontalOptions="Center">
 
                     <Label
-                        Text="Nenhum horário encontrado"
-                        FontSize="17"
+                        Text="Nenhum horário encontrado."
+                        FontSize="16"
                         FontAttributes="Bold"
-                        TextColor="{StaticResource TextDark}"
-                        HorizontalTextAlignment="Center" />
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource TextDark}" />
 
                     <Label
                         Text="Selecione outro médico ou outra data."
                         FontSize="14"
-                        TextColor="{StaticResource InputPlaceholder}"
-                        HorizontalTextAlignment="Center" />
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource InputPlaceholder}" />
 
                 </VerticalStackLayout>
 
             </CollectionView.EmptyView>
 
         </CollectionView>
+
+
+        <!-- AÇÕES -->
+
+        <VerticalStackLayout
+            Grid.Row="2"
+            Spacing="10">
+
+            <Button
+                Text="BLOQUEAR HORÁRIO"
+                HeightRequest="50"
+                CornerRadius="16"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="White"
+                FontAttributes="Bold"
+                Clicked="BloquearHorarioButton_Clicked" />
+
+            <Button
+                Text="LIBERAR HORÁRIOS"
+                HeightRequest="50"
+                CornerRadius="16"
+                BackgroundColor="White"
+                TextColor="{StaticResource PrimaryBlue}"
+                BorderColor="{StaticResource PrimaryBlue}"
+                BorderWidth="1"
+                FontAttributes="Bold"
+                Clicked="LiberarHorariosButton_Clicked" />
+
+            <Button
+                Text="Voltar"
+                HeightRequest="48"
+                CornerRadius="16"
+                BackgroundColor="White"
+                TextColor="{StaticResource PrimaryBlue}"
+                BorderColor="{StaticResource PrimaryBlue}"
+                BorderWidth="1"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
 
     </Grid>
 

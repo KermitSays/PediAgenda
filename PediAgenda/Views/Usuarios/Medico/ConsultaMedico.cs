@@ -1,20 +1,18 @@
-﻿namespace PediAgenda.Views.Usuarios.Medico;
+﻿using PediAgenda.Dados;
+
+namespace PediAgenda.Views.Usuarios.Medico;
 
 public class ConsultaMedico
 {
+    private string status =
+        string.Empty;
+
+
     public Guid Id
     {
         get;
     } = Guid.NewGuid();
 
-
-    // ID DO PACIENTE
-    //
-    // É nullable porque ainda existem alguns dados temporários
-    // que não estão vinculados aos pacientes cadastrados.
-    //
-    // Quando a API estiver integrada, este campo será preenchido
-    // com o ID real vindo do banco.
 
     public int? IdPaciente
     {
@@ -51,11 +49,19 @@ public class ConsultaMedico
     } = "Consulta pediátrica";
 
 
+    // Qualquer valor colocado aqui é
+    // automaticamente padronizado.
+
     public string Status
     {
-        get;
-        set;
-    } = string.Empty;
+        get =>
+            status;
+
+        set =>
+            status =
+                StatusConsulta.Normalizar(
+                    value);
+    }
 
 
     public string MotivoCancelamento

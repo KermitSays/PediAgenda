@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -13,7 +13,8 @@ public partial class CadastroCampo : ContentPage
 
     private static readonly HttpClient http = new()
     {
-        BaseAddress = new Uri("https://pediagenda-api.onrender.com/"),
+        BaseAddress = new Uri(
+            "https://pediagenda-api.onrender.com/"),
         Timeout = TimeSpan.FromSeconds(90)
     };
 
@@ -22,8 +23,9 @@ public partial class CadastroCampo : ContentPage
         InitializeComponent();
     }
 
-    // Mostra ou oculta a senha
-    private void MostrarSenhaButton_Clicked(object sender, EventArgs e)
+    // Mostrar ou ocultar senha
+    private void MostrarSenhaButton_Clicked(
+        object sender, EventArgs e)
     {
         senhaVisivel = !senhaVisivel;
         SenhaEntry.IsPassword = !senhaVisivel;
@@ -33,7 +35,7 @@ public partial class CadastroCampo : ContentPage
             : "olho_aberto.png";
     }
 
-    // Mostra ou oculta a confirmação da senha
+    // Mostrar ou ocultar confirmação da senha
     private void MostrarConfirmarSenhaButton_Clicked(
         object sender, EventArgs e)
     {
@@ -46,61 +48,75 @@ public partial class CadastroCampo : ContentPage
                 : "olho_aberto.png";
     }
 
-    // Valida os campos e envia o cadastro à API
-    private async void ContinuarButton_Clicked(object sender, EventArgs e)
+    // Validação e envio do cadastro
+    private async void ContinuarButton_Clicked(
+        object sender, EventArgs e)
     {
         if (cadastrando)
             return;
 
         MensagemErroLabel.IsVisible = false;
 
-        string nome = NomeEntry.Text?.Trim() ?? "";
-        string cpf = Regex.Replace(CpfEntry.Text ?? "", @"\D", "");
-        string email = EmailEntry.Text?.Trim() ?? "";
-        string telefone = Regex.Replace(
-            TelefoneEntry.Text ?? "", @"\D", "");
-        string senha = SenhaEntry.Text ?? "";
-        string confirmarSenha = ConfirmarSenhaEntry.Text ?? "";
+        string cpf = Regex.Replace(
+            CpfEntry.Text ?? "", @"\D", "");
 
-        if (string.IsNullOrWhiteSpace(nome) || nome.Length > 120)
-        {
-            ExibirErro("Informe um nome com até 120 caracteres.");
-            return;
-        }
+        string codigoAtivacao =
+            CodigoAtivacaoEntry.Text?.Trim() ?? "";
 
+        string email =
+            EmailEntry.Text?.Trim() ?? "";
+
+        string senha =
+            SenhaEntry.Text ?? "";
+
+        string confirmarSenha =
+            ConfirmarSenhaEntry.Text ?? "";
+
+        // Validação do CPF
         if (!ValidarCpf(cpf))
         {
-            ExibirErro("Informe um CPF com 11 dígitos, sem repetição.");
+            ExibirErro(
+                "Informe um CPF com 11 dígitos, sem repetição.");
             return;
         }
 
+        // Validação do código de ativação
+        if (string.IsNullOrWhiteSpace(codigoAtivacao))
+        {
+            ExibirErro(
+                "Informe o código de ativação fornecido pela clínica.");
+            return;
+        }
+
+        // Validação do e-mail
         if (!ValidarEmail(email) || email.Length > 160)
         {
-            ExibirErro("Informe um e-mail válido com até 160 caracteres.");
+            ExibirErro(
+                "Informe um e-mail válido com até 160 caracteres.");
             return;
         }
 
-        if (telefone.Length != 10 && telefone.Length != 11)
+        // Validação da senha
+        if (string.IsNullOrWhiteSpace(senha) ||
+            senha.Length < 8)
         {
-            ExibirErro("Informe o telefone com DDD, com 10 ou 11 dígitos.");
+            ExibirErro(
+                "A senha deve possuir no mínimo 8 caracteres.");
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(senha) || senha.Length < 8)
-        {
-            ExibirErro("A senha deve possuir no mínimo 8 caracteres.");
-            return;
-        }
-
+        // Confirmação da senha
         if (senha != confirmarSenha)
         {
             ExibirErro("As senhas não coincidem.");
             return;
         }
 
+        // Termos de uso
         if (!TermosCheckBox.IsChecked)
         {
-            ExibirErro("Você precisa aceitar os Termos de Uso.");
+            ExibirErro(
+                "Você precisa aceitar os Termos de Uso.");
             return;
         }
 
@@ -108,82 +124,91 @@ public partial class CadastroCampo : ContentPage
         ContinuarButton.IsEnabled = false;
         VoltarButton.IsEnabled = false;
 
-        bool cadastroGravado = false;
-
         try
         {
-            string? token = await SecureStorage.Default.GetAsync(
-                "pediagenda_token");
-
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                ExibirErro(
-                    "Faça login com a conta da recepção para cadastrar responsáveis.");
-                return;
-            }
-
-            using var requisicao = new HttpRequestMessage(
-                HttpMethod.Post,
-                "api/cadastro/responsavel");
-
-            requisicao.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
-
-            requisicao.Content = JsonContent.Create(new
-            {
-                nome,
-                cpf,
-                email,
-                telefone,
-                senha,
-                aceiteTermos = TermosCheckBox.IsChecked
-            });
-
-            using var resposta = await http.SendAsync(requisicao);
+            // Envia os dados para a API
+            // O responsável já existe no banco da clínica.
+            // Apenas as credenciais de acesso serão cadastradas.
+            using var resposta = await http.PostAsJsonAsync(
+                "api/cadastro/responsavel",
+                new
+                {
+                    cpf,
+                    codigoAtivacao,
+                    email,
+                    senha,
+                    aceiteTermos = TermosCheckBox.IsChecked
+                });
 
             string conteudo =
                 await resposta.Content.ReadAsStringAsync();
 
-            if ((int)resposta.StatusCode >= 500)
-            {
-                ExibirErro(
-                    "A API apresentou um erro. Confira o terminal da API.");
-                return;
-            }
-
+            // Tratamento de erros da API
             if (!resposta.IsSuccessStatusCode)
             {
-                using var documento = JsonDocument.Parse(conteudo);
-                var dados = documento.RootElement;
-
                 string mensagem =
-                    dados.TryGetProperty("mensagem", out var campo)
-                        ? campo.GetString() ?? "Não foi possível cadastrar."
-                        : "Não foi possível cadastrar.";
+                    "Não foi possível iniciar o cadastro.";
 
-                // Mostra os detalhes de validação enviados pela API.
-                if (dados.TryGetProperty("campos", out var campos) &&
-                    campos.ValueKind == JsonValueKind.Object)
+                if ((int)resposta.StatusCode >= 500)
                 {
-                    var detalhes = campos.EnumerateObject()
-                        .Select(item => item.Value.GetString() ?? "")
-                        .Where(texto => !string.IsNullOrWhiteSpace(texto));
+                    mensagem =
+                        "O servidor apresentou um problema. " +
+                        "Tente novamente em alguns instantes.";
+                }
+                else if (!string.IsNullOrWhiteSpace(conteudo))
+                {
+                    using var documento =
+                        JsonDocument.Parse(conteudo);
 
-                    mensagem += "\n" + string.Join("\n", detalhes);
+                    var dados = documento.RootElement;
+
+                    if (dados.TryGetProperty(
+                        "mensagem", out var campo))
+                    {
+                        mensagem =
+                            campo.GetString() ?? mensagem;
+                    }
+
+                    if (dados.TryGetProperty(
+                        "campos", out var campos) &&
+                        campos.ValueKind ==
+                            JsonValueKind.Object)
+                    {
+                        var detalhes =
+                            campos.EnumerateObject()
+                                .Select(item =>
+                                    item.Value.GetString() ?? "")
+                                .Where(texto =>
+                                    !string.IsNullOrWhiteSpace(texto));
+
+                        var textos = detalhes.ToArray();
+
+                        if (textos.Length > 0)
+                        {
+                            mensagem += "\n" +
+                                string.Join("\n", textos);
+                        }
+                    }
                 }
 
                 ExibirErro(mensagem);
                 return;
             }
 
-            cadastroGravado = true;
-
+            // Cadastro iniciado com sucesso.
+            // A conta ainda aguarda confirmação do e-mail.
             SenhaEntry.Text = "";
             ConfirmarSenhaEntry.Text = "";
+            CodigoAtivacaoEntry.Text = "";
 
             await DisplayAlertAsync(
-                "Cadastro concluído",
-                "Responsável cadastrado com sucesso.",
+                "Verifique seu e-mail",
+                "Enviamos um link de confirmação para " +
+                email + ".\n\n" +
+                "Acesse sua caixa de entrada e clique " +
+                "no link para ativar sua conta.\n\n" +
+                "Depois da confirmação, você poderá " +
+                "entrar no PediAgenda.",
                 "OK");
 
             await Shell.Current.GoToAsync("..");
@@ -193,62 +218,68 @@ public partial class CadastroCampo : ContentPage
             System.Diagnostics.Debug.WriteLine(ex);
 
             ExibirErro(
-                "Não foi possível confirmar o cadastro. Verifique a conexão " +
-                "e tente entrar com o e-mail informado antes de cadastrar novamente.");
+                "Não foi possível comunicar com a API. " +
+                "Verifique sua conexão. Se o cadastro " +
+                "já tiver sido iniciado, não será " +
+                "necessário criar outro usuário.");
         }
         catch (TaskCanceledException ex)
         {
             System.Diagnostics.Debug.WriteLine(ex);
 
             ExibirErro(
-                "A resposta demorou demais. Tente entrar com o e-mail informado " +
-                "para verificar se o cadastro foi concluído.");
+                "A API demorou para responder. " +
+                "Verifique sua conexão e tente novamente.");
         }
         catch (JsonException ex)
         {
             System.Diagnostics.Debug.WriteLine(ex);
-            ExibirErro("A API retornou uma resposta inesperada.");
+
+            ExibirErro(
+                "A API retornou uma resposta inesperada.");
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine(ex);
 
-            ExibirErro(cadastroGravado
-                ? "O cadastro foi gravado, mas não foi possível abrir a próxima tela. " +
-                  "Volte ao login para entrar."
-                : "Não foi possível concluir o cadastro. Confira a janela Saída.");
+            ExibirErro(
+                "Não foi possível concluir a operação. " +
+                "Confira a janela Saída do Visual Studio.");
         }
         finally
         {
             cadastrando = false;
-            ContinuarButton.IsEnabled = !cadastroGravado;
+            ContinuarButton.IsEnabled = true;
             VoltarButton.IsEnabled = true;
         }
     }
 
-    // Validação simplificada: formato e dígitos repetidos.
-    // Não verifica os dígitos verificadores do CPF.
-    private bool ValidarCpf(string cpf)
+    // Validação simplificada de CPF
+    private static bool ValidarCpf(string cpf)
     {
-        cpf = Regex.Replace(cpf, @"\D", "");
-
         return cpf.Length == 11 &&
                !cpf.All(c => c == cpf[0]);
     }
 
-    private bool ValidarEmail(string email)
+    // Validação de e-mail
+    private static bool ValidarEmail(string email)
     {
         return !string.IsNullOrWhiteSpace(email) &&
-               Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+               Regex.IsMatch(
+                   email,
+                   @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
     }
 
+    // Exibir mensagens de erro
     private void ExibirErro(string mensagem)
     {
         MensagemErroLabel.Text = mensagem;
         MensagemErroLabel.IsVisible = true;
     }
 
-    private async void VoltarButton_Clicked(object sender, EventArgs e)
+    // Voltar à tela anterior
+    private async void VoltarButton_Clicked(
+        object sender, EventArgs e)
     {
         if (cadastrando)
             return;

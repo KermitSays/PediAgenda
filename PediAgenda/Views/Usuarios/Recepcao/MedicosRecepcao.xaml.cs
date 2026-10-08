@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using PediAgenda.Dados;
 using PediAgenda.Views.Usuarios.Medico;
 using PediAgenda.Views.Usuarios.Responsavel;
 
@@ -6,16 +7,43 @@ namespace PediAgenda.Views.Usuarios.Recepcao;
 
 public partial class MedicosRecepcao : ContentPage
 {
+    // =============================================
+    // HORÁRIOS EXIBIDOS
+    // =============================================
+
     public ObservableCollection<HorarioAgendaRecepcao>
         HorariosFiltrados
     {
         get;
         set;
-    } = new();
+    } =
+        new();
 
+
+    // =============================================
+    // CONTROLE DA DATA
+    // =============================================
 
     private bool ajustandoData;
 
+
+    // =============================================
+    // MÉDICO SELECIONADO
+    // =============================================
+    //
+    // Temporário enquanto os médicos ainda são
+    // carregados localmente.
+    //
+    // Futuramente este valor será preenchido com
+    // os dados retornados pela API.
+
+    private string medicoSelecionado =
+        string.Empty;
+
+
+    // =============================================
+    // CONSTRUTOR
+    // =============================================
 
     public MedicosRecepcao()
     {
@@ -26,8 +54,24 @@ public partial class MedicosRecepcao : ContentPage
             this;
 
 
-        CarregarMedicos();
+        // =========================================
+        // MÉDICO INICIAL
+        // =========================================
 
+        medicoSelecionado =
+            AgendaMedicaRecepcaoDados
+                .MedicosCompartilhados
+                .FirstOrDefault()
+            ?? string.Empty;
+
+
+        MedicoSelecionadoLabel.Text =
+            medicoSelecionado;
+
+
+        // =========================================
+        // PRIMEIRA DATA DISPONÍVEL
+        // =========================================
 
         DateTime primeiraDataDisponivel =
             ProximoDiaUtil(
@@ -42,9 +86,17 @@ public partial class MedicosRecepcao : ContentPage
             primeiraDataDisponivel;
 
 
+        // =========================================
+        // CARREGA A AGENDA
+        // =========================================
+
         CarregarAgenda();
     }
 
+
+    // =============================================
+    // AO VOLTAR PARA A TELA
+    // =============================================
 
     protected override void OnAppearing()
     {
@@ -84,8 +136,9 @@ public partial class MedicosRecepcao : ContentPage
             data.Date;
 
 
-        while (!EhDiaUtil(
-            resultado))
+        while (
+            !EhDiaUtil(
+                resultado))
         {
             resultado =
                 resultado.AddDays(1);
@@ -97,42 +150,38 @@ public partial class MedicosRecepcao : ContentPage
 
 
     // =============================================
-    // MÉDICOS
+    // SELECIONAR MÉDICO
     // =============================================
 
-    private void CarregarMedicos()
-    {
-        MedicoPicker.Items.Clear();
-
-
-        foreach (
-            string medico
-            in AgendaMedicaRecepcaoDados
-                .MedicosCompartilhados)
-        {
-            MedicoPicker.Items.Add(
-                medico);
-        }
-
-
-        if (
-            MedicoPicker.Items.Count >
-            0)
-        {
-            MedicoPicker.SelectedIndex =
-                0;
-        }
-    }
-
-
-    // =============================================
-    // ALTERAÇÃO DO MÉDICO
-    // =============================================
-
-    private void Filtro_Changed(
+    private async void SelecionarMedicoButton_Clicked(
         object sender,
         EventArgs e)
     {
+        SelecionarMedicoRecepcao
+            paginaSelecao =
+                new();
+
+
+        SelecionarMedicoRecepcao
+            .MedicoSelecaoItem?
+            medico =
+                await paginaSelecao
+                    .AbrirAsync(
+                        this);
+
+
+        if (medico == null)
+            return;
+
+
+        medicoSelecionado =
+            medico.Nome;
+
+
+        MedicoSelecionadoLabel.Text =
+            medicoSelecionado;
+
+
         CarregarAgenda();
     }
 
@@ -154,8 +203,13 @@ public partial class MedicosRecepcao : ContentPage
             ?? DateTime.Today;
 
 
-        if (!EhDiaUtil(
-            dataSelecionada))
+        // =========================================
+        // BLOQUEIA FIM DE SEMANA
+        // =========================================
+
+        if (
+            !EhDiaUtil(
+                dataSelecionada))
         {
             await DisplayAlertAsync(
                 "Data indisponível",
@@ -187,23 +241,34 @@ public partial class MedicosRecepcao : ContentPage
 
     private void CarregarAgenda()
     {
-        string medicoSelecionado =
-            MedicoPicker.SelectedItem?
-                .ToString()
-            ?? string.Empty;
+        HorariosFiltrados.Clear();
 
 
-        DateTime dataSelecionada =
+        string medico =
+            medicoSelecionado;
+
+
+        if (
+            string.IsNullOrWhiteSpace(
+                medico))
+        {
+            QuantidadeHorariosLabel.Text =
+                "0 horário(s)";
+
+
+            return;
+        }
+
+
+        DateTime data =
             DataPicker.Date
             ?? ProximoDiaUtil(
                 DateTime.Today);
 
 
-        HorariosFiltrados.Clear();
-
-
-        if (!EhDiaUtil(
-            dataSelecionada))
+        if (
+            !EhDiaUtil(
+                data))
         {
             QuantidadeHorariosLabel.Text =
                 "0 horário(s)";
@@ -221,8 +286,8 @@ public partial class MedicosRecepcao : ContentPage
             horarios =
                 AgendaMedicaRecepcaoDados
                     .ObterHorariosCompartilhados(
-                        medicoSelecionado,
-                        dataSelecionada);
+                        medico,
+                        data);
 
 
         foreach (
@@ -240,58 +305,88 @@ public partial class MedicosRecepcao : ContentPage
 
 
     // =============================================
-    // HORÁRIO
+    // CARD DA AGENDA SELECIONADO
     // =============================================
 
-    private async void HorarioButton_Clicked(
+    private async void AgendaCollectionView_SelectionChanged(
         object sender,
-        EventArgs e)
+        SelectionChangedEventArgs e)
     {
         if (
-            sender is not Button botao
-
-            ||
-
-            botao.CommandParameter
-                is not HorarioAgendaRecepcao horario)
+            e.CurrentSelection.FirstOrDefault()
+            is not HorarioAgendaRecepcao horario)
         {
             return;
         }
 
 
-        if (!EhDiaUtil(
-            horario.Data))
-        {
-            await DisplayAlertAsync(
-                "Data indisponível",
-                "Não é possível utilizar horários aos sábados ou domingos.",
-                "OK");
+        // Permite tocar novamente no mesmo card.
 
-
-            return;
-        }
+        AgendaCollectionView.SelectedItem =
+            null;
 
 
         // =========================================
-        // DISPONÍVEL
+        // HORÁRIO DISPONÍVEL
         // =========================================
 
         if (
             horario.Status ==
                 "Disponível")
         {
+            await AgendarHorarioAsync(
+                horario);
+
+
+            return;
+        }
+
+
+        // =========================================
+        // CONSULTA AGENDADA
+        // =========================================
+
+        if (
+            horario.Status ==
+                "Agendado")
+        {
+            await AbrirConsultaAsync(
+                horario);
+
+
+            return;
+        }
+
+
+        // =========================================
+        // HORÁRIO BLOQUEADO
+        // =========================================
+
+        if (
+            horario.Status ==
+                "Bloqueado")
+        {
+            await ExibirBloqueioAsync(
+                horario);
+        }
+    }
+
+
+    // =============================================
+    // AGENDAR CONSULTA
+    // =============================================
+
+    private async Task AgendarHorarioAsync(
+        HorarioAgendaRecepcao horario)
+    {
+        if (
+            PacientesRecepcaoDados
+                .Pacientes.Count ==
+            0)
+        {
             await DisplayAlertAsync(
-                "Agendar consulta",
-
-                $"Horário selecionado:\n" +
-                $"{horario.HorarioFormatado}\n\n" +
-
-                $"Médico: {horario.Medico}\n" +
-                $"Data: {horario.Data:dd/MM/yyyy}\n\n" +
-
-                "O agendamento da Recepção será conectado " +
-                "à fonte compartilhada na próxima etapa.",
-
+                "Nenhum paciente",
+                "Não existem pacientes disponíveis para realizar o agendamento.",
                 "OK");
 
 
@@ -300,12 +395,228 @@ public partial class MedicosRecepcao : ContentPage
 
 
         // =========================================
-        // AGENDADO
+        // SELETOR PESQUISÁVEL DE PACIENTES
+        // =========================================
+
+        SelecionarPacienteRecepcao
+            paginaSelecao =
+                new();
+
+
+        PacienteRecepcaoItem?
+            paciente =
+                await paginaSelecao
+                    .AbrirAsync(
+                        this);
+
+
+        if (paciente == null)
+            return;
+
+
+        // =========================================
+        // CONFIRMAÇÃO
+        // =========================================
+
+        bool confirmar =
+            await DisplayAlertAsync(
+                "Confirmar agendamento",
+
+                $"Paciente: {paciente.Nome}\n" +
+                $"Responsável: {paciente.Responsavel}\n\n" +
+                $"Médico: {horario.Medico}\n" +
+                $"Data: {horario.Data:dd/MM/yyyy}\n" +
+                $"Horário: {horario.HorarioFormatado}",
+
+                "AGENDAR",
+                "CANCELAR");
+
+
+        if (!confirmar)
+            return;
+
+
+        // =========================================
+        // RESERVA O HORÁRIO COMPARTILHADO
+        // =========================================
+
+        bool reservado =
+            HorarioAgendamentoDados
+                .ReservarHorario(
+                    horario.Id);
+
+
+        if (!reservado)
+        {
+            await DisplayAlertAsync(
+                "Horário indisponível",
+                "Este horário não está mais disponível.",
+                "OK");
+
+
+            CarregarAgenda();
+
+
+            return;
+        }
+
+
+        // =========================================
+        // CRIA CONSULTA LOCAL
+        // =========================================
+        //
+        // Futuramente esta operação será feita
+        // através da API.
+
+        paciente.Consultas.Add(
+            new ConsultaPacienteRecepcaoItem
+            {
+                HorarioId =
+                    horario.Id,
+
+                Data =
+                    horario.Data,
+
+                Horario =
+                    horario.Horario,
+
+                Medico =
+                    horario.Medico,
+
+                Especialidade =
+                    "Pediatria Geral",
+
+                TipoAtendimento =
+                    "Particular",
+
+                Status =
+                    StatusConsulta.PorConfirmar
+            });
+
+
+        CarregarAgenda();
+
+
+        await DisplayAlertAsync(
+            "Consulta agendada",
+            $"A consulta de {paciente.Nome} foi agendada com sucesso.",
+            "OK");
+    }
+
+
+    // =============================================
+    // ABRIR CONSULTA
+    // =============================================
+
+    private async Task AbrirConsultaAsync(
+        HorarioAgendaRecepcao horario)
+    {
+        // =========================================
+        // PROCURA CONSULTA DA RECEPÇÃO
+        // =========================================
+
+        var consultaRecepcao =
+            PacientesRecepcaoDados
+                .Pacientes
+                .SelectMany(
+                    paciente =>
+                        paciente.Consultas.Select(
+                            consulta =>
+                                new
+                                {
+                                    Paciente =
+                                        paciente,
+
+                                    Consulta =
+                                        consulta
+                                }))
+                .FirstOrDefault(item =>
+                    item.Consulta.HorarioId ==
+                        horario.Id
+
+                    &&
+
+                    !StatusConsulta.EhCancelada(
+                        item.Consulta.Status));
+
+
+        // =========================================
+        // CONSULTA GERENCIADA PELA RECEPÇÃO
         // =========================================
 
         if (
-            horario.Status ==
-                "Agendado")
+            consultaRecepcao !=
+            null)
+        {
+            await Shell.Current.GoToAsync(
+                nameof(
+                    DetalhesConsultaRecepcao),
+
+                new Dictionary<string, object>
+                {
+                    {
+                        "HorarioId",
+                        horario.Id.ToString()
+                    }
+                });
+
+
+            return;
+        }
+
+
+        // =========================================
+        // CONSULTA LOCAL DO MÉDICO
+        // =========================================
+        //
+        // ConsultasMedicoDados representa,
+        // temporariamente, o médico de ID 1.
+        //
+        // Quando a API estiver integrada,
+        // Médico e Recepção consultarão a mesma
+        // entidade de consulta.
+
+        int idMedico =
+            AgendaMedicaRecepcaoDados
+                .ObterIdMedico(
+                    horario.Medico);
+
+
+        ConsultaMedico?
+            consultaMedico =
+                null;
+
+
+        if (
+            idMedico ==
+            1)
+        {
+            consultaMedico =
+                ConsultasMedicoDados
+                    .Consultas
+                    .FirstOrDefault(c =>
+                        c.Data.Date ==
+                            horario.Data.Date
+
+                        &&
+
+                        c.Horario ==
+                            horario.Horario
+
+                        &&
+
+                        !StatusConsulta.EhCancelada(
+                            c.Status));
+        }
+
+
+        // =========================================
+        // OCUPADO SEM DADOS LOCAIS
+        // =========================================
+
+        if (
+            consultaMedico ==
+            null)
         {
             await DisplayAlertAsync(
                 "Horário ocupado",
@@ -324,14 +635,104 @@ public partial class MedicosRecepcao : ContentPage
 
 
         // =========================================
-        // BLOQUEADO
+        // RESUMO ADMINISTRATIVO
+        // =========================================
+        //
+        // A Recepção vê somente informações
+        // necessárias para administrar a consulta.
+        //
+        // Não são exibidos prontuário, diagnóstico,
+        // observações clínicas ou outros dados
+        // médicos.
+
+        string detalhes =
+            $"Paciente: {consultaMedico.Paciente}\n" +
+            $"Médico: {horario.Medico}\n" +
+            $"Data: {horario.Data:dd/MM/yyyy}\n" +
+            $"Horário: {horario.HorarioFormatado}\n" +
+            $"Status: {consultaMedico.Status}";
+
+
+        // =========================================
+        // CONSULTA REALIZADA
         // =========================================
 
         if (
-            horario.Status ==
-                "Bloqueado")
+            StatusConsulta.EhRealizada(
+                consultaMedico.Status))
         {
-            BloqueioHorario? bloqueio =
+            await DisplayAlertAsync(
+                "Consulta",
+                detalhes,
+                "OK");
+
+
+            return;
+        }
+
+
+        // =========================================
+        // CANCELAR CONSULTA
+        // =========================================
+
+        bool cancelar =
+            await DisplayAlertAsync(
+                "Consulta",
+
+                detalhes +
+                "\n\nDeseja cancelar esta consulta e liberar o horário?",
+
+                "CANCELAR CONSULTA",
+                "VOLTAR");
+
+
+        if (!cancelar)
+            return;
+
+
+        bool confirmar =
+            await DisplayAlertAsync(
+                "Confirmar cancelamento",
+
+                $"Deseja realmente cancelar a consulta de " +
+                $"{consultaMedico.Paciente}?",
+
+                "SIM",
+                "NÃO");
+
+
+        if (!confirmar)
+            return;
+
+
+        consultaMedico.Status =
+            StatusConsulta.Cancelada;
+
+
+        HorarioAgendamentoDados
+            .LiberarHorario(
+                horario.Id);
+
+
+        CarregarAgenda();
+
+
+        await DisplayAlertAsync(
+            "Consulta cancelada",
+            "A consulta foi cancelada e o horário foi liberado.",
+            "OK");
+    }
+
+
+    // =============================================
+    // EXIBIR BLOQUEIO
+    // =============================================
+
+    private async Task ExibirBloqueioAsync(
+        HorarioAgendaRecepcao horario)
+    {
+        BloqueioHorario?
+            bloqueio =
                 AgendaMedicaRecepcaoDados
                     .ObterBloqueioCompartilhado(
                         horario.Medico,
@@ -339,68 +740,127 @@ public partial class MedicosRecepcao : ContentPage
                         horario.Horario);
 
 
-            if (bloqueio == null)
-            {
-                await DisplayAlertAsync(
-                    "Horário bloqueado",
-                    "Este horário está indisponível.",
-                    "OK");
-
-
-                return;
-            }
-
-
-            string periodo =
-                bloqueio.DataInicial.Date ==
-                bloqueio.DataFinal.Date
-
-                    ? $"{bloqueio.DataInicial:dd/MM/yyyy} • " +
-                      $"{bloqueio.HorarioInicial:hh\\:mm} às " +
-                      $"{bloqueio.HorarioFinal:hh\\:mm}"
-
-                    : $"{bloqueio.DataInicial:dd/MM/yyyy} até " +
-                      $"{bloqueio.DataFinal:dd/MM/yyyy} • " +
-                      $"{bloqueio.HorarioInicial:hh\\:mm} às " +
-                      $"{bloqueio.HorarioFinal:hh\\:mm}";
-
-
-            bool confirmar =
-                await DisplayAlertAsync(
-                    "Liberar bloqueio",
-
-                    $"Este horário faz parte do bloqueio:\n\n" +
-                    $"{periodo}\n\n" +
-                    $"Motivo: {bloqueio.Motivo}\n\n" +
-                    "Deseja liberar todo este período?",
-
-                    "LIBERAR",
-                    "CANCELAR");
-
-
-            if (!confirmar)
-                return;
-
-
-            // LIBERA A MESMA FONTE USADA PELO MÉDICO
-
-            HorarioAgendamentoDados
-                .LiberarBloqueio(
-                    bloqueio.Id);
-
-
-            BloqueiosMedico.Bloqueios
-                .Remove(
-                    bloqueio);
-
-
-            CarregarAgenda();
-
-
+        if (bloqueio == null)
+        {
             await DisplayAlertAsync(
-                "Período liberado",
-                "O bloqueio foi liberado com sucesso.",
+                "Horário bloqueado",
+                "Este horário está indisponível.",
                 "OK");
+
+
+            return;
         }
+
+
+        await DisplayAlertAsync(
+            "Horário bloqueado",
+
+            $"Data: {horario.Data:dd/MM/yyyy}\n" +
+            $"Horário: {horario.HorarioFormatado}\n" +
+            $"Motivo: {bloqueio.Motivo}\n\n" +
+            "Use o botão “LIBERAR HORÁRIOS” para gerenciar este bloqueio.",
+
+            "OK");
+    }
+
+
+    // =============================================
+    // BLOQUEAR HORÁRIO
+    // =============================================
+
+    private async void BloquearHorarioButton_Clicked(
+        object sender,
+        EventArgs e)
+    {
+        string medico =
+            medicoSelecionado;
+
+
+        int idMedico =
+            AgendaMedicaRecepcaoDados
+                .ObterIdMedico(
+                    medico);
+
+
+        if (idMedico <= 0)
+        {
+            await DisplayAlertAsync(
+                "Selecione um médico",
+                "Selecione o médico cuja agenda deseja bloquear.",
+                "OK");
+
+
+            return;
+        }
+
+
+        await Shell.Current.GoToAsync(
+            nameof(
+                BloquearHorario),
+
+            new Dictionary<string, object>
+            {
+                {
+                    "IdMedico",
+                    idMedico.ToString()
+                }
+            });
+    }
+
+
+    // =============================================
+    // LIBERAR HORÁRIOS
+    // =============================================
+
+    private async void LiberarHorariosButton_Clicked(
+        object sender,
+        EventArgs e)
+    {
+        string medico =
+            medicoSelecionado;
+
+
+        int idMedico =
+            AgendaMedicaRecepcaoDados
+                .ObterIdMedico(
+                    medico);
+
+
+        if (idMedico <= 0)
+        {
+            await DisplayAlertAsync(
+                "Selecione um médico",
+                "Selecione o médico cuja agenda deseja gerenciar.",
+                "OK");
+
+
+            return;
+        }
+
+
+        await Shell.Current.GoToAsync(
+            nameof(
+                LiberarHorarios),
+
+            new Dictionary<string, object>
+            {
+                {
+                    "IdMedico",
+                    idMedico.ToString()
+                }
+            });
+    }
+
+
+    // =============================================
+    // VOLTAR
+    // =============================================
+
+    private async void VoltarButton_Clicked(
+        object sender,
+        EventArgs e)
+    {
+        await Shell.Current.GoToAsync(
+            "..");
     }
 }

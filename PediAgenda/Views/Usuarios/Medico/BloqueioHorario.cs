@@ -2,15 +2,57 @@
 
 public class BloqueioHorario
 {
-    public Guid Id { get; } = Guid.NewGuid();
+    public Guid Id
+    {
+        get;
+    } =
+        Guid.NewGuid();
 
-    public DateTime DataInicial { get; set; }
 
-    public DateTime DataFinal { get; set; }
+    // Enquanto os bloqueios antigos eram sempre
+    // da Dra. Ana, usamos 1 como padrão.
+    //
+    // Quando a API assumir a agenda, este valor
+    // virá do médico selecionado/autenticado.
 
-    public TimeSpan HorarioInicial { get; set; }
+    public int IdMedico
+    {
+        get;
+        set;
+    } = 1;
 
-    public TimeSpan HorarioFinal { get; set; }
 
-    public string Motivo { get; set; } = string.Empty;
+    public DateTime DataInicial
+    {
+        get;
+        set;
+    }
+
+
+    public DateTime DataFinal
+    {
+        get;
+        set;
+    }
+
+
+    public TimeSpan HorarioInicial
+    {
+        get;
+        set;
+    }
+
+
+    public TimeSpan HorarioFinal
+    {
+        get;
+        set;
+    }
+
+
+    public string Motivo
+    {
+        get;
+        set;
+    } = string.Empty;
 }

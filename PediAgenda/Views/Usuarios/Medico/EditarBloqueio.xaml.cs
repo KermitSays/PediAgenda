@@ -1,3 +1,5 @@
+using PediAgenda.Dados;
+using PediAgenda.Views.Usuarios.Recepcao;
 using PediAgenda.Views.Usuarios.Responsavel;
 
 namespace PediAgenda.Views.Usuarios.Medico;
@@ -7,10 +9,6 @@ namespace PediAgenda.Views.Usuarios.Medico;
     "IdBloqueio")]
 public partial class EditarBloqueio : ContentPage
 {
-    private const int IdMedicoAgendaLocal =
-        1;
-
-
     private string idBloqueio =
         string.Empty;
 
@@ -46,10 +44,6 @@ public partial class EditarBloqueio : ContentPage
     }
 
 
-    // =============================================
-    // CARREGA BLOQUEIO
-    // =============================================
-
     private void CarregarBloqueio()
     {
         if (
@@ -63,10 +57,8 @@ public partial class EditarBloqueio : ContentPage
 
         bloqueioAtual =
             BloqueiosMedico.Bloqueios
-                .FirstOrDefault(
-                    bloqueio =>
-                        bloqueio.Id ==
-                        id);
+                .FirstOrDefault(b =>
+                    b.Id == id);
 
 
         if (bloqueioAtual == null)
@@ -94,9 +86,145 @@ public partial class EditarBloqueio : ContentPage
     }
 
 
-    // =============================================
-    // SALVAR ALTERAÇÃO
-    // =============================================
+    private List<ConsultaMedico>
+        EncontrarConsultasMedicoAfetadas(
+            DateTime dataInicial,
+            DateTime dataFinal,
+            TimeSpan horarioInicial,
+            TimeSpan horarioFinal)
+    {
+        if (
+            bloqueioAtual == null
+
+            ||
+
+            bloqueioAtual.IdMedico !=
+                1)
+        {
+            return
+                new List<ConsultaMedico>();
+        }
+
+
+        return ConsultasMedicoDados.Consultas
+            .Where(consulta =>
+                consulta.Data.Date >=
+                    dataInicial.Date
+
+                &&
+
+                consulta.Data.Date <=
+                    dataFinal.Date
+
+                &&
+
+                consulta.Horario >=
+                    horarioInicial
+
+                &&
+
+                consulta.Horario <
+                    horarioFinal
+
+                &&
+
+                StatusConsulta.EhAtiva(
+                    consulta.Status))
+            .ToList();
+    }
+
+
+    private List<(
+        PacienteRecepcaoItem Paciente,
+        ConsultaPacienteRecepcaoItem Consulta)>
+        EncontrarConsultasRecepcaoAfetadas(
+            DateTime dataInicial,
+            DateTime dataFinal,
+            TimeSpan horarioInicial,
+            TimeSpan horarioFinal)
+    {
+        List<(
+            PacienteRecepcaoItem Paciente,
+            ConsultaPacienteRecepcaoItem Consulta)>
+            resultado =
+                new();
+
+
+        if (bloqueioAtual == null)
+            return resultado;
+
+
+        foreach (
+            PacienteRecepcaoItem paciente
+            in PacientesRecepcaoDados.Pacientes)
+        {
+            foreach (
+                ConsultaPacienteRecepcaoItem consulta
+                in paciente.Consultas)
+            {
+                if (
+                    !consulta.HorarioId
+                        .HasValue)
+                {
+                    continue;
+                }
+
+
+                int idMedico =
+                    AgendaMedicaRecepcaoDados
+                        .ObterIdMedico(
+                            consulta.Medico);
+
+
+                if (
+                    idMedico !=
+                    bloqueioAtual.IdMedico)
+                {
+                    continue;
+                }
+
+
+                bool dentro =
+                    consulta.Data.Date >=
+                        dataInicial.Date
+
+                    &&
+
+                    consulta.Data.Date <=
+                        dataFinal.Date
+
+                    &&
+
+                    consulta.Horario >=
+                        horarioInicial
+
+                    &&
+
+                    consulta.Horario <
+                        horarioFinal;
+
+
+                if (
+                    dentro
+
+                    &&
+
+                    StatusConsulta.EhAtiva(
+                        consulta.Status))
+                {
+                    resultado.Add(
+                        (
+                            paciente,
+                            consulta
+                        ));
+                }
+            }
+        }
+
+
+        return resultado;
+    }
+
 
     private async void SalvarAlteracaoButton_Clicked(
         object sender,
@@ -126,18 +254,12 @@ public partial class EditarBloqueio : ContentPage
 
         TimeSpan horarioInicial =
             HorarioInicialPicker.Time
-            ?? new TimeSpan(
-                12,
-                0,
-                0);
+            ?? bloqueioAtual.HorarioInicial;
 
 
         TimeSpan horarioFinal =
             HorarioFinalPicker.Time
-            ?? new TimeSpan(
-                12,
-                0,
-                0);
+            ?? bloqueioAtual.HorarioFinal;
 
 
         string motivo =
@@ -188,10 +310,55 @@ public partial class EditarBloqueio : ContentPage
         }
 
 
+        List<ConsultaMedico>
+            consultasMedico =
+                EncontrarConsultasMedicoAfetadas(
+                    dataInicial,
+                    dataFinal,
+                    horarioInicial,
+                    horarioFinal);
+
+
+        List<(
+            PacienteRecepcaoItem Paciente,
+            ConsultaPacienteRecepcaoItem Consulta)>
+            consultasRecepcao =
+                EncontrarConsultasRecepcaoAfetadas(
+                    dataInicial,
+                    dataFinal,
+                    horarioInicial,
+                    horarioFinal);
+
+
+        int total =
+            consultasMedico.Count +
+            consultasRecepcao.Count;
+
+
+        string mensagem =
+            "Deseja salvar as alterações deste bloqueio?";
+
+
+        if (total > 0)
+        {
+            mensagem +=
+                $"\n\nAtenção: {total} " +
+                $"{(
+                    total == 1
+                        ? "consulta será afetada."
+                        : "consultas serão afetadas."
+                )}";
+
+
+            mensagem +=
+                "\n\nAs consultas afetadas serão canceladas.";
+        }
+
+
         bool confirmar =
             await DisplayAlertAsync(
                 "Salvar alteração",
-                "Deseja salvar as alterações deste bloqueio?",
+                mensagem,
                 "Salvar",
                 "Cancelar");
 
@@ -200,14 +367,14 @@ public partial class EditarBloqueio : ContentPage
             return;
 
 
-        // RETIRA O BLOQUEIO ANTIGO DA FONTE LOCAL.
+        int idMedico =
+            bloqueioAtual.IdMedico;
+
 
         HorarioAgendamentoDados
             .LiberarBloqueio(
                 bloqueioAtual.Id);
 
-
-        // ATUALIZA OS DADOS.
 
         bloqueioAtual.DataInicial =
             dataInicial;
@@ -229,21 +396,113 @@ public partial class EditarBloqueio : ContentPage
             motivo;
 
 
-        // APLICA O NOVO PERÍODO À FONTE LOCAL.
-
         HorarioAgendamentoDados
             .BloquearPeriodo(
                 bloqueioAtual.Id,
-                IdMedicoAgendaLocal,
+                idMedico,
                 dataInicial,
                 dataFinal,
                 horarioInicial,
                 horarioFinal);
 
 
+        foreach (
+            ConsultaMedico consulta
+            in consultasMedico)
+        {
+            consulta.Status =
+                StatusConsulta.Cancelada;
+
+
+            consulta.CanceladaPorBloqueio =
+                true;
+
+
+            consulta.MotivoCancelamento =
+                motivo;
+
+
+            HorarioAgendamentoItem?
+                horario =
+                    HorarioAgendamentoDados
+                        .ObterPorDataHora(
+                            idMedico,
+                            consulta.Data,
+                            consulta.Horario);
+
+
+            if (horario != null)
+            {
+                HorarioAgendamentoDados
+                    .LiberarHorario(
+                        horario.IdHorario);
+            }
+
+
+            NotificacoesDados.Notificacoes.Add(
+                new Notificacao
+                {
+                    Titulo =
+                        "Consulta cancelada",
+
+                    Mensagem =
+                        $"A consulta de {consulta.Paciente} " +
+                        $"do dia {consulta.Data:dd/MM/yyyy} às " +
+                        $"{consulta.Horario:hh\\:mm} " +
+                        $"foi cancelada após uma alteração " +
+                        $"no bloqueio da agenda." +
+                        $"\n\nMotivo: {motivo}",
+
+                    DataHora =
+                        DateTime.Now,
+
+                    Lida =
+                        false
+                });
+        }
+
+
+        foreach (
+            var item
+            in consultasRecepcao)
+        {
+            ConsultaPacienteRecepcaoItem consulta =
+                item.Consulta;
+
+
+            if (
+                !consulta.HorarioId
+                    .HasValue)
+            {
+                continue;
+            }
+
+
+            int idHorario =
+                consulta.HorarioId.Value;
+
+
+            consulta.Status =
+                StatusConsulta.Cancelada;
+
+
+            consulta.HorarioId =
+                null;
+
+
+            HorarioAgendamentoDados
+                .LiberarHorario(
+                    idHorario);
+        }
+
+
         await DisplayAlertAsync(
             "Alteração salva",
-            "O bloqueio foi atualizado com sucesso.",
+
+            total > 0
+                ? "O bloqueio foi atualizado e as consultas afetadas foram canceladas."
+                : "O bloqueio foi atualizado com sucesso.",
+
             "OK");
 
 
@@ -251,10 +510,6 @@ public partial class EditarBloqueio : ContentPage
             "..");
     }
 
-
-    // =============================================
-    // CANCELAR
-    // =============================================
 
     private async void CancelarButton_Clicked(
         object sender,

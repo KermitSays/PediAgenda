@@ -70,9 +70,10 @@ public partial class RelatoriosMedico : ContentPage
         StatusPicker.Items.Clear();
 
         StatusPicker.Items.Add("Todos");
-        StatusPicker.Items.Add("Confirmado");
-        StatusPicker.Items.Add("Cancelado");
-        StatusPicker.Items.Add("Por Confirmar");
+        StatusPicker.Items.Add("Confirmada");
+        StatusPicker.Items.Add("Cancelada");
+        StatusPicker.Items.Add("Por confirmar");
+        StatusPicker.Items.Add("Realizada");
 
         StatusPicker.SelectedIndex = 0;
     }
@@ -146,28 +147,40 @@ public partial class RelatoriosMedico : ContentPage
     // Atualiza os quatro cards de resumo.
     private void AtualizarResumo()
     {
-        int total = Resultados.Count;
+        int total =
+            Resultados.Count;
+
 
         int confirmadas =
             Resultados.Count(c =>
-                c.Status == "Confirmado");
+                c.Status == "Confirmada");
+
 
         int canceladas =
             Resultados.Count(c =>
-                c.Status == "Cancelado");
+                c.Status == "Cancelada");
+
 
         int porConfirmar =
             Resultados.Count(c =>
-                c.Status == "Por Confirmar");
+                c.Status == "Por confirmar");
 
 
-        TotalConsultasLabel.Text = total.ToString();
+        TotalConsultasLabel.Text =
+            total.ToString();
 
-        ConfirmadasLabel.Text = confirmadas.ToString();
 
-        CanceladasLabel.Text = canceladas.ToString();
+        ConfirmadasLabel.Text =
+            confirmadas.ToString();
 
-        PorConfirmarLabel.Text = porConfirmar.ToString();
+
+        CanceladasLabel.Text =
+            canceladas.ToString();
+
+
+        PorConfirmarLabel.Text =
+            porConfirmar.ToString();
+
 
         QuantidadeLabel.Text =
             $"{total} resultado(s)";
@@ -242,23 +255,43 @@ public partial class RelatoriosMedico : ContentPage
 
 
             // RESUMO
-            planilha.Cell("A8").Value = "Resumo";
-            planilha.Cell("A8").Style.Font.Bold = true;
 
-            planilha.Cell("A9").Value = "Total de consultas";
-            planilha.Cell("B9").Value = Resultados.Count;
+            planilha.Cell("A8").Value =
+                "Resumo";
 
-            planilha.Cell("A10").Value = "Confirmadas";
+            planilha.Cell("A8").Style.Font.Bold =
+                true;
+
+
+            planilha.Cell("A9").Value =
+                "Total de consultas";
+
+            planilha.Cell("B9").Value =
+                Resultados.Count;
+
+
+            planilha.Cell("A10").Value =
+                "Confirmadas";
+
             planilha.Cell("B10").Value =
-                Resultados.Count(c => c.Status == "Confirmado");
+                Resultados.Count(c =>
+                    c.Status == "Confirmada");
 
-            planilha.Cell("A11").Value = "Canceladas";
+
+            planilha.Cell("A11").Value =
+                "Canceladas";
+
             planilha.Cell("B11").Value =
-                Resultados.Count(c => c.Status == "Cancelado");
+                Resultados.Count(c =>
+                    c.Status == "Cancelada");
 
-            planilha.Cell("A12").Value = "Por confirmar";
+
+            planilha.Cell("A12").Value =
+                "Por confirmar";
+
             planilha.Cell("B12").Value =
-                Resultados.Count(c => c.Status == "Por Confirmar");
+                Resultados.Count(c =>
+                    c.Status == "Por confirmar");
 
 
             // CABEÇALHO DA TABELA

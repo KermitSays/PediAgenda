@@ -19,7 +19,7 @@
 
             <Label
                 x:Name="SaudacaoLabel"
-                Text="Olá, Dr(a).!"
+                Text="Olá,!"
                 FontSize="28"
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />

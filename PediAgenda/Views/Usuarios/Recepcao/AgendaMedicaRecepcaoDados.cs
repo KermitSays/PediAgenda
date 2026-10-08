@@ -1,4 +1,5 @@
-﻿using PediAgenda.Views.Usuarios.Medico;
+﻿using PediAgenda.Dados;
+using PediAgenda.Views.Usuarios.Medico;
 using PediAgenda.Views.Usuarios.Responsavel;
 
 namespace PediAgenda.Views.Usuarios.Recepcao;
@@ -6,35 +7,14 @@ namespace PediAgenda.Views.Usuarios.Recepcao;
 public static class AgendaMedicaRecepcaoDados
 {
     // =============================================
-    // MÉDICOS ANTIGOS DA RECEPÇÃO
+    // MÉDICOS LOCAIS
     // =============================================
     //
-    // Mantidos temporariamente porque o fluxo
-    // AgendarConsultaRecepcao ainda utiliza esta
-    // lista.
-    //
-    // Na Etapa 4C2 ele também será migrado para
-    // a fonte compartilhada.
+    // Temporário enquanto os médicos ainda não
+    // são carregados pela API.
 
-    public static List<string> Medicos
-    {
-        get;
-    } =
-        new()
-        {
-            "Dr. Carlos Mendes",
-            "Dra. Fernanda Lima"
-        };
-
-
-    // =============================================
-    // MÉDICOS DA AGENDA COMPARTILHADA
-    // =============================================
-    //
-    // Estes IDs correspondem aos mesmos IDs
-    // utilizados no fluxo do Responsável.
-
-    public static List<string> MedicosCompartilhados
+    public static List<string>
+        MedicosCompartilhados
     {
         get;
     } =
@@ -67,7 +47,7 @@ public static class AgendaMedicaRecepcaoDados
 
 
     // =============================================
-    // AGENDA COMPARTILHADA
+    // AGENDA
     // =============================================
 
     public static List<HorarioAgendaRecepcao>
@@ -88,7 +68,7 @@ public static class AgendaMedicaRecepcaoDados
 
 
         List<HorarioAgendamentoItem>
-            horariosCompartilhados =
+            horarios =
                 HorarioAgendamentoDados
                     .ObterHorariosDoDia(
                         idMedico,
@@ -102,69 +82,33 @@ public static class AgendaMedicaRecepcaoDados
 
         foreach (
             HorarioAgendamentoItem horario
-            in horariosCompartilhados)
+            in horarios)
         {
-            // =====================================
-            // LOCALIZA BLOQUEIO
-            // =====================================
-            //
-            // Nesta versão local, os bloqueios
-            // criados pelo perfil Médico pertencem
-            // ao médico local de ID 1.
-
             BloqueioHorario? bloqueio =
-                null;
-
-
-            if (
-                idMedico == 1
-
-                &&
-
-                horario.Bloqueado)
-            {
-                bloqueio =
-                    BloqueiosMedico.Bloqueios
-                        .FirstOrDefault(b =>
-                            horario.Data.Date >=
-                                b.DataInicial.Date
-
-                            &&
-
-                            horario.Data.Date <=
-                                b.DataFinal.Date
-
-                            &&
-
-                            horario.HoraInicio >=
-                                b.HorarioInicial
-
-                            &&
-
-                            horario.HoraInicio <
-                                b.HorarioFinal);
-            }
+                ObterBloqueioCompartilhado(
+                    medico,
+                    horario.Data,
+                    horario.HoraInicio);
 
 
             // =====================================
-            // PROCURA PACIENTE DA RECEPÇÃO
+            // CONSULTA DA RECEPÇÃO
             // =====================================
 
-            var consultaPaciente =
+            var consultaRecepcao =
                 PacientesRecepcaoDados.Pacientes
                     .SelectMany(
                         paciente =>
-                            paciente.Consultas
-                                .Select(
-                                    consulta =>
-                                        new
-                                        {
-                                            Paciente =
-                                                paciente,
+                            paciente.Consultas.Select(
+                                consulta =>
+                                    new
+                                    {
+                                        Paciente =
+                                            paciente,
 
-                                            Consulta =
-                                                consulta
-                                        }))
+                                        Consulta =
+                                            consulta
+                                    }))
                     .FirstOrDefault(item =>
                         item.Consulta.HorarioId ==
                             horario.IdHorario
@@ -187,30 +131,87 @@ public static class AgendaMedicaRecepcaoDados
 
                         &&
 
-                        !item.Consulta.Status.Equals(
-                            "Cancelado",
-                            StringComparison.OrdinalIgnoreCase)
+                        !StatusConsulta.EhCancelada(
+                            item.Consulta.Status));
 
-                        &&
 
-                        !item.Consulta.Status.Equals(
-                            "Cancelada",
-                            StringComparison.OrdinalIgnoreCase));
+            string paciente =
+                consultaRecepcao?
+                    .Paciente
+                    .Nome
+                ?? string.Empty;
+
+
+            string statusConsulta =
+                consultaRecepcao?
+                    .Consulta
+                    .Status
+                ?? string.Empty;
 
 
             // =====================================
-            // DEFINE O STATUS VISUAL
+            // CONSULTA LOCAL DO MÉDICO
+            // =====================================
+            //
+            // O conjunto local ConsultasMedicoDados
+            // representa atualmente o médico de ID 1.
+
+            if (
+                consultaRecepcao ==
+                    null
+
+                &&
+
+                idMedico ==
+                    1)
+            {
+                ConsultaMedico?
+                    consultaMedico =
+                        ConsultasMedicoDados.Consultas
+                            .FirstOrDefault(c =>
+                                c.Data.Date ==
+                                    horario.Data.Date
+
+                                &&
+
+                                c.Horario ==
+                                    horario.HoraInicio
+
+                                &&
+
+                                !StatusConsulta.EhCancelada(
+                                    c.Status));
+
+
+                if (
+                    consultaMedico !=
+                    null)
+                {
+                    paciente =
+                        consultaMedico.Paciente;
+
+
+                    statusConsulta =
+                        consultaMedico.Status;
+                }
+            }
+
+
+            // =====================================
+            // STATUS DA AGENDA
             // =====================================
 
             string status;
 
 
-            if (horario.Bloqueado)
+            if (
+                horario.Bloqueado)
             {
                 status =
                     "Bloqueado";
             }
-            else if (!horario.Disponivel)
+            else if (
+                !horario.Disponivel)
             {
                 status =
                     "Agendado";
@@ -219,27 +220,6 @@ public static class AgendaMedicaRecepcaoDados
             {
                 status =
                     "Disponível";
-            }
-
-
-            string pacienteTexto =
-                consultaPaciente?
-                    .Paciente
-                    .Nome
-                ?? string.Empty;
-
-
-            if (
-                status ==
-                    "Agendado"
-
-                &&
-
-                string.IsNullOrWhiteSpace(
-                    pacienteTexto))
-            {
-                pacienteTexto =
-                    "Horário ocupado";
             }
 
 
@@ -261,11 +241,15 @@ public static class AgendaMedicaRecepcaoDados
                     Status =
                         status,
 
+                    StatusConsulta =
+                        statusConsulta,
+
                     Paciente =
-                        pacienteTexto,
+                        paciente,
 
                     MotivoBloqueio =
-                        bloqueio?.Motivo
+                        bloqueio?
+                            .Motivo
                         ?? string.Empty
                 });
         }
@@ -279,7 +263,7 @@ public static class AgendaMedicaRecepcaoDados
 
 
     // =============================================
-    // LOCALIZA BLOQUEIO
+    // BLOQUEIO
     // =============================================
 
     public static BloqueioHorario?
@@ -293,15 +277,17 @@ public static class AgendaMedicaRecepcaoDados
                 medico);
 
 
-        // Nesta versão local, somente o Médico
-        // de ID 1 possui bloqueios compartilhados.
-
-        if (idMedico != 1)
+        if (idMedico <= 0)
             return null;
 
 
         return BloqueiosMedico.Bloqueios
             .FirstOrDefault(b =>
+                b.IdMedico ==
+                    idMedico
+
+                &&
+
                 data.Date >=
                     b.DataInicial.Date
 
@@ -320,107 +306,4 @@ public static class AgendaMedicaRecepcaoDados
                 horario <
                     b.HorarioFinal);
     }
-
-
-    // =============================================
-    // DADOS ANTIGOS DA RECEPÇÃO
-    // =============================================
-    //
-    // Ainda ficam aqui SOMENTE para não quebrar
-    // AgendarConsultaRecepcao e
-    // DetalhesConsultaRecepcao antes da Etapa 4C2.
-
-    public static List<HorarioAgendaRecepcao>
-        Horarios
-    {
-        get;
-    } =
-        new()
-        {
-            new HorarioAgendaRecepcao
-            {
-                Id = 1,
-                Medico = "Dr. Carlos Mendes",
-                Data = new DateTime(2026, 10, 5),
-                Horario = new TimeSpan(8, 0, 0),
-                Status = "Disponível"
-            },
-
-            new HorarioAgendaRecepcao
-            {
-                Id = 2,
-                Medico = "Dr. Carlos Mendes",
-                Data = new DateTime(2026, 10, 5),
-                Horario = new TimeSpan(9, 0, 0),
-                Status = "Agendado",
-                Paciente = "Maria Alice"
-            },
-
-            new HorarioAgendaRecepcao
-            {
-                Id = 3,
-                Medico = "Dr. Carlos Mendes",
-                Data = new DateTime(2026, 10, 5),
-                Horario = new TimeSpan(10, 0, 0),
-                Status = "Bloqueado",
-                MotivoBloqueio = "Reunião da equipe"
-            },
-
-            new HorarioAgendaRecepcao
-            {
-                Id = 4,
-                Medico = "Dr. Carlos Mendes",
-                Data = new DateTime(2026, 10, 5),
-                Horario = new TimeSpan(11, 0, 0),
-                Status = "Disponível"
-            },
-
-            new HorarioAgendaRecepcao
-            {
-                Id = 5,
-                Medico = "Dr. Carlos Mendes",
-                Data = new DateTime(2026, 10, 5),
-                Horario = new TimeSpan(14, 0, 0),
-                Status = "Agendado",
-                Paciente = "Bianca"
-            },
-
-            new HorarioAgendaRecepcao
-            {
-                Id = 6,
-                Medico = "Dra. Fernanda Lima",
-                Data = new DateTime(2026, 10, 5),
-                Horario = new TimeSpan(8, 0, 0),
-                Status = "Agendado",
-                Paciente = "João Pedro"
-            },
-
-            new HorarioAgendaRecepcao
-            {
-                Id = 7,
-                Medico = "Dra. Fernanda Lima",
-                Data = new DateTime(2026, 10, 5),
-                Horario = new TimeSpan(9, 0, 0),
-                Status = "Disponível"
-            },
-
-            new HorarioAgendaRecepcao
-            {
-                Id = 8,
-                Medico = "Dra. Fernanda Lima",
-                Data = new DateTime(2026, 10, 5),
-                Horario = new TimeSpan(10, 0, 0),
-                Status = "Bloqueado",
-                MotivoBloqueio = "Atendimento externo"
-            },
-
-            new HorarioAgendaRecepcao
-            {
-                Id = 9,
-                Medico = "Dra. Fernanda Lima",
-                Data = new DateTime(2026, 10, 5),
-                Horario = new TimeSpan(11, 0, 0),
-                Status = "Disponível"
-            }
-        };
 }

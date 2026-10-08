@@ -16,7 +16,7 @@
 
             <!-- Imagem - Responsavel -->
             <Image
-                Source="user.png"
+                Source="login_responsavel.png"
                 HeightRequest="100"
                 WidthRequest="100"
                 Aspect="AspectFit"

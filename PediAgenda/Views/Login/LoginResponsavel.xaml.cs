@@ -10,6 +10,7 @@ public partial class LoginResponsavel : ContentPage
     private bool senhaVisivel =
         false;
 
+
     private bool entrando =
         false;
 
@@ -81,10 +82,9 @@ public partial class LoginResponsavel : ContentPage
         object sender,
         EventArgs e)
     {
-        await DisplayAlertAsync(
-            "Recuperação de senha",
-            "A recuperação de senha será implementada posteriormente.",
-            "OK");
+        await Shell.Current.GoToAsync(
+            nameof(
+                RecuperarSenha));
     }
 
 
@@ -105,7 +105,8 @@ public partial class LoginResponsavel : ContentPage
 
 
         string email =
-            EmailEntry.Text?.Trim()
+            EmailEntry.Text?
+                .Trim()
             ?? string.Empty;
 
 
@@ -115,9 +116,13 @@ public partial class LoginResponsavel : ContentPage
 
 
         if (
-            string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(
+                email)
 
-            string.IsNullOrWhiteSpace(senha))
+            ||
+
+            string.IsNullOrWhiteSpace(
+                senha))
         {
             MostrarErro(
                 "Informe seu e-mail e sua senha.");
@@ -174,7 +179,8 @@ public partial class LoginResponsavel : ContentPage
                 documento.RootElement;
 
 
-            if (!resposta.IsSuccessStatusCode)
+            if (
+                !resposta.IsSuccessStatusCode)
             {
                 string mensagem =
                     dados.TryGetProperty(
@@ -287,7 +293,9 @@ public partial class LoginResponsavel : ContentPage
             }
 
 
-            if (string.IsNullOrWhiteSpace(token))
+            if (
+                string.IsNullOrWhiteSpace(
+                    token))
             {
                 MostrarErro(
                     "A API não retornou uma sessão válida.");
@@ -297,21 +305,15 @@ public partial class LoginResponsavel : ContentPage
             }
 
 
-            // LIMPA POSSÍVEIS DADOS DA CONTA ANTERIOR
-
             ResponsavelDados.Pacientes
                 .Clear();
 
-
-            // GUARDA TOKEN
 
             await SecureStorage.Default
                 .SetAsync(
                     "pediagenda_token",
                     token);
 
-
-            // GUARDA A SESSÃO
 
             SessaoUsuario.Iniciar(
                 idUsuario,
@@ -325,7 +327,8 @@ public partial class LoginResponsavel : ContentPage
 
 
             await Shell.Current.GoToAsync(
-                nameof(MenuResponsavel));
+                nameof(
+                    MenuResponsavel));
         }
         catch (HttpRequestException ex)
         {
@@ -397,6 +400,7 @@ public partial class LoginResponsavel : ContentPage
 
 
         await Shell.Current.GoToAsync(
-            nameof(MenuResponsavel));
+            nameof(
+                MenuResponsavel));
     }
 }

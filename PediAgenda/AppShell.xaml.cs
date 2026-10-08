@@ -20,6 +20,10 @@ public partial class AppShell : Shell
             typeof(Views.Login.LoginFuncionario));
 
         Routing.RegisterRoute(
+            nameof(Views.Login.RecuperarSenha),
+            typeof(Views.Login.RecuperarSenha));
+
+        Routing.RegisterRoute(
             nameof(Views.Cadastro.CadastroCampo),
             typeof(Views.Cadastro.CadastroCampo));
 
@@ -150,5 +154,9 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(
             nameof(Views.Usuarios.Recepcao.AgendarConsultaRecepcao),
             typeof(Views.Usuarios.Recepcao.AgendarConsultaRecepcao));
+
+        Routing.RegisterRoute(
+            nameof(Views.Usuarios.Recepcao.AdicionarPacienteRecepcao),
+            typeof(Views.Usuarios.Recepcao.AdicionarPacienteRecepcao));
     }
 }

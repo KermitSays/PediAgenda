@@ -1,13 +1,47 @@
+using PediAgenda.Dados;
+using PediAgenda.Views.Usuarios.Recepcao;
 using PediAgenda.Views.Usuarios.Responsavel;
 
 namespace PediAgenda.Views.Usuarios.Medico;
 
+[QueryProperty(
+    nameof(IdMedico),
+    "IdMedico")]
 public partial class BloquearHorario : ContentPage
 {
-    // Temporário enquanto a identidade do médico
-    // ainda não vem da integração da API.
-    private const int IdMedicoAgendaLocal =
+    private int idMedicoAgenda =
         1;
+
+
+    private string idMedico =
+        "1";
+
+
+    public string IdMedico
+    {
+        get =>
+            idMedico;
+
+        set
+        {
+            idMedico =
+                value;
+
+
+            if (
+                int.TryParse(
+                    value,
+                    out int id)
+
+                &&
+
+                id > 0)
+            {
+                idMedicoAgenda =
+                    id;
+            }
+        }
+    }
 
 
     public BloquearHorario()
@@ -33,92 +67,156 @@ public partial class BloquearHorario : ContentPage
         HorarioFinalPicker.Time =
             new TimeSpan(
                 12,
-                0,
+                30,
                 0);
     }
 
 
     // =============================================
-    // CONSULTAS AFETADAS
+    // CONSULTAS LOCAIS DO MÉDICO
     // =============================================
 
     private List<ConsultaMedico>
-        EncontrarConsultasAfetadas(
+        EncontrarConsultasMedicoAfetadas(
             DateTime dataInicial,
             DateTime dataFinal,
             TimeSpan horarioInicial,
             TimeSpan horarioFinal)
     {
-        List<ConsultaMedico>
-            consultasAfetadas =
-                new();
+        // Neste momento ConsultasMedicoDados
+        // representa o médico de ID 1.
 
-
-        foreach (
-            ConsultaMedico consulta
-            in ConsultasMedicoDados.Consultas)
+        if (
+            idMedicoAgenda !=
+            1)
         {
-            bool dataDentroDoBloqueio =
+            return
+                new List<ConsultaMedico>();
+        }
+
+
+        return ConsultasMedicoDados.Consultas
+            .Where(consulta =>
                 consulta.Data.Date >=
                     dataInicial.Date
 
                 &&
 
                 consulta.Data.Date <=
-                    dataFinal.Date;
+                    dataFinal.Date
 
+                &&
 
-            if (!dataDentroDoBloqueio)
-                continue;
-
-
-            bool horarioDentroDoBloqueio =
                 consulta.Horario >=
                     horarioInicial
 
                 &&
 
                 consulta.Horario <
-                    horarioFinal;
+                    horarioFinal
 
+                &&
 
-            if (!horarioDentroDoBloqueio)
-                continue;
-
-
-            bool consultaEncerrada =
-                consulta.Status.Equals(
-                    "Cancelado",
-                    StringComparison.OrdinalIgnoreCase)
-
-                ||
-
-                consulta.Status.Equals(
-                    "Cancelada",
-                    StringComparison.OrdinalIgnoreCase)
-
-                ||
-
-                consulta.Status.Equals(
-                    "Realizada",
-                    StringComparison.OrdinalIgnoreCase);
-
-
-            if (consultaEncerrada)
-                continue;
-
-
-            consultasAfetadas.Add(
-                consulta);
-        }
-
-
-        return consultasAfetadas;
+                StatusConsulta.EhAtiva(
+                    consulta.Status))
+            .ToList();
     }
 
 
     // =============================================
-    // BLOQUEAR HORÁRIO
+    // CONSULTAS DA RECEPÇÃO
+    // =============================================
+
+    private List<(
+        PacienteRecepcaoItem Paciente,
+        ConsultaPacienteRecepcaoItem Consulta)>
+        EncontrarConsultasRecepcaoAfetadas(
+            DateTime dataInicial,
+            DateTime dataFinal,
+            TimeSpan horarioInicial,
+            TimeSpan horarioFinal)
+    {
+        List<(
+            PacienteRecepcaoItem Paciente,
+            ConsultaPacienteRecepcaoItem Consulta)>
+            resultado =
+                new();
+
+
+        foreach (
+            PacienteRecepcaoItem paciente
+            in PacientesRecepcaoDados.Pacientes)
+        {
+            foreach (
+                ConsultaPacienteRecepcaoItem consulta
+                in paciente.Consultas)
+            {
+                if (
+                    !consulta.HorarioId
+                        .HasValue)
+                {
+                    continue;
+                }
+
+
+                int idMedicoConsulta =
+                    AgendaMedicaRecepcaoDados
+                        .ObterIdMedico(
+                            consulta.Medico);
+
+
+                if (
+                    idMedicoConsulta !=
+                    idMedicoAgenda)
+                {
+                    continue;
+                }
+
+
+                bool dentro =
+                    consulta.Data.Date >=
+                        dataInicial.Date
+
+                    &&
+
+                    consulta.Data.Date <=
+                        dataFinal.Date
+
+                    &&
+
+                    consulta.Horario >=
+                        horarioInicial
+
+                    &&
+
+                    consulta.Horario <
+                        horarioFinal;
+
+
+                if (
+                    dentro
+
+                    &&
+
+                    StatusConsulta.EhAtiva(
+                        consulta.Status))
+                {
+                    resultado.Add(
+                        (
+                            paciente,
+                            consulta
+                        ));
+                }
+            }
+        }
+
+
+        return resultado;
+    }
+
+
+    // =============================================
+    // BLOQUEAR
     // =============================================
 
     private async void BloquearHorarioButton_Clicked(
@@ -147,7 +245,7 @@ public partial class BloquearHorario : ContentPage
             HorarioFinalPicker.Time
             ?? new TimeSpan(
                 12,
-                0,
+                30,
                 0);
 
 
@@ -156,8 +254,6 @@ public partial class BloquearHorario : ContentPage
                 .Trim()
             ?? string.Empty;
 
-
-        // DATA FINAL
 
         if (
             dataFinal <
@@ -173,8 +269,6 @@ public partial class BloquearHorario : ContentPage
         }
 
 
-        // HORÁRIO FINAL
-
         if (
             horarioFinal <=
             horarioInicial)
@@ -188,8 +282,6 @@ public partial class BloquearHorario : ContentPage
             return;
         }
 
-
-        // MOTIVO
 
         if (
             string.IsNullOrWhiteSpace(
@@ -205,67 +297,84 @@ public partial class BloquearHorario : ContentPage
         }
 
 
-        string periodo =
-            $"{dataInicial:dd/MM/yyyy} às " +
-            $"{horarioInicial:hh\\:mm} até " +
-            $"{dataFinal:dd/MM/yyyy} às " +
-            $"{horarioFinal:hh\\:mm}";
-
-
         List<ConsultaMedico>
-            consultasAfetadas =
-                EncontrarConsultasAfetadas(
+            consultasMedico =
+                EncontrarConsultasMedicoAfetadas(
                     dataInicial,
                     dataFinal,
                     horarioInicial,
                     horarioFinal);
 
 
-        string mensagemConfirmacao =
+        List<(
+            PacienteRecepcaoItem Paciente,
+            ConsultaPacienteRecepcaoItem Consulta)>
+            consultasRecepcao =
+                EncontrarConsultasRecepcaoAfetadas(
+                    dataInicial,
+                    dataFinal,
+                    horarioInicial,
+                    horarioFinal);
+
+
+        int total =
+            consultasMedico.Count +
+            consultasRecepcao.Count;
+
+
+        string mensagem =
             $"Deseja bloquear o horário?\n\n" +
-            $"Período: {periodo}\n\n" +
+            $"Período: {dataInicial:dd/MM/yyyy} " +
+            $"{horarioInicial:hh\\:mm} até " +
+            $"{dataFinal:dd/MM/yyyy} " +
+            $"{horarioFinal:hh\\:mm}\n\n" +
             $"Motivo: {motivo}";
 
 
-        if (
-            consultasAfetadas.Count >
-            0)
+        if (total > 0)
         {
-            mensagemConfirmacao +=
-                $"\n\nAtenção: " +
-                $"{consultasAfetadas.Count} " +
+            mensagem +=
+                $"\n\nAtenção: {total} " +
                 $"{(
-                    consultasAfetadas.Count == 1
-                        ? "consulta será afetada"
-                        : "consultas serão afetadas"
-                )}.";
+                    total == 1
+                        ? "consulta será afetada."
+                        : "consultas serão afetadas."
+                )}";
 
 
-            mensagemConfirmacao +=
+            mensagem +=
                 "\n\nConsultas:";
 
 
             foreach (
                 ConsultaMedico consulta
-                in consultasAfetadas)
+                in consultasMedico)
             {
-                mensagemConfirmacao +=
-                    $"\n• " +
-                    $"{consulta.Horario:hh\\:mm} - " +
+                mensagem +=
+                    $"\n• {consulta.Horario:hh\\:mm} - " +
                     $"{consulta.Paciente}";
             }
 
 
-            mensagemConfirmacao +=
-                "\n\nEssas consultas serão canceladas " +
-                "e os responsáveis serão notificados.";
+            foreach (
+                var item
+                in consultasRecepcao)
+            {
+                mensagem +=
+                    $"\n• {item.Consulta.Horario:hh\\:mm} - " +
+                    $"{item.Paciente.Nome}";
+            }
+
+
+            mensagem +=
+                "\n\nAs consultas afetadas serão canceladas.";
         }
 
 
         bool confirmar =
             await DisplayAlertAsync(
                 "Confirmar bloqueio",
-                mensagemConfirmacao,
+                mensagem,
                 "Bloquear",
                 "Cancelar");
 
@@ -274,13 +383,12 @@ public partial class BloquearHorario : ContentPage
             return;
 
 
-        // =========================================
-        // CRIA O BLOQUEIO
-        // =========================================
-
         BloqueioHorario novoBloqueio =
             new()
             {
+                IdMedico =
+                    idMedicoAgenda,
+
                 DataInicial =
                     dataInicial,
 
@@ -302,30 +410,24 @@ public partial class BloquearHorario : ContentPage
             novoBloqueio);
 
 
-        // =========================================
-        // REFLETE NA FONTE COMPARTILHADA
-        // =========================================
-
         HorarioAgendamentoDados
             .BloquearPeriodo(
                 novoBloqueio.Id,
-                IdMedicoAgendaLocal,
+                idMedicoAgenda,
                 dataInicial,
                 dataFinal,
                 horarioInicial,
                 horarioFinal);
 
 
-        // =========================================
-        // CONSULTAS AFETADAS
-        // =========================================
+        // CONSULTAS DO MÉDICO
 
         foreach (
             ConsultaMedico consulta
-            in consultasAfetadas)
+            in consultasMedico)
         {
             consulta.Status =
-                "Cancelado";
+                StatusConsulta.Cancelada;
 
 
             consulta.CanceladaPorBloqueio =
@@ -336,26 +438,20 @@ public partial class BloquearHorario : ContentPage
                 motivo;
 
 
-            // Se o horário estava reservado,
-            // libera a reserva.
-            //
-            // Ele continua INDISPONÍVEL porque
-            // agora está bloqueado.
-
             HorarioAgendamentoItem?
-                horarioConsulta =
+                horario =
                     HorarioAgendamentoDados
                         .ObterPorDataHora(
-                            IdMedicoAgendaLocal,
+                            idMedicoAgenda,
                             consulta.Data,
                             consulta.Horario);
 
 
-            if (horarioConsulta != null)
+            if (horario != null)
             {
                 HorarioAgendamentoDados
                     .LiberarHorario(
-                        horarioConsulta.IdHorario);
+                        horario.IdHorario);
             }
 
 
@@ -366,13 +462,10 @@ public partial class BloquearHorario : ContentPage
                         "Consulta cancelada",
 
                     Mensagem =
-                        $"A consulta de " +
-                        $"{consulta.Paciente} " +
-                        $"do dia " +
-                        $"{consulta.Data:dd/MM/yyyy} às " +
+                        $"A consulta de {consulta.Paciente} " +
+                        $"do dia {consulta.Data:dd/MM/yyyy} às " +
                         $"{consulta.Horario:hh\\:mm} " +
-                        $"foi cancelada pelo médico " +
-                        $"devido a um bloqueio de agenda." +
+                        $"foi cancelada devido a um bloqueio de agenda." +
                         $"\n\nMotivo: {motivo}",
 
                     DataHora =
@@ -384,9 +477,49 @@ public partial class BloquearHorario : ContentPage
         }
 
 
+        // CONSULTAS DA RECEPÇÃO
+
+        foreach (
+            var item
+            in consultasRecepcao)
+        {
+            ConsultaPacienteRecepcaoItem consulta =
+                item.Consulta;
+
+
+            if (
+                !consulta.HorarioId
+                    .HasValue)
+            {
+                continue;
+            }
+
+
+            int idHorario =
+                consulta.HorarioId.Value;
+
+
+            consulta.Status =
+                StatusConsulta.Cancelada;
+
+
+            consulta.HorarioId =
+                null;
+
+
+            HorarioAgendamentoDados
+                .LiberarHorario(
+                    idHorario);
+        }
+
+
         await DisplayAlertAsync(
             "Horário bloqueado",
-            "O horário foi bloqueado com sucesso.",
+
+            total > 0
+                ? "O horário foi bloqueado e as consultas afetadas foram canceladas."
+                : "O horário foi bloqueado com sucesso.",
+
             "OK");
 
 
@@ -394,10 +527,6 @@ public partial class BloquearHorario : ContentPage
             "..");
     }
 
-
-    // =============================================
-    // CANCELAR
-    // =============================================
 
     private async void CancelarButton_Clicked(
         object sender,

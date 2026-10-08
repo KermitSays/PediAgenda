@@ -3,6 +3,9 @@ using PediAgenda.Views.Usuarios.Responsavel;
 
 namespace PediAgenda.Views.Usuarios.Medico;
 
+[QueryProperty(
+    nameof(IdMedico),
+    "IdMedico")]
 public partial class LiberarHorarios : ContentPage
 {
     public ObservableCollection<BloqueioExibicao>
@@ -10,6 +13,50 @@ public partial class LiberarHorarios : ContentPage
     {
         get;
         set;
+    } =
+        new();
+
+
+    private int idMedicoAgenda =
+        1;
+
+
+    private string idMedico =
+        "1";
+
+
+    public string IdMedico
+    {
+        get =>
+            idMedico;
+
+        set
+        {
+            idMedico =
+                value;
+
+
+            if (
+                int.TryParse(
+                    value,
+                    out int id)
+
+                &&
+
+                id > 0)
+            {
+                idMedicoAgenda =
+                    id;
+            }
+
+
+            if (
+                BloqueiosCollectionView !=
+                null)
+            {
+                CarregarBloqueios();
+            }
+        }
     }
 
 
@@ -31,19 +78,17 @@ public partial class LiberarHorarios : ContentPage
     }
 
 
-    // =============================================
-    // CARREGA BLOQUEIOS
-    // =============================================
-
     private void CarregarBloqueios()
     {
-        Bloqueios =
-            new ObservableCollection<BloqueioExibicao>();
+        Bloqueios.Clear();
 
 
         foreach (
             BloqueioHorario bloqueio
-            in BloqueiosMedico.Bloqueios)
+            in BloqueiosMedico.Bloqueios
+                .Where(b =>
+                    b.IdMedico ==
+                    idMedicoAgenda))
         {
             Bloqueios.Add(
                 new BloqueioExibicao
@@ -59,15 +104,12 @@ public partial class LiberarHorarios : ContentPage
                                 .ToString(
                                     "dd/MM/yyyy")
 
-                            : $"{bloqueio.DataInicial:dd/MM/yyyy} " +
-                              $"até " +
+                            : $"{bloqueio.DataInicial:dd/MM/yyyy} até " +
                               $"{bloqueio.DataFinal:dd/MM/yyyy}",
-
 
                     PeriodoHorario =
                         $"{bloqueio.HorarioInicial:hh\\:mm} às " +
                         $"{bloqueio.HorarioFinal:hh\\:mm}",
-
 
                     MotivoTexto =
                         $"Motivo: {bloqueio.Motivo}"
@@ -79,10 +121,6 @@ public partial class LiberarHorarios : ContentPage
             Bloqueios;
     }
 
-
-    // =============================================
-    // EDITAR
-    // =============================================
 
     private async void EditarBloqueioButton_Clicked(
         object sender,
@@ -110,10 +148,6 @@ public partial class LiberarHorarios : ContentPage
     }
 
 
-    // =============================================
-    // LIBERAR
-    // =============================================
-
     private async void LiberarPeriodoButton_Clicked(
         object sender,
         EventArgs e)
@@ -124,7 +158,7 @@ public partial class LiberarHorarios : ContentPage
             ||
 
             button.BindingContext
-                is not BloqueioExibicao bloqueioExibicao)
+                is not BloqueioExibicao item)
         {
             return;
         }
@@ -132,21 +166,13 @@ public partial class LiberarHorarios : ContentPage
 
         BloqueioHorario? bloqueio =
             BloqueiosMedico.Bloqueios
-                .FirstOrDefault(item =>
-                    item.Id ==
-                    bloqueioExibicao.Id);
+                .FirstOrDefault(b =>
+                    b.Id ==
+                    item.Id);
 
 
         if (bloqueio == null)
-        {
-            await DisplayAlertAsync(
-                "Atenção",
-                "Não foi possível localizar o bloqueio.",
-                "OK");
-
-
             return;
-        }
 
 
         bool confirmar =
@@ -154,9 +180,9 @@ public partial class LiberarHorarios : ContentPage
                 "Liberar período",
 
                 $"Deseja liberar todo este período?\n\n" +
-                $"Data: {bloqueioExibicao.PeriodoData}\n" +
-                $"Horário: {bloqueioExibicao.PeriodoHorario}\n" +
-                $"{bloqueioExibicao.MotivoTexto}",
+                $"Data: {item.PeriodoData}\n" +
+                $"Horário: {item.PeriodoHorario}\n" +
+                $"{item.MotivoTexto}",
 
                 "Liberar",
                 "Cancelar");
@@ -166,32 +192,24 @@ public partial class LiberarHorarios : ContentPage
             return;
 
 
-        // PRIMEIRO ATUALIZA A FONTE DE HORÁRIOS.
-
         HorarioAgendamentoDados
             .LiberarBloqueio(
                 bloqueio.Id);
 
 
-        // DEPOIS REMOVE O BLOQUEIO DA LISTA.
-
         BloqueiosMedico.Bloqueios.Remove(
             bloqueio);
+
+
+        CarregarBloqueios();
 
 
         await DisplayAlertAsync(
             "Período liberado",
             "Todo o período foi liberado com sucesso.",
             "OK");
-
-
-        CarregarBloqueios();
     }
 
-
-    // =============================================
-    // ITEM DE EXIBIÇÃO
-    // =============================================
 
     public class BloqueioExibicao
     {

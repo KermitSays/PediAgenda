@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Recepcao.AdicionarPacienteRecepcao"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Adicionar Paciente"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="24,28,24,24"
+            Spacing="20">
+
+            <!-- ==================================
+                 CABEÇALHO
+                 ================================== -->
+
+            <VerticalStackLayout
+                Spacing="4">
+
+                <Label
+                    Text="Adicionar paciente"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    Text="Localize o responsável e cadastre o paciente."
+                    FontSize="14"
+                    TextColor="{StaticResource InputPlaceholder}" />
+
+            </VerticalStackLayout>
+
+
+            <!-- ==================================
+                 RESPONSÁVEL
+                 ================================== -->
+
+            <VerticalStackLayout
+                Spacing="10">
+
+                <Label
+                    Text="Responsável pelo paciente"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+
+                <!-- CPF + BUSCAR -->
+
+                <Grid
+                    ColumnDefinitions="*,Auto"
+                    ColumnSpacing="10">
+
+                    <Border
+                        Grid.Column="0"
+                        BackgroundColor="White"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="14,3">
+
+                        <Entry
+                            x:Name="CpfEntry"
+                            Placeholder="Digite os 11 números do CPF"
+                            Keyboard="Numeric"
+                            MaxLength="11"
+                            TextColor="{StaticResource TextDark}"
+                            PlaceholderColor="{StaticResource InputPlaceholder}"
+                            TextChanged="CpfEntry_TextChanged" />
+
+                    </Border>
+
+
+                    <Button
+                        Grid.Column="1"
+                        Text="BUSCAR"
+                        Padding="18,0"
+                        CornerRadius="14"
+                        BackgroundColor="{StaticResource PrimaryBlue}"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        Clicked="BuscarResponsavelButton_Clicked" />
+
+                </Grid>
+
+            </VerticalStackLayout>
+
+
+            <!-- ==================================
+                 RESPONSÁVEL ENCONTRADO
+                 ================================== -->
+
+            <Border
+                x:Name="ResponsavelEncontradoBorder"
+                IsVisible="False"
+                BackgroundColor="White"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 16"
+                Padding="16">
+
+                <VerticalStackLayout
+                    Spacing="8">
+
+                    <Label
+                        Text="Responsável encontrado:"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource PrimaryBlue}" />
+
+
+                    <Label
+                        x:Name="ResponsavelNomeLabel"
+                        FontSize="19"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+
+                    <Grid
+                        RowDefinitions="Auto,Auto"
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="8"
+                        RowSpacing="5">
+
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Text="CPF:"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="ResponsavelCpfLabel"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            FontSize="14"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Text="Telefone:"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                        <Label
+                            x:Name="ResponsavelTelefoneLabel"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            FontSize="14"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                    </Grid>
+
+                </VerticalStackLayout>
+
+            </Border>
+
+
+            <!-- ==================================
+                 PACIENTE
+                 ================================== -->
+
+            <VerticalStackLayout
+                Spacing="14">
+
+                <Label
+                    Text="Paciente"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+
+                <!-- NOME -->
+
+                <VerticalStackLayout
+                    Spacing="6">
+
+                    <Label
+                        Text="Nome completo"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Border
+                        BackgroundColor="White"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="14,3">
+
+                        <Entry
+                            x:Name="NomePacienteEntry"
+                            Placeholder="Digite o nome completo"
+                            TextColor="{StaticResource TextDark}"
+                            PlaceholderColor="{StaticResource InputPlaceholder}" />
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+
+                <!-- NASCIMENTO -->
+
+                <VerticalStackLayout
+                    Spacing="6">
+
+                    <Label
+                        Text="Data de nascimento"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Border
+                        BackgroundColor="White"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="14,3">
+
+                        <DatePicker
+                            x:Name="DataNascimentoPicker"
+                            Format="dd/MM/yyyy"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+
+
+            <!-- ==================================
+                 AÇÕES
+                 ================================== -->
+
+            <VerticalStackLayout
+                Spacing="10"
+                Margin="0,6,0,0">
+
+                <Button
+                    Text="CADASTRAR PACIENTE"
+                    HeightRequest="52"
+                    CornerRadius="16"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    Clicked="CadastrarPacienteButton_Clicked" />
+
+
+                <Button
+                    Text="Cancelar"
+                    HeightRequest="48"
+                    CornerRadius="16"
+                    BackgroundColor="White"
+                    TextColor="{StaticResource PrimaryBlue}"
+                    BorderColor="{StaticResource PrimaryBlue}"
+                    BorderWidth="1"
+                    Clicked="CancelarButton_Clicked" />
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

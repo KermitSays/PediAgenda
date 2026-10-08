@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="PediAgenda.Views.Cadastro.CadastroCampo"
-             Title="Cadastro"
-             BackgroundColor="{StaticResource PageBlue}"
-             NavigationPage.HasNavigationBar="False">
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Cadastro.CadastroCampo"
+    Title="Cadastro"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
 
     <ScrollView>
         <VerticalStackLayout
             Padding="30,40,30,30"
             Spacing="18">
 
-            <!-- Título -->           
+            <!-- Título -->
             <Label
                 Text="Dados do responsável"
                 FontSize="30"
@@ -21,18 +22,13 @@
                 HorizontalOptions="Center"
                 Margin="0,0,0,10" />
 
-            <!-- Nome -->
+            <!-- Descrição -->
             <Label
-                Text="Nome"
-                FontSize="16"
-                TextColor="{StaticResource TextDark}" />
-            
-            <Border Style="{StaticResource LoginBorder}">       
-                <Entry
-                    x:Name="NomeEntry"
-                    Style="{StaticResource LoginEntry}"
-                    Placeholder="Insira seu nome aqui"/>                
-            </Border>
+                Text="Ative seu acesso ao PediAgenda com os dados cadastrados na clínica."
+                FontSize="14"
+                TextColor="{StaticResource TextDark}"
+                HorizontalTextAlignment="Center"
+                Margin="0,0,0,10" />
 
             <!-- CPF -->
             <Label
@@ -48,21 +44,25 @@
                     Keyboard="Numeric"
                     MaxLength="14" />
             </Border>
-            
-            <!--/ Telefone-->
+
+            <!-- Código de ativação -->
             <Label
-                Text="Telefone com DDD"
+                Text="Código de ativação"
                 FontSize="16"
                 TextColor="{StaticResource TextDark}" />
 
             <Border Style="{StaticResource LoginBorder}">
                 <Entry
-                    x:Name="TelefoneEntry"
+                    x:Name="CodigoAtivacaoEntry"
                     Style="{StaticResource LoginEntry}"
-                    Placeholder="Ex.: 11999990000"
-                    Keyboard="Telephone"
-                    MaxLength="20" />
+                    Placeholder="Código fornecido pela clínica"
+                    MaxLength="100" />
             </Border>
+
+            <Label
+                Text="Informe o código de ativação recebido durante seu cadastro na clínica."
+                FontSize="12"
+                TextColor="{StaticResource TextDark}" />
 
             <!-- E-mail -->
             <Label
@@ -75,7 +75,8 @@
                     x:Name="EmailEntry"
                     Style="{StaticResource LoginEntry}"
                     Placeholder="Insira seu e-mail aqui"
-                    Keyboard="Email" />
+                    Keyboard="Email"
+                    MaxLength="160" />
             </Border>
 
             <!-- Senha -->
@@ -86,24 +87,28 @@
 
             <Border Style="{StaticResource LoginBorder}">
                 <Grid ColumnDefinitions="*,Auto">
+
                     <Entry
                         x:Name="SenhaEntry"
+                        Grid.Column="0"
                         Style="{StaticResource LoginEntry}"
                         Placeholder="Insira sua senha aqui"
                         IsPassword="True" />
-                    
-                    <!-- Botão de mostrar senha-->
+
+                    <!-- Botão de mostrar senha -->
                     <ImageButton
                         x:Name="MostrarSenhaButton"
+                        Grid.Column="1"
                         Source="olho_fechado.png"
                         BackgroundColor="Transparent"
                         WidthRequest="40"
                         HeightRequest="40"
                         Clicked="MostrarSenhaButton_Clicked"
-                        Padding="5" 
+                        Padding="5"
                         Margin="0,0,10,0"
                         HorizontalOptions="End"
-                        VerticalOptions="Center"/>
+                        VerticalOptions="Center" />
+
                 </Grid>
             </Border>
 
@@ -115,24 +120,28 @@
 
             <Border Style="{StaticResource LoginBorder}">
                 <Grid ColumnDefinitions="*,Auto">
+
                     <Entry
                         x:Name="ConfirmarSenhaEntry"
+                        Grid.Column="0"
                         Style="{StaticResource LoginEntry}"
                         Placeholder="Confirme sua senha"
                         IsPassword="True" />
 
-                    <!-- Botão de mostrar senha-->
+                    <!-- Botão de mostrar senha -->
                     <ImageButton
                         x:Name="MostrarConfirmarSenhaButton"
+                        Grid.Column="1"
                         Source="olho_fechado.png"
                         BackgroundColor="Transparent"
                         WidthRequest="40"
                         HeightRequest="40"
                         Clicked="MostrarConfirmarSenhaButton_Clicked"
-                        Padding="5" 
+                        Padding="5"
                         Margin="0,0,10,0"
                         HorizontalOptions="End"
-                        VerticalOptions="Center"/>  
+                        VerticalOptions="Center" />
+
                 </Grid>
             </Border>
 
@@ -160,7 +169,8 @@
                 FontSize="14"
                 TextColor="Red"
                 IsVisible="False"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center" />
 
             <!-- Botão continuar -->
             <Button

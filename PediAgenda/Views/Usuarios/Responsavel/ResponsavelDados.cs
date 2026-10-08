@@ -1,28 +1,39 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using PediAgenda.Dados;
 
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
 public static class ResponsavelDados
 {
-    // A lista começa vazia, sem pacientes de exemplo.
     public static ObservableCollection<PacienteResponsavelItem>
         Pacientes
-    { get; } = new();
+    {
+        get;
+    } = new();
 }
 
 
-public class PacienteResponsavelItem: INotifyPropertyChanged
+public class PacienteResponsavelItem :
+    INotifyPropertyChanged
 {
     private bool isExpanded;
+
     private bool isHistoricoExpanded;
 
 
-    public int Id { get; set; }
+    public int Id
+    {
+        get;
+        set;
+    }
 
 
-    public string Nome { get; set; } =
-        string.Empty;
+    public string Nome
+    {
+        get;
+        set;
+    } = string.Empty;
 
 
     public DateTime DataNascimento
@@ -32,14 +43,19 @@ public class PacienteResponsavelItem: INotifyPropertyChanged
     }
 
 
-    public string Foto { get; set; } =
-        string.Empty;
+    public string Foto
+    {
+        get;
+        set;
+    } = string.Empty;
 
 
     public ObservableCollection<ConsultaResponsavelItem>
         Consultas
-    { get; set; } =
-            new();
+    {
+        get;
+        set;
+    } = new();
 
 
     public int Idade
@@ -55,7 +71,8 @@ public class PacienteResponsavelItem: INotifyPropertyChanged
                 DataNascimento.Year;
 
 
-            if (DataNascimento.Date >
+            if (
+                DataNascimento.Date >
                 hoje.AddYears(
                     -idade))
             {
@@ -68,23 +85,23 @@ public class PacienteResponsavelItem: INotifyPropertyChanged
     }
 
 
+    // =============================================
     // CONSULTAS ATIVAS
-    //
-    // Mais próxima primeiro.
+    // =============================================
 
     public IEnumerable<ConsultaResponsavelItem>
         ConsultasAtivasOrdenadas =>
             Consultas
                 .Where(c =>
-                    c.Status.Equals(
-                        "Confirmada",
-                        StringComparison.OrdinalIgnoreCase)
+                    StatusConsulta
+                        .EhConfirmada(
+                            c.Status)
 
                     ||
 
-                    c.Status.Equals(
-                        "Por confirmar",
-                        StringComparison.OrdinalIgnoreCase))
+                    StatusConsulta
+                        .EhPorConfirmar(
+                            c.Status))
                 .OrderBy(c =>
                     c.Data)
                 .ThenBy(c =>
@@ -99,19 +116,17 @@ public class PacienteResponsavelItem: INotifyPropertyChanged
         !TemConsultasAtivas;
 
 
+    // =============================================
     // HISTÓRICO
-    //
-    // Somente consultas REALIZADAS.
-    //
-    // Mais recente primeiro.
+    // =============================================
 
     public IEnumerable<ConsultaResponsavelItem>
         HistoricoConsultasOrdenado =>
             Consultas
                 .Where(c =>
-                    c.Status.Equals(
-                        "Realizada",
-                        StringComparison.OrdinalIgnoreCase))
+                    StatusConsulta
+                        .EhRealizada(
+                            c.Status))
                 .OrderByDescending(c =>
                     c.Data)
                 .ThenByDescending(c =>
@@ -128,7 +143,8 @@ public class PacienteResponsavelItem: INotifyPropertyChanged
 
     public bool IsExpanded
     {
-        get => isExpanded;
+        get =>
+            isExpanded;
 
         set
         {
@@ -150,12 +166,17 @@ public class PacienteResponsavelItem: INotifyPropertyChanged
 
     public bool IsHistoricoExpanded
     {
-        get => isHistoricoExpanded;
+        get =>
+            isHistoricoExpanded;
 
         set
         {
-            if (isHistoricoExpanded == value)
+            if (
+                isHistoricoExpanded ==
+                value)
+            {
                 return;
+            }
 
 
             isHistoricoExpanded =
@@ -177,42 +198,83 @@ public class PacienteResponsavelItem: INotifyPropertyChanged
 
 public class ConsultaResponsavelItem
 {
-    public int Id { get; set; }
-
-
-    // Correspondem futuramente às FKs
-    // utilizadas pelo banco/API.
-
-    public int IdMedico { get; set; }
-
-
-    public int IdHorario { get; set; }
-
-
-    public string Medico { get; set; } =
+    private string status =
         string.Empty;
 
 
-    public string Especialidade { get; set; } =
-        string.Empty;
+    public int Id
+    {
+        get;
+        set;
+    }
 
 
-    public DateTime Data { get; set; }
+    public int IdMedico
+    {
+        get;
+        set;
+    }
 
 
-    public TimeSpan Horario { get; set; }
+    public int IdHorario
+    {
+        get;
+        set;
+    }
 
 
-    public string Modalidade { get; set; } =
-        string.Empty;
+    public string Medico
+    {
+        get;
+        set;
+    } = string.Empty;
 
 
-    public string Valor { get; set; } =
-        string.Empty;
+    public string Especialidade
+    {
+        get;
+        set;
+    } = string.Empty;
 
 
-    public string Status { get; set; } =
-        string.Empty;
+    public DateTime Data
+    {
+        get;
+        set;
+    }
+
+
+    public TimeSpan Horario
+    {
+        get;
+        set;
+    }
+
+
+    public string Modalidade
+    {
+        get;
+        set;
+    } = string.Empty;
+
+
+    public string Valor
+    {
+        get;
+        set;
+    } = string.Empty;
+
+
+    public string Status
+    {
+        get =>
+            status;
+
+        set =>
+            status =
+                StatusConsulta.Normalizar(
+                    value);
+    }
 
 
     public string DataFormatada =>

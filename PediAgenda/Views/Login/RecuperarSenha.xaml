@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Login.RecuperarSenha"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Recuperar Senha"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="30,35,30,30"
+            Spacing="20">
+
+            <!-- ==================================
+                 CABEÇALHO
+                 ================================== -->
+
+            <VerticalStackLayout
+                Spacing="6">
+
+                <Label
+                    Text="Recuperar senha"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}" />
+
+                <Label
+                    x:Name="DescricaoEtapaLabel"
+                    Text="Informe o e-mail cadastrado na sua conta."
+                    FontSize="15"
+                    TextColor="{StaticResource InputPlaceholder}" />
+
+            </VerticalStackLayout>
+
+
+            <!-- ==================================
+                 ETAPA 1 - E-MAIL
+                 ================================== -->
+
+            <VerticalStackLayout
+                x:Name="EtapaEmailLayout"
+                Spacing="16">
+
+                <VerticalStackLayout
+                    Spacing="7">
+
+                    <Label
+                        Text="E-mail"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Border
+                        BackgroundColor="White"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="14,4">
+
+                        <Entry
+                            x:Name="EmailEntry"
+                            Placeholder="Digite seu e-mail"
+                            Keyboard="Email"
+                            ClearButtonVisibility="WhileEditing"
+                            TextColor="{StaticResource TextDark}"
+                            PlaceholderColor="{StaticResource InputPlaceholder}" />
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+
+                <Button
+                    x:Name="EnviarCodigoButton"
+                    Text="ENVIAR CÓDIGO"
+                    HeightRequest="52"
+                    CornerRadius="16"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="White"
+                    FontAttributes="Bold" />
+
+            </VerticalStackLayout>
+
+
+            <!-- ==================================
+                 ETAPA 2 - CÓDIGO
+                 ================================== -->
+
+            <VerticalStackLayout
+                x:Name="EtapaCodigoLayout"
+                IsVisible="False"
+                Spacing="16">
+
+                <Border
+                    BackgroundColor="White"
+                    Stroke="{StaticResource InputBlue}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 16"
+                    Padding="16">
+
+                    <VerticalStackLayout
+                        Spacing="5">
+
+                        <Label
+                            Text="Código enviado para:"
+                            FontSize="13"
+                            TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label
+                            x:Name="EmailMascaradoLabel"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+
+                <VerticalStackLayout
+                    Spacing="7">
+
+                    <Label
+                        Text="Código de verificação"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Border
+                        BackgroundColor="White"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="14,4">
+
+                        <Entry
+                            x:Name="CodigoEntry"
+                            Placeholder="Digite o código recebido"
+                            Keyboard="Numeric"
+                            MaxLength="6"
+                            TextColor="{StaticResource TextDark}"
+                            PlaceholderColor="{StaticResource InputPlaceholder}" />
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+
+                <Button
+                    x:Name="ConfirmarCodigoButton"
+                    Text="CONFIRMAR CÓDIGO"
+                    HeightRequest="52"
+                    CornerRadius="16"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="White"
+                    FontAttributes="Bold" />
+
+
+                <Button
+                    x:Name="ReenviarCodigoButton"
+                    Text="Reenviar código"
+                    HeightRequest="46"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource PrimaryBlue}" />
+
+            </VerticalStackLayout>
+
+
+            <!-- ==================================
+                 ETAPA 3 - NOVA SENHA
+                 ================================== -->
+
+            <VerticalStackLayout
+                x:Name="EtapaNovaSenhaLayout"
+                IsVisible="False"
+                Spacing="16">
+
+                <!-- NOVA SENHA -->
+
+                <VerticalStackLayout
+                    Spacing="7">
+
+                    <Label
+                        Text="Nova senha"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Border
+                        BackgroundColor="White"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="14,4">
+
+                        <Entry
+                            x:Name="NovaSenhaEntry"
+                            Placeholder="Digite a nova senha"
+                            IsPassword="True"
+                            TextColor="{StaticResource TextDark}"
+                            PlaceholderColor="{StaticResource InputPlaceholder}" />
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+
+                <!-- CONFIRMAR SENHA -->
+
+                <VerticalStackLayout
+                    Spacing="7">
+
+                    <Label
+                        Text="Confirmar nova senha"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Border
+                        BackgroundColor="White"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="14,4">
+
+                        <Entry
+                            x:Name="ConfirmarSenhaEntry"
+                            Placeholder="Digite novamente a nova senha"
+                            IsPassword="True"
+                            TextColor="{StaticResource TextDark}"
+                            PlaceholderColor="{StaticResource InputPlaceholder}" />
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+
+                <Button
+                    x:Name="AlterarSenhaButton"
+                    Text="ALTERAR SENHA"
+                    HeightRequest="52"
+                    CornerRadius="16"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="White"
+                    FontAttributes="Bold" />
+
+            </VerticalStackLayout>
+
+
+            <!-- ==================================
+                 VOLTAR
+                 ================================== -->
+
+            <Button
+                x:Name="VoltarButton"
+                Text="Voltar"
+                HeightRequest="48"
+                CornerRadius="16"
+                BackgroundColor="White"
+                TextColor="{StaticResource PrimaryBlue}"
+                BorderColor="{StaticResource PrimaryBlue}"
+                BorderWidth="1" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

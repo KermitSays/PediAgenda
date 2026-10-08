@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using PediAgenda.Dados;
 
 namespace PediAgenda.Views.Usuarios.Recepcao;
 
@@ -71,5 +72,18 @@ public class ConsultaRecepcaoResumo
     public string Horario { get; set; } = string.Empty;
     public string Paciente { get; set; } = string.Empty;
     public string Medico { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
+    private string status =
+    string.Empty;
+
+
+    public string Status
+    {
+        get =>
+            status;
+
+        set =>
+            status =
+                StatusConsulta.Normalizar(
+                    value);
+    }
 }

@@ -11,6 +11,7 @@ public partial class LoginFuncionario : ContentPage
     private bool senhaVisivel =
         false;
 
+
     private bool entrando =
         false;
 
@@ -66,10 +67,9 @@ public partial class LoginFuncionario : ContentPage
         object sender,
         EventArgs e)
     {
-        await DisplayAlertAsync(
-            "Recuperação de senha",
-            "A recuperação de senha será implementada posteriormente.",
-            "OK");
+        await Shell.Current.GoToAsync(
+            nameof(
+                RecuperarSenha));
     }
 
 
@@ -90,7 +90,8 @@ public partial class LoginFuncionario : ContentPage
 
 
         string email =
-            EmailEntry.Text?.Trim()
+            EmailEntry.Text?
+                .Trim()
             ?? string.Empty;
 
 
@@ -100,9 +101,13 @@ public partial class LoginFuncionario : ContentPage
 
 
         if (
-            string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(
+                email)
 
-            string.IsNullOrWhiteSpace(senha))
+            ||
+
+            string.IsNullOrWhiteSpace(
+                senha))
         {
             MostrarErro(
                 "Informe seu e-mail e sua senha.");
@@ -159,7 +164,8 @@ public partial class LoginFuncionario : ContentPage
                 documento.RootElement;
 
 
-            if (!resposta.IsSuccessStatusCode)
+            if (
+                !resposta.IsSuccessStatusCode)
             {
                 string mensagem =
                     dados.TryGetProperty(
@@ -224,8 +230,6 @@ public partial class LoginFuncionario : ContentPage
                 ?? string.Empty;
 
 
-            // ID
-
             int idUsuario =
                 dados.TryGetProperty(
                     "id",
@@ -240,8 +244,6 @@ public partial class LoginFuncionario : ContentPage
 
                     : 0;
 
-
-            // NOME
 
             string nome =
                 dados.TryGetProperty(
@@ -258,8 +260,6 @@ public partial class LoginFuncionario : ContentPage
 
                     : string.Empty;
 
-
-            // EMAIL
 
             string emailUsuario =
                 dados.TryGetProperty(
@@ -285,7 +285,8 @@ public partial class LoginFuncionario : ContentPage
                 case "MEDICO":
 
                     rota =
-                        nameof(MenuMedico);
+                        nameof(
+                            MenuMedico);
 
                     break;
 
@@ -293,7 +294,8 @@ public partial class LoginFuncionario : ContentPage
                 case "RECEPCIONISTA":
 
                     rota =
-                        nameof(MenuRecepcao);
+                        nameof(
+                            MenuRecepcao);
 
                     break;
 
@@ -309,7 +311,9 @@ public partial class LoginFuncionario : ContentPage
             }
 
 
-            if (string.IsNullOrWhiteSpace(token))
+            if (
+                string.IsNullOrWhiteSpace(
+                    token))
             {
                 MostrarErro(
                     "A API não retornou uma sessão válida.");
@@ -318,8 +322,6 @@ public partial class LoginFuncionario : ContentPage
                 return;
             }
 
-
-            // LIMPA DADOS DA CONTA ANTERIOR
 
             PediAgenda
                 .Views
@@ -330,15 +332,11 @@ public partial class LoginFuncionario : ContentPage
                 .Clear();
 
 
-            // GUARDA TOKEN
-
             await SecureStorage.Default
                 .SetAsync(
                     "pediagenda_token",
                     token);
 
-
-            // GUARDA DADOS DA SESSÃO
 
             SessaoUsuario.Iniciar(
                 idUsuario,
@@ -440,7 +438,8 @@ public partial class LoginFuncionario : ContentPage
 
 
         await Shell.Current.GoToAsync(
-            nameof(MenuMedico));
+            nameof(
+                MenuMedico));
     }
 
 
@@ -464,6 +463,7 @@ public partial class LoginFuncionario : ContentPage
 
 
         await Shell.Current.GoToAsync(
-            nameof(MenuRecepcao));
+            nameof(
+                MenuRecepcao));
     }
 }

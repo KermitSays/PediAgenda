@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="PediAgenda.Views.Usuarios.Recepcao.SelecionarPacienteRecepcao"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="{StaticResource PageBlue}">
+
+    <Grid
+        RowDefinitions="Auto,Auto,*,Auto"
+        Padding="20,26,20,20"
+        RowSpacing="16">
+
+        <!-- ======================================
+             TÍTULO
+             ====================================== -->
+
+        <VerticalStackLayout
+            Grid.Row="0"
+            Spacing="4">
+
+            <Label
+                Text="Selecionar paciente"
+                FontSize="26"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                Text="Escolha o paciente que será agendado."
+                FontSize="14"
+                TextColor="{StaticResource InputPlaceholder}" />
+
+        </VerticalStackLayout>
+
+
+        <!-- ======================================
+             BUSCA
+             ====================================== -->
+
+        <Border
+            Grid.Row="1"
+            BackgroundColor="White"
+            Stroke="{StaticResource InputBlue}"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 16"
+            Padding="6,0">
+
+            <SearchBar
+                x:Name="BuscaPacienteSearchBar"
+                Placeholder="Buscar paciente ou responsável..."
+                PlaceholderColor="{StaticResource InputPlaceholder}"
+                TextColor="{StaticResource TextDark}"
+                BackgroundColor="Transparent"
+                TextChanged="BuscaPacienteSearchBar_TextChanged" />
+
+        </Border>
+
+
+        <!-- ======================================
+             PACIENTES
+             ====================================== -->
+
+        <CollectionView
+            Grid.Row="2"
+            x:Name="PacientesCollectionView"
+            SelectionMode="Single"
+            SelectionChanged="PacientesCollectionView_SelectionChanged">
+
+            <CollectionView.ItemsLayout>
+
+                <LinearItemsLayout
+                    Orientation="Vertical"
+                    ItemSpacing="10" />
+
+            </CollectionView.ItemsLayout>
+
+
+            <CollectionView.ItemTemplate>
+
+                <DataTemplate>
+
+                    <Border
+                        BackgroundColor="White"
+                        Stroke="{StaticResource InputBlue}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="16">
+
+                        <Grid
+                            ColumnDefinitions="*,Auto"
+                            ColumnSpacing="12">
+
+                            <VerticalStackLayout
+                                Grid.Column="0"
+                                Spacing="5">
+
+                                <!-- NOME + IDADE -->
+
+                                <Label
+                                    Text="{Binding NomeIdade}"
+                                    FontSize="17"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource TextDark}" />
+
+
+                                <!-- RESPONSÁVEL -->
+
+                                <Label
+                                    Text="{Binding ResponsavelTexto}"
+                                    FontSize="14"
+                                    TextColor="{StaticResource TextDark}" />
+
+
+                                <!-- NASCIMENTO -->
+
+                                <Label
+                                    Text="{Binding NascimentoTexto}"
+                                    FontSize="12"
+                                    TextColor="{StaticResource InputPlaceholder}" />
+
+                            </VerticalStackLayout>
+
+
+                            <!-- SETA -->
+
+                            <Label
+                                Grid.Column="1"
+                                Text="›"
+                                FontSize="28"
+                                TextColor="{StaticResource PrimaryBlue}"
+                                VerticalOptions="Center"
+                                HorizontalOptions="End" />
+
+                        </Grid>
+
+                    </Border>
+
+                </DataTemplate>
+
+            </CollectionView.ItemTemplate>
+
+
+            <CollectionView.EmptyView>
+
+                <VerticalStackLayout
+                    Padding="30"
+                    Spacing="8"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center">
+
+                    <Label
+                        Text="Nenhum paciente encontrado."
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}"
+                        HorizontalTextAlignment="Center" />
+
+                    <Label
+                        Text="Tente pesquisar por outro nome ou responsável."
+                        FontSize="13"
+                        TextColor="{StaticResource InputPlaceholder}"
+                        HorizontalTextAlignment="Center" />
+
+                </VerticalStackLayout>
+
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+
+
+        <!-- ======================================
+             CANCELAR
+             ====================================== -->
+
+        <Button
+            Grid.Row="3"
+            Text="CANCELAR"
+            HeightRequest="48"
+            CornerRadius="16"
+            BackgroundColor="White"
+            TextColor="{StaticResource PrimaryBlue}"
+            BorderColor="{StaticResource PrimaryBlue}"
+            BorderWidth="1"
+            FontAttributes="Bold"
+            Clicked="CancelarButton_Clicked" />
+
+    </Grid>
+
+</ContentPage>
