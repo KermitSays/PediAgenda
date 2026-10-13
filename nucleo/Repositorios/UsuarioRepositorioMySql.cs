@@ -1,4 +1,4 @@
-﻿using MySqlConnector;
+using MySqlConnector;
 using PediAgenda.Nucleo.Modelos;
 using PediAgenda.Nucleo.Seguranca;
 
@@ -281,102 +281,6 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
         };
     }
 
-    public bool CodigoAtivacaoResponsavelValido(
-        int usuarioId,
-        string codigo,
-        DateTime agora)
-    {
-        const string sql = """
-            SELECT
-                codigo_ativacao_hash,
-                codigo_ativacao_expira_em,
-                codigo_ativacao_usado_em
-
-            FROM responsavel
-
-            WHERE id_usuario = @id
-
-            LIMIT 1
-            """;
-
-        using var con = Abrir();
-        using var cmd =
-            new MySqlCommand(sql, con);
-
-        cmd.Parameters.AddWithValue(
-            "@id",
-            usuarioId);
-
-        using var r =
-            cmd.ExecuteReader();
-
-        if (!r.Read())
-            return false;
-
-        if (r.IsDBNull(
-            r.GetOrdinal(
-                "codigo_ativacao_hash")))
-        {
-            return false;
-        }
-
-        if (r.IsDBNull(
-            r.GetOrdinal(
-                "codigo_ativacao_expira_em")))
-        {
-            return false;
-        }
-
-        if (!r.IsDBNull(
-            r.GetOrdinal(
-                "codigo_ativacao_usado_em")))
-        {
-            return false;
-        }
-
-        var expiraEm =
-            r.GetDateTime(
-                "codigo_ativacao_expira_em");
-
-        if (expiraEm <= agora)
-            return false;
-
-        var hashEsperado =
-            (byte[])r[
-                "codigo_ativacao_hash"];
-
-        return CodigoAtivacao.Conferir(
-            codigo,
-            hashEsperado);
-    }
-
-    public void MarcarCodigoAtivacaoComoUsado(
-        int usuarioId,
-        DateTime usadoEm)
-    {
-        const string sql = """
-            UPDATE responsavel
-
-            SET codigo_ativacao_usado_em = @usadoEm
-
-            WHERE id_usuario = @id
-            """;
-
-        using var con = Abrir();
-        using var cmd =
-            new MySqlCommand(sql, con);
-
-        cmd.Parameters.AddWithValue(
-            "@usadoEm",
-            usadoEm);
-
-        cmd.Parameters.AddWithValue(
-            "@id",
-            usuarioId);
-
-        cmd.ExecuteNonQuery();
-    }
-
     public void CompletarCadastroResponsavel(
         int usuarioId,
         string email,
@@ -403,7 +307,6 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
                 ON r.id_usuario = u.id_usuario
 
             SET
-                u.email = @email,
                 u.senha_hash = @hash,
                 u.senha_salt = @salt,
                 u.senha_iteracoes = @iteracoes,
@@ -419,6 +322,9 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
                 u.bloqueado_ate = NULL
 
             WHERE u.id_usuario = @id
+              AND u.email = @email
+              AND u.ativo = 0
+              AND u.email_verificado = 0
             """;
 
         try
@@ -461,7 +367,7 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
             if (alterados == 0)
             {
                 throw new InvalidOperationException(
-                    "O responsável informado não foi encontrado.");
+                    "O cadastro não está disponível para este responsável. Confira CPF e e-mail na clínica.");
             }
         }
         catch (MySqlException e)
@@ -493,9 +399,7 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
             u.token_verificacao_expira_em = NULL,
 
             u.tentativas_invalidas = 0,
-            u.bloqueado_ate = NULL,
-
-            r.codigo_ativacao_usado_em = @confirmadoEm
+            u.bloqueado_ate = NULL
 
         WHERE u.token_verificacao_hash = @token
 
@@ -511,7 +415,6 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
 
           AND u.senha_salt IS NOT NULL
 
-          AND r.codigo_ativacao_usado_em IS NULL
         """;
 
         using var con = Abrir();

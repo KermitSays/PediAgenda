@@ -1,4 +1,4 @@
-﻿using PediAgenda.Nucleo.Modelos;
+using PediAgenda.Nucleo.Modelos;
 using PediAgenda.Nucleo.Seguranca;
 using System.Security.Cryptography;
 
@@ -74,23 +74,6 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
             u =>
                 u.Cpf == cpf
                 && u.Perfil == Perfil.Responsavel);
-
-    public bool CodigoAtivacaoResponsavelValido(
-    int usuarioId,
-    string codigo,
-    DateTime agora)
-    {
-        // A versão em memória é apenas auxiliar para testes.
-        // O fluxo real de ativação utiliza o MySQL.
-        return false;
-    }
-
-    public void MarcarCodigoAtivacaoComoUsado(
-        int usuarioId,
-        DateTime usadoEm)
-    {
-        // Nada a persistir na versão em memória por enquanto.
-    }
 
     public bool ConfirmarEmailResponsavel(
     byte[] tokenHash,
@@ -174,7 +157,7 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
         byte[] tokenVerificacaoHash,
         DateTime tokenExpiraEm)
     {
-        if (ExisteEmail(email))
+        if (ExisteEmailDeOutroUsuario(email, usuarioId))
         {
             throw new CadastroDuplicadoException(
                 "e-mail");
@@ -201,10 +184,18 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
                 "O responsável informado não foi encontrado.");
         }
 
+        if (string.IsNullOrWhiteSpace(usuario.Email)
+            || !string.Equals(usuario.Email.Trim(), email, StringComparison.OrdinalIgnoreCase)
+            || usuario.Ativo || usuario.EmailVerificado)
+        {
+            throw new InvalidOperationException(
+                "O cadastro não está disponível para este responsável.");
+        }
+
         var (hash, salt, iteracoes) =
             HashSenha.Gerar(senha);
 
-        usuario.Email = email;
+        // E-mail foi registrado anteriormente pela clínica.
 
         usuario.SenhaHash = hash;
         usuario.SenhaSalt = salt;

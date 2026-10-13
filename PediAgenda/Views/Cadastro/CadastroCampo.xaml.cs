@@ -60,9 +60,6 @@ public partial class CadastroCampo : ContentPage
         string cpf = Regex.Replace(
             CpfEntry.Text ?? "", @"\D", "");
 
-        string codigoAtivacao =
-            CodigoAtivacaoEntry.Text?.Trim() ?? "";
-
         string email =
             EmailEntry.Text?.Trim() ?? "";
 
@@ -77,14 +74,6 @@ public partial class CadastroCampo : ContentPage
         {
             ExibirErro(
                 "Informe um CPF com 11 dígitos, sem repetição.");
-            return;
-        }
-
-        // Validação do código de ativação
-        if (string.IsNullOrWhiteSpace(codigoAtivacao))
-        {
-            ExibirErro(
-                "Informe o código de ativação fornecido pela clínica.");
             return;
         }
 
@@ -134,7 +123,6 @@ public partial class CadastroCampo : ContentPage
                 new
                 {
                     cpf,
-                    codigoAtivacao,
                     email,
                     senha,
                     aceiteTermos = TermosCheckBox.IsChecked
@@ -199,7 +187,6 @@ public partial class CadastroCampo : ContentPage
             // A conta ainda aguarda confirmação do e-mail.
             SenhaEntry.Text = "";
             ConfirmarSenhaEntry.Text = "";
-            CodigoAtivacaoEntry.Text = "";
 
             await DisplayAlertAsync(
                 "Verifique seu e-mail",

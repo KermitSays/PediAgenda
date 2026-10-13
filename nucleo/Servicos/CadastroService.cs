@@ -11,13 +11,12 @@ public enum MotivoRecusa
     DadosInvalidos,
     EmailJaCadastrado,
     ResponsavelNaoEncontrado,
-    CodigoAtivacaoInvalido,
+    DadosCadastraisNaoConferem,
     CadastroJaIniciado
 }
 
 public record DadosResponsavel(
     string? Cpf,
-    string? CodigoAtivacao,
     string? Email,
     string? Senha,
     bool AceiteTermos);
@@ -84,9 +83,6 @@ public partial class CadastroService(
         var cpf =
             SoDigitos(dados.Cpf ?? "");
 
-        var codigoAtivacao =
-            (dados.CodigoAtivacao ?? "").Trim();
-
         var email =
             (dados.Email ?? "").Trim();
 
@@ -98,13 +94,6 @@ public partial class CadastroService(
         {
             campos["cpf"] =
                 "O CPF deve ter 11 dígitos.";
-        }
-
-        // Código entregue pela clínica
-        if (string.IsNullOrWhiteSpace(codigoAtivacao))
-        {
-            campos["codigoAtivacao"] =
-                "Informe o código de ativação fornecido pela clínica.";
         }
 
         // E-mail
@@ -171,6 +160,19 @@ public partial class CadastroService(
                 "O acesso deste responsável já está ativo.");
         }
 
+        // O e-mail precisa ter sido registrado pela clínica
+        // para este mesmo CPF; não pode ser escolhido livremente.
+        if (string.IsNullOrWhiteSpace(responsavel.Email)
+            || !string.Equals(
+                responsavel.Email.Trim(),
+                email,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return ResultadoCadastro.Falha(
+                MotivoRecusa.DadosCadastraisNaoConferem,
+                "CPF e e-mail não conferem com o cadastro da clínica. Procure a recepção.");
+        }
+
         // Não permite utilizar um e-mail que já pertence
         // a outro usuário do sistema.
         if (_repo.ExisteEmailDeOutroUsuario(
@@ -185,19 +187,6 @@ public partial class CadastroService(
         var agora =
             DateTime.UtcNow;
 
-        // CPF sozinho não é suficiente.
-        // Também precisa apresentar o código entregue
-        // pela clínica no momento do pré-cadastro.
-        if (!_repo.CodigoAtivacaoResponsavelValido(
-            responsavel.Id,
-            codigoAtivacao,
-            agora))
-        {
-            return ResultadoCadastro.Falha(
-                MotivoRecusa.CodigoAtivacaoInvalido,
-                "Código de ativação inválido, expirado ou já utilizado.");
-        }
-
         // Token aleatório que depois será enviado para
         // o endereço de e-mail informado pelo responsável.
         var (tokenEmail, tokenEmailHash) =
@@ -208,8 +197,8 @@ public partial class CadastroService(
 
         try
         {
-            // Preenche e-mail + senha no MESMO usuário
-            // anteriormente cadastrado pela clínica.
+            // Salva a senha no MESMO usuário, preservando o e-mail
+            // que já foi registrado pela clínica.
             _repo.CompletarCadastroResponsavel(
                 responsavel.Id,
                 email,
