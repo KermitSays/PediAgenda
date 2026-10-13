@@ -1,12 +1,268 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Camada_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 259.9 259.9">
+<svg id="Camada_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 396.6 254">
   <!-- Generator: Adobe Illustrator 30.7.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 114)  -->
   <defs>
     <style>
       .st0 {
+        fill: #f2cb9b;
+      }
+
+      .st0, .st1, .st2, .st3, .st4 {
         isolation: isolate;
       }
+
+      .st0, .st1, .st4 {
+        opacity: .7;
+      }
+
+      .st5 {
+        fill: url(#Gradiente_sem_nome_9);
+      }
+
+      .st6 {
+        fill: #ebaf68;
+      }
+
+      .st7 {
+        stroke: url(#Gradiente_sem_nome_11);
+        stroke-width: 6px;
+      }
+
+      .st7, .st8, .st3, .st9, .st4, .st10, .st11, .st12, .st13 {
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      .st14 {
+        fill: #ffdd52;
+      }
+
+      .st8 {
+        stroke: url(#Gradiente_sem_nome_131);
+      }
+
+      .st8, .st11, .st12 {
+        stroke-width: 12px;
+      }
+
+      .st1 {
+        fill: #f1c99b;
+      }
+
+      .st15 {
+        fill: url(#Gradiente_sem_nome_95);
+      }
+
+      .st16 {
+        fill: #4195c4;
+      }
+
+      .st17 {
+        fill: url(#Gradiente_sem_nome_2);
+      }
+
+      .st18 {
+        fill: #6ca3ce;
+      }
+
+      .st19 {
+        fill: #ffe89a;
+      }
+
+      .st20 {
+        fill: url(#Gradiente_sem_nome_92);
+      }
+
+      .st21 {
+        fill: #ffd137;
+      }
+
+      .st22 {
+        fill: #61acc3;
+      }
+
+      .st23 {
+        fill: url(#Gradiente_sem_nome_91);
+      }
+
+      .st2 {
+        fill: #f298ab;
+        opacity: .4;
+      }
+
+      .st3 {
+        opacity: .6;
+      }
+
+      .st3, .st4 {
+        stroke: #f5fbff;
+        stroke-width: 3px;
+      }
+
+      .st24 {
+        fill: url(#Gradiente_sem_nome_93);
+      }
+
+      .st25 {
+        fill: url(#Gradiente_sem_nome_94);
+      }
+
+      .st9 {
+        stroke: #0d71b9;
+        stroke-width: 17px;
+      }
+
+      .st26 {
+        fill: #aecd83;
+      }
+
+      .st10 {
+        stroke: url(#Gradiente_sem_nome_10);
+        stroke-width: 16px;
+      }
+
+      .st11 {
+        stroke: #3b8ec7;
+      }
+
+      .st27 {
+        fill: url(#Gradiente_sem_nome_97);
+      }
+
+      .st12 {
+        stroke: url(#Gradiente_sem_nome_13);
+      }
+
+      .st28 {
+        fill: #e49536;
+      }
+
+      .st13 {
+        stroke: #6ca9d4;
+        stroke-width: 5px;
+      }
+
+      .st29 {
+        fill: url(#Gradiente_sem_nome_15);
+        stroke: #ea5271;
+        stroke-width: .6px;
+      }
+
+      .st30 {
+        fill: url(#Gradiente_sem_nome_96);
+      }
+
+      .st31 {
+        fill: #3a84bf;
+        stroke: #1864ab;
+        stroke-width: 2px;
+      }
+
+      .st32 {
+        fill: url(#Gradiente_sem_nome_14);
+      }
     </style>
+    <linearGradient id="Gradiente_sem_nome_2" data-name="Gradiente sem nome 2" x1="-1420.3" y1="16" x2="-1419.3" y2="17.3" gradientTransform="translate(231869.7496 -2605.5) scale(163.1818 164.5)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".6" stop-color="#f9fcff"/>
+      <stop offset="1" stop-color="#d4edfa"/>
+    </linearGradient>
+    <linearGradient id="Gradiente_sem_nome_9" data-name="Gradiente sem nome 9" x1="-1384.3" y1="65.6" x2="-1383.1" y2="66.8" gradientTransform="translate(44427.3771 -1741.5) scale(32 28)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e2f3fd"/>
+      <stop offset="1" stop-color="#c8e7f9"/>
+    </linearGradient>
+    <linearGradient id="Gradiente_sem_nome_91" data-name="Gradiente sem nome 9" x1="-1384" y1="65.6" x2="-1382.8" y2="66.8" gradientTransform="translate(44468.3771 -1741.5) scale(32 28)" xlink:href="#Gradiente_sem_nome_9"/>
+    <linearGradient id="Gradiente_sem_nome_92" data-name="Gradiente sem nome 9" x1="-1382.4" y1="65.6" x2="-1381.2" y2="66.8" gradientTransform="translate(44468.3771 -1741.5) scale(32 28)" xlink:href="#Gradiente_sem_nome_9"/>
+    <linearGradient id="Gradiente_sem_nome_93" data-name="Gradiente sem nome 9" x1="-1384.3" y1="65.9" x2="-1383.1" y2="67.1" gradientTransform="translate(44427.3771 -1706.5) scale(32 28)" xlink:href="#Gradiente_sem_nome_9"/>
+    <linearGradient id="Gradiente_sem_nome_94" data-name="Gradiente sem nome 9" x1="-1384" y1="65.9" x2="-1382.8" y2="67.1" gradientTransform="translate(44468.3771 -1706.5) scale(32 28)" xlink:href="#Gradiente_sem_nome_9"/>
+    <linearGradient id="Gradiente_sem_nome_95" data-name="Gradiente sem nome 9" x1="-1382.5" y1="65.8" x2="-1381.2" y2="67.1" gradientTransform="translate(44468.3771 -1706.5) scale(32 28)" xlink:href="#Gradiente_sem_nome_9"/>
+    <linearGradient id="Gradiente_sem_nome_96" data-name="Gradiente sem nome 9" x1="-1384.3" y1="64.1" x2="-1383" y2="65.4" gradientTransform="translate(44427.3771 -1677) scale(32 29)" xlink:href="#Gradiente_sem_nome_9"/>
+    <linearGradient id="Gradiente_sem_nome_97" data-name="Gradiente sem nome 9" x1="-1384" y1="64.1" x2="-1382.7" y2="65.4" gradientTransform="translate(44468.3771 -1677) scale(32 29)" xlink:href="#Gradiente_sem_nome_9"/>
+    <linearGradient id="Gradiente_sem_nome_10" data-name="Gradiente sem nome 10" x1="-1417.6" y1="57.6" x2="-1416.9" y2="58.6" gradientTransform="translate(181580.5447 -1673.8403) scale(128 32.6418)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d1d1d1"/>
+      <stop offset="1" stop-color="#525252"/>
+    </linearGradient>
+    <linearGradient id="Gradiente_sem_nome_11" data-name="Gradiente sem nome 11" x1="-1416.7" y1="71.3" x2="-1415.6" y2="72.4" gradientTransform="translate(164436.3988 -1631.2118) scale(116 25.8641)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#dedede"/>
+      <stop offset="1" stop-color="#8f8f8f"/>
+    </linearGradient>
+    <linearGradient id="Gradiente_sem_nome_13" data-name="Gradiente sem nome 13" x1="-1324.6" y1="34" x2="-1323.6" y2="34.5" gradientTransform="translate(17939.6902 -1934) scale(13.5361 60)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#aeadad"/>
+      <stop offset=".5" stop-color="#d2d2d2"/>
+      <stop offset="1" stop-color="#8f8f8f"/>
+    </linearGradient>
+    <linearGradient id="Gradiente_sem_nome_131" data-name="Gradiente sem nome 13" x1="-1333.7" y1="42.4" x2="-1332.6" y2="42.9" gradientTransform="translate(20102.1703 -1849) scale(15 46)" xlink:href="#Gradiente_sem_nome_13"/>
+    <radialGradient id="Gradiente_sem_nome_14" data-name="Gradiente sem nome 14" cx="283.3" cy="-791.6" fx="283.3" fy="-791.6" r="34.2" gradientTransform="translate(0 -584) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".7" stop-color="#fffbf3"/>
+      <stop offset="1" stop-color="#fff8d4"/>
+    </radialGradient>
+    <linearGradient id="Gradiente_sem_nome_15" data-name="Gradiente sem nome 15" x1="-1400.9" y1="44" x2="-1400.2" y2="44.9" gradientTransform="translate(74585.0197 -1848.8386) scale(53.0507 46.1887)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ef7a95"/>
+      <stop offset=".5" stop-color="#eb5779"/>
+      <stop offset="1" stop-color="#e83856"/>
+    </linearGradient>
   </defs>
-  <image class="st0" width="512" height="512" transform="translate(1.9 1.9) scale(.5)" xlink:href="../../../../../Users/sarah/Downloads/fonendoscopio.png"/>
+  <g>
+    <g id="Calendario">
+      <path id="Contorno-calendario" class="st16" d="M125.7,30.1h146.8c17.3,0,27.1,10.5,29.6,27.8l8.6,157.9c.9,18.9-8.6,30-28.4,33.3l-155.4,1.2c-21.3,0-33.3-9.5-35.8-28.4l5.6-160.4c.4-19.7,10.1-30.2,29-31.5Z"/>
+      <path id="Folha" class="st17" d="M126.9,38.7h144.3c13.2,0,20.6,7.2,22.2,21.6l8.6,155.4c1.6,14.8-5.8,23.1-22.2,24.7l-153,1.2c-17.3,0-25.9-7.4-25.9-22.2l4.9-156.7c0-15.7,7-23.7,21-24.1Z"/>
+      <path id="Divisoria" class="st16" d="M101.3,70.2c65.3.4,130.5.9,195.6,1.2.2,2.7.4,5.4.6,8.1-65.6-.4-131.2-.7-196.9-1.1,0-2.8.4-5.6.5-8.4h.1Z"/>
+    </g>
+    <g id="Argolas">
+      <path id="Argola-esquerda" class="st28" d="M151.7,0h0c7.2,0,13,5.8,13,13v31.5c0,7.2-5.8,13-13,13h0c-7.2,0-13-5.8-13-13V13C138.8,5.8,144.6,0,151.7,0Z"/>
+      <path id="Brilho-argola-esquerda" class="st6" d="M151.7,8h0c3.5,0,6.2,2.7,6.2,6.2v29c0,3.5-2.7,6.2-6.2,6.2h0c-3.5,0-6.2-2.7-6.2-6.2V14.2c0-3.5,2.7-6.2,6.2-6.2Z"/>
+      <path class="st0" d="M146.8,40.7V14.8c0-4.9,2.1-7,6.2-6.2-2.8.9-4.3,3.3-4.3,7.4v24.7h-1.9Z"/>
+      <path id="Argola-direita" class="st28" d="M242.4,0h0c7.2,0,13,5.8,13,13v31.5c0,7.2-5.8,13-13,13h0c-7.2,0-13-5.8-13-13V13C229.4,5.8,235.2,0,242.4,0Z"/>
+      <path id="Brilho-argola-direita" class="st6" d="M242.4,8h0c3.5,0,6.2,2.7,6.2,6.2v29c0,3.5-2.7,6.2-6.2,6.2h0c-3.5,0-6.2-2.7-6.2-6.2V14.2c0-3.5,2.7-6.2,6.2-6.2Z"/>
+      <path class="st1" d="M238.1,40.7V14.8c0-4.9,2.1-7,6.2-6.2-2.8.9-4.3,3.3-4.3,7.4v24.7h-1.9Z"/>
+    </g>
+    <g id="Dias-do-calendario">
+      <rect id="Dia-1" class="st5" x="129.1" y="94.2" width="39.5" height="34.5" rx="5" ry="5"/>
+      <rect id="Dia-2" class="st23" x="179.7" y="94.2" width="39.5" height="34.5" rx="5" ry="5"/>
+      <rect id="Dia-21" class="st20" x="231.3" y="94.2" width="39.5" height="34.5" rx="5" ry="5"/>
+      <rect id="Dia-3" class="st24" x="129.1" y="137.4" width="39.5" height="34.5" rx="5" ry="5"/>
+      <rect id="Dia-4" class="st25" x="179.7" y="137.4" width="39.5" height="34.5" rx="5" ry="5"/>
+      <rect id="Dia-41" class="st15" x="229.7" y="137.4" width="39.5" height="34.5" rx="5" ry="5"/>
+      <rect id="Dia-5" class="st30" x="129.1" y="181.2" width="39.5" height="35.8" rx="5" ry="5"/>
+      <rect id="Dia-6" class="st27" x="179.7" y="181.2" width="39.5" height="35.8" rx="5" ry="5"/>
+    </g>
+  </g>
+  <g>
+    <g id="Estetoscopio-tubo-longo">
+      <path id="Mangueira-contorno" class="st10" d="M98.1,205.4c19.7,34.5,50.6,43.2,88.8,39.5,28.4-2.5,45.6-9.9,69.1-21"/>
+      <path id="Mangueira-brilho" class="st7" d="M100.4,209c4.4,6.3,12.3,15.9,24.7,23.6,22.6,14.1,45.5,13,60.3,12.3,28.1-1.4,50-11.2,63-18.7"/>
+    </g>
+    <g id="Estetoscopio-haste">
+      <path id="Haste-esquerda" class="st12" d="M10.8,90.3c-.2,8.4,0,18.6,2.3,30.2,3.3,17.4,9.4,31.1,14.6,40.5"/>
+      <path id="Brilho-haste-esquerda" class="st3" d="M12,103.5c0,8.4,1.2,19.9,5.1,32.8,3.6,12,8.4,21.5,12.6,28.4"/>
+      <path id="Haste-direita" class="st8" d="M98.1,88.2c6.2,17.3,14.8,38.2,18.5,56.7"/>
+      <path id="Brilho-haste-direita" class="st4" d="M101.1,96.2c3.6,9.1,6.9,19.1,10.1,30,2.5,8.4,4.4,16.4,6.2,24.1"/>
+      <path id="Arco-azul" class="st9" d="M30.2,163.4c13.6,32.1,37,49.3,64.1,40.7,28.4-8.6,30.8-32.1,23.4-58"/>
+      <path class="st11" d="M30.2,163.4c1.7,4.3,13.9,34.2,40.5,41.3,3.9,1.1,13.7,3.5,25-.4,2.5-.9,11.5-4.1,18.1-12,9.6-11.6,11.1-29.2,4.4-45.5"/>
+      <path id="Brilho-arco" class="st13" d="M30.2,163.4c8.1,24.7,26.8,41.9,47.6,43.7,2.8.2,18,1.5,30.2-9.1,12.7-11.1,17-30.7,10.7-50"/>
+    </g>
+    <g id="Auscultador">
+      <ellipse class="st31" cx="282.7" cy="206.7" rx="48.5" ry="46.3"/>
+      <path id="Brilho-aro" class="st18" d="M249.4,176.5c3-3,13.9-13.6,31.1-13.7,14.6,0,24.7,7.5,27.6,10-2.3-1.5-19.6-11.8-40.6-4.9-21.6,7.2-29.1,26.6-30.1,29.1,1.2-4.3,4.3-12.8,12-20.5Z"/>
+      <ellipse class="st32" cx="283.3" cy="207.6" rx="35" ry="33.3"/>
+    </g>
+    <g id="Olivas">
+      <rect class="st21" x="74.7" y="55.1" width="28.9" height="37.4" rx="8.5" ry="8.5" transform="translate(-17.4 28.5) rotate(-16.6)"/>
+      <rect class="st19" x="81.2" y="62.3" width="14.9" height="23.4" rx="4.4" ry="4.4" transform="translate(-17.5 28.4) rotate(-16.6)"/>
+    </g>
+    <g id="Olivas1">
+      <path class="st21" d="M17.4,67.6h0c7.9,1,13.6,8.1,12.6,16.2l-1.1,8.4c-1,7.9-8.1,13.6-16.2,12.6h0c-7.9-1-13.6-8.1-12.6-16.2l1.1-8.4c1-7.9,8.1-13.6,16.2-12.6Z"/>
+      <rect class="st19" x="2.8" y="78.7" width="23.4" height="14.9" rx="4.4" ry="4.4" transform="translate(-72.7 89.9) rotate(-82.9)"/>
+    </g>
+  </g>
+  <g id="Enfeites">
+    <path id="Raio-amarelo" class="st14" d="M317,150.9c2.8-10.7,5.6-21.5,8.3-32.2,2.3-5.3,8.4-7.6,13.7-5.4,5.3,2.2,7.6,8.4,5.4,13.7-5.4,9.9-10.7,19.7-16.2,29.6-1.7,3.8-5.3,5.8-7.8,5.1-3.1-.9-5.6-5.8-3.2-10.7h-.2Z"/>
+    <path id="Raio-verde" class="st26" d="M340.3,172.9c9-8.3,18.1-16.5,27.1-24.8,4.9-4.6,12.5-3.5,15.3,1,2.5,3.7,1.5,9.7-3.1,13.2-11.5,6.2-22.8,12.5-34.3,18.6-2.3,1.1-5.2.2-6.3-1.9-1.1-2-.6-4.7,1.4-6.2h-.1Z"/>
+    <path id="Raio-laranja" class="st22" d="M349.6,195.4c12.1.4,24.2.9,36.3,1.4,7.5.7,12,7.8,10.5,13.2-1.4,4.8-7.3,8.4-13.6,6.9-12-3.2-24.1-6.4-36-9.6-2.3-1.4-3.7-3.8-3.3-6.4.4-3,3-5.3,6-5.4h.1Z"/>
+  </g>
+  <g id="Coracao-calendario">
+    <path class="st29" d="M283.3,195.1c-11.7-14.9-24.8-6.5-24.8,5.7-1,11.2,12.2,23.4,23.4,29,1,.6,1.9.6,2.8,0,12.2-9.4,23.4-18.7,23.4-29s-14.9-19.6-24.8-5.7h-.1Z"/>
+    <path class="st2" d="M263.1,194.4c3.6-4.4,8.8-4.8,9.5-4.8-1.5-.4-3.9-.9-6.4.2-4.3,2-6.8,7.8-5.6,14.3-.1-.7-.7-5.6,2.5-9.7h0Z"/>
+  </g>
 </svg>

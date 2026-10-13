@@ -403,4 +403,13 @@ public partial class LoginResponsavel : ContentPage
             nameof(
                 MenuResponsavel));
     }
+
+    // =============================================
+    // BOTÃO DE CADASTRO
+    // =============================================
+    private async void CadastroButton_Clicked(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync(
+            nameof(Cadastro.CadastroCampo));
+    }
 }
