@@ -7,9 +7,16 @@ public partial class AgendarConsulta : ContentPage
     private string? especialidadeSelecionada;
 
 
+
     public AgendarConsulta()
     {
         InitializeComponent();
+    }
+
+    // Atualiza os pacientes sempre que a tela aparecer
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
 
         CarregarPacientes();
     }
@@ -17,18 +24,36 @@ public partial class AgendarConsulta : ContentPage
 
     // CARREGA OS DEPENDENTES DO RESPONSÁVEL
 
+
     private void CarregarPacientes()
     {
+        // Limpa a seleção anterior
+        pacienteSelecionado = null;
+
+        // Limpa os pacientes exibidos no Picker
         PacientePicker.Items.Clear();
 
-
+        // Carrega os dependentes cadastrados
         foreach (PacienteResponsavelItem paciente
             in ResponsavelDados.Pacientes)
         {
-            PacientePicker.Items.Add(
-                paciente.Nome);
+            PacientePicker.Items.Add(paciente.Nome);
+        }
+
+        // Informa se não houver pacientes cadastrados
+        if (PacientePicker.Items.Count == 0)
+        {
+            ErroLabel.Text =
+                "Nenhum paciente cadastrado. Adicione um dependente primeiro.";
+
+            ErroLabel.IsVisible = true;
+        }
+        else
+        {
+            ErroLabel.IsVisible = false;
         }
     }
+
 
 
     // PACIENTE SELECIONADO

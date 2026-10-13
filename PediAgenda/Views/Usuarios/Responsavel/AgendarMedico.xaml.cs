@@ -62,111 +62,124 @@ public partial class AgendarMedico : ContentPage
 
     // CARREGA OS MÉDICOS
 
-    private void CarregarMedicos(
-        string especialidade)
+
+    private void CarregarMedicos(string especialidade)
     {
-        List<Medico> medicos =
-            especialidade switch
+        List<Medico> medicos = especialidade switch
+        {
+            "Pediatria Geral" => new List<Medico>
+        {
+            new Medico
             {
-                "Pediatria" =>
-                    new List<Medico>
-                    {
-                        new Medico
-                        {
-                            IdMedico = 1,
-                            Nome = "Dra. Ana Oliveira",
-                            Rqe = "RQE 12345",
-                            Foto = "user.png"
-                        },
+                IdMedico = 1,
+                Nome = "Dra. Ana Oliveira",
+                Rqe = "RQE 12345",
+                Foto = "user.png"
+            },
+            new Medico
+            {
+                IdMedico = 2,
+                Nome = "Dr. Carlos Mendes",
+                Rqe = "RQE 23456",
+                Foto = "user.png"
+            },
+            new Medico
+            {
+                IdMedico = 3,
+                Nome = "Dra. Juliana Santos",
+                Rqe = "RQE 34567",
+                Foto = "user.png"
+            }
+        },
 
-                        new Medico
-                        {
-                            IdMedico = 2,
-                            Nome = "Dr. Carlos Mendes",
-                            Rqe = "RQE 23456",
-                            Foto = "user.png"
-                        },
+            "Neuropediatria" => new List<Medico>
+        {
+            new Medico
+            {
+                IdMedico = 4,
+                Nome = "Dra. Mariana Costa",
+                Rqe = "RQE 45678",
+                Foto = "user.png"
+            },
+            new Medico
+            {
+                IdMedico = 5,
+                Nome = "Dr. Rafael Almeida",
+                Rqe = "RQE 56789",
+                Foto = "user.png"
+            }
+        },
 
-                        new Medico
-                        {
-                            IdMedico = 3,
-                            Nome = "Dra. Juliana Santos",
-                            Rqe = "RQE 34567",
-                            Foto = "user.png"
-                        }
-                    },
+            "Cardiologia Pediátrica" => new List<Medico>
+        {
+            new Medico
+            {
+                IdMedico = 6,
+                Nome = "Dr. Felipe Martins",
+                Rqe = "RQE 67890",
+                Foto = "user.png"
+            },
+            new Medico
+            {
+                IdMedico = 7,
+                Nome = "Dra. Camila Rodrigues",
+                Rqe = "RQE 78901",
+                Foto = "user.png"
+            }
+        },
 
+            "Endocrinologia Pediátrica" => new List<Medico>
+        {
+            new Medico
+            {
+                IdMedico = 8,
+                Nome = "Dra. Beatriz Lima",
+                Rqe = "RQE 89012",
+                Foto = "user.png"
+            },
+            new Medico
+            {
+                IdMedico = 9,
+                Nome = "Dr. Lucas Ferreira",
+                Rqe = "RQE 90123",
+                Foto = "user.png"
+            }
+        },
 
-                "Neuropediatria" =>
-                    new List<Medico>
-                    {
-                        new Medico
-                        {
-                            IdMedico = 4,
-                            Nome = "Dra. Mariana Costa",
-                            Rqe = "RQE 45678",
-                            Foto = "user.png"
-                        },
+            // As demais especialidades aguardam
+            // o cadastro de médicos pela API.
+            _ => new List<Medico>()
+        };
 
-                        new Medico
-                        {
-                            IdMedico = 5,
-                            Nome = "Dr. Rafael Almeida",
-                            Rqe = "RQE 56789",
-                            Foto = "user.png"
-                        }
-                    },
+        MedicosCollectionView.ItemsSource = medicos;
 
+        // Limpa a seleção anterior
+        medicoSelecionado = null;
 
-                "Cardiologia" =>
-                    new List<Medico>
-                    {
-                        new Medico
-                        {
-                            IdMedico = 6,
-                            Nome = "Dr. Felipe Martins",
-                            Rqe = "RQE 67890",
-                            Foto = "user.png"
-                        },
+        // Finaliza o estado de carregamento
+        CarregandoIndicator.IsRunning = false;
+        CarregandoIndicator.IsVisible = false;
 
-                        new Medico
-                        {
-                            IdMedico = 7,
-                            Nome = "Dra. Camila Rodrigues",
-                            Rqe = "RQE 78901",
-                            Foto = "user.png"
-                        }
-                    },
+        // Informa quando não houver médicos
+        SemMedicosLabel.IsVisible = medicos.Count == 0;
 
+        ErroLabel.IsVisible = false;
+    
+    MedicosCollectionView.ItemsSource = medicos;
 
-                "Endocrinologia" =>
-                    new List<Medico>
-                    {
-                        new Medico
-                        {
-                            IdMedico = 8,
-                            Nome = "Dra. Beatriz Lima",
-                            Rqe = "RQE 89012",
-                            Foto = "user.png"
-                        },
+             // Limpa a seleção anterior
+                medicoSelecionado = null;
 
-                        new Medico
-                        {
-                            IdMedico = 9,
-                            Nome = "Dr. Lucas Ferreira",
-                            Rqe = "RQE 90123",
-                            Foto = "user.png"
-                        }
-                    },
+             // Esconde o indicador de carregamento
+                CarregandoIndicator.IsRunning = false;
+                CarregandoIndicator.IsVisible = false;
 
+            // Exibe mensagem se não houver médicos
+                SemMedicosLabel.IsVisible = medicos.Count == 0;
 
-                _ =>
-                    new List<Medico>()
-            };
+            // Limpa mensagens de erro anteriores
+                ErroLabel.IsVisible = false;
 
-
-        MedicosCollectionView.ItemsSource =
-            medicos;
     }
 
 

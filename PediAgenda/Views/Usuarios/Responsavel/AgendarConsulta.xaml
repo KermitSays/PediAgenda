@@ -66,17 +66,22 @@
                     BackgroundColor="{StaticResource White}"
                     SelectedIndexChanged="EspecialidadePicker_SelectedIndexChanged">
 
+
                     <Picker.Items>
-
-                        <x:String>Pediatria</x:String>
-
+                        <x:String>Pediatria Geral</x:String>
                         <x:String>Neuropediatria</x:String>
-
-                        <x:String>Cardiologia</x:String>
-
-                        <x:String>Endocrinologia</x:String>
-
+                        <x:String>Cardiologia Pediátrica</x:String>
+                        <x:String>Endocrinologia Pediátrica</x:String>
+                        <x:String>Cirurgia Pediátrica</x:String>
+                        <x:String>Gastroenterologia Pediátrica</x:String>
+                        <x:String>Pneumologia Pediátrica</x:String>
+                        <x:String>Nefrologia Pediátrica</x:String>
+                        <x:String>Alergia e Imunologia Pediátrica</x:String>
+                        <x:String>Hematologia Pediátrica</x:String>
+                        <x:String>Dermatologia Pediátrica</x:String>
+                        <x:String>Infectologia Pediátrica</x:String>
                     </Picker.Items>
+
 
                 </Picker>
 

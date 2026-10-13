@@ -38,6 +38,24 @@
                     FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}" />
 
+
+                <!-- INDICADOR DE CARREGAMENTO -->
+                <ActivityIndicator
+                    x:Name="CarregandoIndicator"
+                    IsRunning="False"
+                    IsVisible="False"
+                    Color="{StaticResource PrimaryBlue}"
+                    HeightRequest="40" />
+
+                <!-- MENSAGEM QUANDO NÃO EXISTIREM MÉDICOS -->
+                <Label
+                    x:Name="SemMedicosLabel"
+                    Text="Nenhum médico disponível para esta especialidade."
+                    FontSize="14"
+                    TextColor="{StaticResource InputPlaceholder}"
+                    HorizontalTextAlignment="Center"
+                    IsVisible="False" />
+
                 <CollectionView
                     x:Name="MedicosCollectionView"
                     SelectionMode="None">
