@@ -102,10 +102,6 @@ public partial class AppShell : Shell
             typeof(Views.Usuarios.Medico.DetalhesProntuario));
 
         Routing.RegisterRoute(
-            nameof(Views.Usuarios.Medico.DetalhesProntuario),
-            typeof(Views.Usuarios.Medico.DetalhesProntuario));
-
-        Routing.RegisterRoute(
             nameof(Views.Usuarios.Medico.RegistrarAtendimento),
             typeof(Views.Usuarios.Medico.RegistrarAtendimento));
 

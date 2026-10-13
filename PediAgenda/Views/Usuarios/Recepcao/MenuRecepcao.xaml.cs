@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using PediAgenda.Dados;
-using PediAgenda.Views.Usuarios.Medico;
 
 namespace PediAgenda.Views.Usuarios.Recepcao;
 
@@ -10,8 +9,8 @@ public partial class MenuRecepcao : ContentPage
         ConsultasHoje
     {
         get;
-        set;
-    }
+    } =
+        new();
 
 
     public MenuRecepcao()
@@ -19,78 +18,14 @@ public partial class MenuRecepcao : ContentPage
         InitializeComponent();
 
 
-        ConsultasHoje =
-            new ObservableCollection<ConsultaRecepcaoResumo>
-            {
-                new ConsultaRecepcaoResumo
-                {
-                    Horario =
-                        "08:00",
-
-                    Paciente =
-                        "Maria Alice",
-
-                    Medico =
-                        "Dr. Carlos Mendes",
-
-                    Status =
-                        "Confirmado"
-                },
-
-
-                new ConsultaRecepcaoResumo
-                {
-                    Horario =
-                        "09:00",
-
-                    Paciente =
-                        "João Pedro",
-
-                    Medico =
-                        "Dra. Fernanda Lima",
-
-                    Status =
-                        "Por Confirmar"
-                },
-
-
-                new ConsultaRecepcaoResumo
-                {
-                    Horario =
-                        "10:00",
-
-                    Paciente =
-                        "Bianca",
-
-                    Medico =
-                        "Dr. Carlos Mendes",
-
-                    Status =
-                        "Confirmado"
-                },
-
-
-                new ConsultaRecepcaoResumo
-                {
-                    Horario =
-                        "11:00",
-
-                    Paciente =
-                        "Isaac",
-
-                    Medico =
-                        "Dra. Fernanda Lima",
-
-                    Status =
-                        "Cancelado"
-                }
-            };
-
-
         BindingContext =
             this;
     }
 
+
+    // =============================================
+    // AO ABRIR / VOLTAR PARA O MENU
+    // =============================================
 
     protected override void OnAppearing()
     {
@@ -101,6 +36,9 @@ public partial class MenuRecepcao : ContentPage
 
 
         AtualizarData();
+
+
+        AtualizarConsultasHoje();
 
 
         AtualizarQuantidadeConsultas();
@@ -140,13 +78,195 @@ public partial class MenuRecepcao : ContentPage
 
 
     // =============================================
+    // CONSULTAS DE HOJE
+    // =============================================
+    //
+    // O Menu usa a MESMA fonte compartilhada da
+    // tela Médicos.
+    //
+    // Assim, se um horário estiver disponível na
+    // agenda, ele não poderá continuar aparecendo
+    // como consulta no Menu.
+
+    private void AtualizarConsultasHoje()
+    {
+        ConsultasHoje.Clear();
+
+
+        DateTime hoje =
+            DateTime.Today;
+
+
+        List<(
+            TimeSpan Horario,
+            ConsultaRecepcaoResumo Resumo)>
+            consultas =
+                new();
+
+
+        // =========================================
+        // PERCORRE TODOS OS MÉDICOS
+        // =========================================
+
+        foreach (
+            string medico
+            in AgendaMedicaRecepcaoDados
+                .MedicosCompartilhados)
+        {
+            List<HorarioAgendaRecepcao>
+                horarios =
+                    AgendaMedicaRecepcaoDados
+                        .ObterHorariosCompartilhados(
+                            medico,
+                            hoje);
+
+
+            foreach (
+                HorarioAgendaRecepcao horario
+                in horarios)
+            {
+                // =================================
+                // SOMENTE HORÁRIOS AGENDADOS
+                // =================================
+                //
+                // Disponível:
+                // não existe consulta ativa.
+                //
+                // Bloqueado:
+                // não é uma consulta.
+                //
+                // Agendado:
+                // existe uma consulta ativa.
+
+                if (
+                    horario.Status !=
+                    "Agendado")
+                {
+                    continue;
+                }
+
+
+                // =================================
+                // PROTEÇÃO EXTRA
+                // =================================
+
+                if (
+                    StatusConsulta.EhCancelada(
+                        horario.StatusConsulta))
+                {
+                    continue;
+                }
+
+
+                consultas.Add(
+                    (
+                        horario.Horario,
+
+                        new ConsultaRecepcaoResumo
+                        {
+                            Horario =
+                                horario
+                                    .HorarioFormatado,
+
+                            Paciente =
+                                string.IsNullOrWhiteSpace(
+                                    horario.Paciente)
+
+                                    ? "Paciente"
+
+                                    : horario.Paciente,
+
+                            Medico =
+                                medico,
+
+                            Status =
+                                string.IsNullOrWhiteSpace(
+                                    horario.StatusConsulta)
+
+                                    ? "Por confirmar"
+
+                                    : StatusConsulta
+                                        .Normalizar(
+                                            horario.StatusConsulta)
+                        }
+                    ));
+            }
+        }
+
+
+        // =============================================
+        // ORDENA E REMOVE DUPLICAÇÕES
+        // =============================================
+
+        var consultasOrdenadas =
+            consultas
+
+                .GroupBy(item =>
+                    new
+                    {
+                        item.Horario,
+
+                        item.Resumo.Paciente,
+
+                        item.Resumo.Medico
+                    })
+
+                .Select(grupo =>
+                    grupo.First())
+
+                .OrderBy(item =>
+                    item.Horario)
+
+                .ToList();
+
+
+        foreach (
+            var item
+            in consultasOrdenadas)
+        {
+            ConsultasHoje.Add(
+                item.Resumo);
+        }
+    }
+
+
+    // =============================================
     // QUANTIDADE
     // =============================================
 
     private void AtualizarQuantidadeConsultas()
     {
         QuantidadeConsultasLabel.Text =
-            $"{ConsultasHoje.Count} consulta(s)";
+            ConsultasHoje.Count switch
+            {
+                0 =>
+                    "0 consultas",
+
+                1 =>
+                    "1 consulta",
+
+                _ =>
+                    $"{ConsultasHoje.Count} consultas"
+            };
+    }
+
+
+    // =============================================
+    // ATUALIZAÇÃO MANUAL
+    // =============================================
+
+    private void ConsultasRefreshView_Refreshing(
+        object sender,
+        EventArgs e)
+    {
+        AtualizarConsultasHoje();
+
+
+        AtualizarQuantidadeConsultas();
+
+
+        ConsultasRefreshView.IsRefreshing =
+            false;
     }
 
 
