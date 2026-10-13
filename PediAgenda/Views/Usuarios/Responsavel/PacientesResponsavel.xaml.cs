@@ -132,6 +132,15 @@ public partial class PacientesResponsavel : ContentPage
             });
     }
 
+    // ABRIR TELA DE CADASTRO DE DEPENDENTES
+    private async void AdicionarDependenteButton_Clicked(
+        object sender,
+        EventArgs e)
+    {
+        await Shell.Current.GoToAsync(
+            nameof(AdicionarDependente));
+    }
+
 
     // VOLTAR
 

@@ -165,6 +165,9 @@
 	  <MauiXaml Update="Views\Usuarios\Recepcao\SelecionarPacienteRecepcao.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\Usuarios\Responsavel\AdicionarDependente.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\Usuarios\Responsavel\AgendamentoConcluido.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

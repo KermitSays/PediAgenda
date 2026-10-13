@@ -275,17 +275,31 @@
         </CollectionView>
 
 
-        <!-- VOLTAR -->
-
-        <Button
+       <!-- BOTÕES INFERIORES -->
+        <VerticalStackLayout
             Grid.Row="2"
-            Text="VOLTAR"
-            HeightRequest="52"
-            CornerRadius="14"
-            BackgroundColor="{StaticResource PrimaryBlue}"
-            TextColor="{StaticResource White}"
-            FontAttributes="Bold"
-            Clicked="VoltarButton_Clicked" />
+            Spacing="10">
+
+            <Button
+                Text="ADICIONAR DEPENDENTE"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="AdicionarDependenteButton_Clicked" />
+
+            <Button
+                Text="VOLTAR"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+
 
     </Grid>
 

@@ -84,6 +84,11 @@ public partial class AppShell : Shell
             nameof(Views.Usuarios.Responsavel.Notificacoes),
             typeof(Views.Usuarios.Responsavel.Notificacoes));
 
+        Routing.RegisterRoute(
+            nameof(AdicionarDependente),
+            typeof(AdicionarDependente));
+
+
         //ROTAS MÉDICO
         Routing.RegisterRoute(
             nameof(Views.Usuarios.Medico.MenuMedico),

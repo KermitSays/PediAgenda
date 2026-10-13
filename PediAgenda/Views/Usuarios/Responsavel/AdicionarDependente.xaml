@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.Views.Usuarios.Responsavel.AdicionarDependente"
+    Title="Adicionar dependente"
+    BackgroundColor="{StaticResource PageBlue}"
+    NavigationPage.HasNavigationBar="False">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,30,24,24"
+            Spacing="18">
+
+            <!-- TÍTULO -->
+            <Label
+                Text="Adicionar dependente"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
+
+            <Label
+                Text="Preencha os dados da criança para cadastrá-la como paciente."
+                FontSize="15"
+                TextColor="{StaticResource InputPlaceholder}" />
+
+            <!-- FORMULÁRIO -->
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="20"
+                StrokeShape="RoundRectangle 16">
+
+                <VerticalStackLayout Spacing="16">
+
+                    <Label
+                        Text="Nome completo"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Entry
+                        x:Name="NomeEntry"
+                        Placeholder="Nome completo da criança"
+                        MaxLength="120" />
+
+                    <Label
+                        Text="Data de nascimento"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <DatePicker
+                        x:Name="DataNascimentoPicker"
+                        Format="dd/MM/yyyy" />
+
+                    <Label
+                        x:Name="MensagemErroLabel"
+                        IsVisible="False"
+                        TextColor="Red"
+                        FontSize="13" />
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- SALVAR -->
+            <Button
+                x:Name="SalvarButton"
+                Text="CADASTRAR DEPENDENTE"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="SalvarButton_Clicked" />
+
+            <!-- VOLTAR -->
+            <Button
+                Text="VOLTAR"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="{StaticResource White}"
+                TextColor="{StaticResource PrimaryBlue}"
+                FontAttributes="Bold"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
