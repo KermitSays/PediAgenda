@@ -1,4 +1,4 @@
-﻿using PediAgenda.Nucleo.Modelos;
+using PediAgenda.Nucleo.Modelos;
 using PediAgenda.Nucleo.Repositorios;
 using PediAgenda.Nucleo.Seguranca;
 
@@ -144,23 +144,6 @@ public class AutenticacaoService(
                 $"Conta temporariamente bloqueada. " +
                 $"Tente novamente em {restante} minuto(s).",
                 MotivoFalha.ContaBloqueada);
-        }
-
-        // Responsáveis que já escolheram e-mail e senha,
-        // mas ainda não confirmaram o e-mail, continuam
-        // sem autorização para entrar.
-        if (usuario.Perfil == Perfil.Responsavel
-            && !usuario.EmailVerificado)
-        {
-            _repo.RegistrarTentativa(
-                email,
-                usuario.Id,
-                false,
-                "email nao verificado");
-
-            return ResultadoLogin.Falha(
-                "Confirme seu e-mail para ativar sua conta.",
-                MotivoFalha.ContaInativa);
         }
 
         // Conta inativa por qualquer outro motivo.

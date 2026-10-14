@@ -18,14 +18,6 @@ public interface IUsuarioRepositorio
     string codigo,
     DateTime agora);
 
-    void MarcarCodigoAtivacaoComoUsado(
-        int usuarioId,
-        DateTime usadoEm);
-
-    bool ConfirmarEmailResponsavel(
-    byte[] tokenHash,
-    DateTime confirmadoEm);
-
     void Atualizar(Usuario usuario);
 
     void RegistrarTentativa(
@@ -51,8 +43,7 @@ public interface IUsuarioRepositorio
         int usuarioId,
         string email,
         string senha,
-        byte[] tokenVerificacaoHash,
-        DateTime tokenExpiraEm);
+        DateTime ativadoEm);
 
     
     /// Cria uma conta completa.
@@ -76,3 +67,6 @@ public class CadastroDuplicadoException(string campo)
 {
     public string Campo { get; } = campo;
 }
+/// Código de ativação consumido, vencido ou cadastro já concluído.
+public class CodigoAtivacaoIndisponivelException()
+    : Exception("O código de ativação não está mais disponível.");
