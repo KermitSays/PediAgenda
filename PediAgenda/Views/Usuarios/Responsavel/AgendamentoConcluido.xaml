@@ -63,6 +63,23 @@
                         HeightRequest="65" />
 
 
+                    <!-- RESPONSÁVEL LEGAL -->
+                    <VerticalStackLayout Spacing="3">
+
+                        <Label
+                             Text="Responsável legal"
+                             FontSize="13"
+                             TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label
+                            Text="{Binding Responsavel}"
+                            FontSize="18"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextDark}" />
+
+                    </VerticalStackLayout>
+                    
+
                     <!-- PACIENTE -->
 
                     <VerticalStackLayout

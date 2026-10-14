@@ -6,6 +6,7 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 [QueryProperty(nameof(Especialidade), "Especialidade")]
 [QueryProperty(nameof(Data), "Data")]
 [QueryProperty(nameof(Horario), "Horario")]
+[QueryProperty(nameof(Responsavel), "Responsavel")]
 public partial class AgendamentoConcluido : ContentPage
 {
     private string? paciente;
@@ -19,6 +20,20 @@ public partial class AgendamentoConcluido : ContentPage
     private string? data;
 
     private string? horario;
+    private string? responsavel;
+
+
+    public string Responsavel
+    {
+        get => responsavel ?? string.Empty;
+
+        set
+        {
+            responsavel = value;
+
+            OnPropertyChanged(nameof(Responsavel));
+        }
+    }
 
 
     public string Paciente

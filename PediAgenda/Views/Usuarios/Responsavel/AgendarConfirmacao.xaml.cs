@@ -1,4 +1,5 @@
 using System.Globalization;
+using PediAgenda.Dados;
 
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
@@ -360,6 +361,12 @@ public partial class AgendarConfirmacao : ContentPage
             nameof(AgendamentoConcluido),
             new Dictionary<string, object>
             {
+                {
+
+                    "Responsavel",
+                      SessaoUsuario.Nome
+                },
+
                 {
                     "Paciente",
                     Paciente
