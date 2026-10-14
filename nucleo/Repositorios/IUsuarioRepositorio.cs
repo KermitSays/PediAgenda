@@ -13,15 +13,6 @@ public interface IUsuarioRepositorio
     // decide criar seu acesso ao aplicativo.
     Usuario? BuscarResponsavelPorCpf(string cpf);
 
-    bool CodigoAtivacaoResponsavelValido(
-    int usuarioId,
-    string codigo,
-    DateTime agora);
-
-    void MarcarCodigoAtivacaoComoUsado(
-        int usuarioId,
-        DateTime usadoEm);
-
     bool ConfirmarEmailResponsavel(
     byte[] tokenHash,
     DateTime confirmadoEm);

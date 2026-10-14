@@ -112,8 +112,8 @@ app.MapGet("/api/auth/eu", (ClaimsPrincipal usuario) =>
 // Conclusão do cadastro de acesso do responsável.
 //
 // O responsável já foi previamente cadastrado pela clínica.
-// Aqui ele informa CPF + código de ativação e escolhe
-// o e-mail e a senha que usará no aplicativo.
+// Aqui ele informa CPF, e-mail previamente cadastrado pela clínica
+// e senha para utilizar o aplicativo.
 //
 // Esta rota não exige login, porque o responsável ainda
 // está justamente criando o acesso dele.
@@ -128,7 +128,6 @@ app.MapPost(
             cadastro.Cadastrar(
                 new DadosResponsavel(
                     req.Cpf,
-                    req.CodigoAtivacao,
                     req.Email,
                     req.Senha,
                     req.AceiteTermos));
@@ -153,9 +152,8 @@ app.MapPost(
                     or InvalidOperationException)
             {
                 // O cadastro fica pendente no banco.
-                // Como o código da clínica ainda não foi marcado
-                // como utilizado, o responsável poderá tentar
-                // novamente e receber um novo link.
+                // O cadastro fica pendente; o responsável pode
+                // tentar novamente com os mesmos dados e receber novo link.
                 Console.Error.WriteLine(
                     $"Falha ao enviar e-mail de confirmação: {e.Message}");
 
@@ -210,11 +208,11 @@ app.MapPost(
         }
 
         if (resultado.Motivo
-            == MotivoRecusa.CodigoAtivacaoInvalido)
+            == MotivoRecusa.DadosCadastraisNaoConferem)
         {
             return Results.Json(
                 new ErroApi(
-                    "CODIGO_ATIVACAO_INVALIDO",
+                    "DADOS_CADASTRAIS_NAO_CONFEREM",
                     resultado.Mensagem),
                 statusCode:
                     StatusCodes.Status400BadRequest);
@@ -319,7 +317,7 @@ static string Codigo(MotivoFalha motivo) => motivo switch
 
 // O que a tela manda e o que ela recebe. A senha só entra; nunca sai.
 record LoginRequisicao(string? Email, string? Senha);
-record CadastroRequisicao(  string? Cpf, string? CodigoAtivacao, string? Email, string? Senha, bool AceiteTermos);
+record CadastroRequisicao(string? Cpf, string? Email, string? Senha, bool AceiteTermos);
 record UsuarioLogado(int Id, string Nome, string Email, string Perfil);
 record SessaoIniciada(int Id, string Nome, string Email, string Perfil, string Token, DateTime ExpiraEm);
 record ErroApi(string Codigo, string Mensagem);
