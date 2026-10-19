@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:PediAgenda.Controls"
+             x:Class="PediAgenda.Views.SobreDesenvolvedores"
+             Title="Sobre os desenvolvedores"
+             BackgroundColor="{StaticResource PageBlue}">
+    <ScrollView>
+        <VerticalStackLayout Padding="24,32,24,32" Spacing="20">
+            <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                <Label Text="Sobre o PediAgenda"
+                       FontSize="27" FontAttributes="Bold"
+                       TextColor="{StaticResource TextDark}"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Um projeto de conclusão de curso desenvolvido para apoiar a organização de consultas pediátricas."
+                       FontSize="15" TextColor="{StaticResource TextDark}"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <Border BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}" StrokeThickness="1"
+                    StrokeShape="RoundRectangle 16" Padding="18">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Equipe de desenvolvimento"
+                           FontSize="19" FontAttributes="Bold"
+                           TextColor="{StaticResource TextDark}" />
+                    <Label Text="Sara • Talita • Lara"
+                           FontSize="17" TextColor="{StaticResource PrimaryBlue}" />
+                    <Label Text="Design, desenvolvimento do aplicativo, integrações e documentação do projeto."
+                           FontSize="14" TextColor="{StaticResource TextDark}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}" StrokeThickness="1"
+                    StrokeShape="RoundRectangle 16" Padding="18">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Tecnologias utilizadas"
+                           FontSize="19" FontAttributes="Bold"
+                           TextColor="{StaticResource TextDark}" />
+                    <Label Text=".NET MAUI, C#, XAML, ASP.NET Core (Web API), MySQL e Brevo."
+                           FontSize="15" TextColor="{StaticResource TextDark}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}" StrokeThickness="1"
+                    StrokeShape="RoundRectangle 16" Padding="18">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Créditos dos ícones"
+                           FontSize="19" FontAttributes="Bold"
+                           TextColor="{StaticResource TextDark}" />
+                    <Label Text="Parte dos ícones utilizados no aplicativo foi obtida na plataforma Flaticon. Agradecemos aos autores dos recursos gráficos."
+                           FontSize="15" TextColor="{StaticResource TextDark}" />
+                    <Label Text="www.flaticon.com"
+                           FontSize="15" TextDecorations="Underline"
+                           TextColor="{StaticResource PrimaryBlue}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="Flaticon_Tapped" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}" StrokeThickness="1"
+                    StrokeShape="RoundRectangle 16" Padding="18">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Agradecimentos"
+                           FontSize="19" FontAttributes="Bold"
+                           TextColor="{StaticResource TextDark}" />
+                    <Label Text="Agradecemos aos professores, orientadores, colegas e a todas as pessoas que contribuíram com apoio e sugestões durante a elaboração deste projeto."
+                           FontSize="15" TextColor="{StaticResource TextDark}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="PediAgenda • 2026"
+                   TextColor="{StaticResource InputPlaceholder}"
+                   FontSize="13" HorizontalTextAlignment="Center" />
+            <controls:BotaoVoltar />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -3,7 +3,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PediAgenda.Views.Cadastro.CadastroConcluido"
-             Title="Cadastro Concluído"
+             Title="Verificação de E-mail"
              BackgroundColor="{StaticResource PageBlue}"
              NavigationPage.HasNavigationBar="False">
 
@@ -24,7 +24,7 @@
 
             <!-- Título -->
             <Label
-                Text="Cadastro Concluído"
+                Text="Verifique seu e-mail"
                 FontSize="28"
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}"
@@ -32,7 +32,7 @@
 
             <!-- Mensagem -->
             <Label
-                Text="Verifique seu e-mail para ativar sua conta e fazer login."
+                Text="Confira sua caixa de entrada e clique no link de verificação enviado para seu e-mail. Depois de confirmar seu endereço, você poderá fazer login no PediAgenda."
                 FontSize="18"
                 TextColor="{StaticResource TextDark}"
                 HorizontalTextAlignment="Center"
@@ -41,7 +41,7 @@
             <!-- Botão voltar ao login -->
             <Button
                 x:Name="VoltarLoginButton"
-                Text="Voltar ao login"
+                Text="VOLTAR AO LOGIN"
                 Style="{StaticResource PrimaryButton}"
                 Clicked="VoltarLoginButton_Clicked"
                 Margin="0,20,0,0" />

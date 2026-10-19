@@ -163,12 +163,10 @@
 
             <!-- Voltar -->
             <Button
+                Text="Voltar"
                 x:Name="VoltarButton"
-                Text="← Voltar"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource PrimaryBlue}"
-                FontSize="16"
-                Clicked="VoltarButton_Clicked" />
+                Clicked="VoltarButton_Clicked"
+                Style="{StaticResource BotaoVoltarSimples}" />
 
         </VerticalStackLayout>
     </ScrollView>

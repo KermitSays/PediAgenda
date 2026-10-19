@@ -1,4 +1,4 @@
-﻿using PediAgenda.Views;
+using PediAgenda.Views;
 
 
 namespace PediAgenda
@@ -24,6 +24,10 @@ namespace PediAgenda
         {
             await Shell.Current.GoToAsync(
             nameof(Views.Login.LoginFuncionario));
+        }
+        private async void SobreDesenvolvedoresButton_Clicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync(nameof(Views.SobreDesenvolvedores));
         }
     }
 }

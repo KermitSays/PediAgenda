@@ -150,16 +150,10 @@
         <!-- CANCELAR -->
 
         <Button
+            Text="Voltar"
             Grid.Row="3"
-            Text="CANCELAR"
-            HeightRequest="48"
-            CornerRadius="16"
-            BackgroundColor="White"
-            TextColor="{StaticResource PrimaryBlue}"
-            BorderColor="{StaticResource PrimaryBlue}"
-            BorderWidth="1"
-            FontAttributes="Bold"
-            Clicked="CancelarButton_Clicked" />
+            Clicked="CancelarButton_Clicked"
+            Style="{StaticResource BotaoVoltarSimples}" />
 
     </Grid>
 

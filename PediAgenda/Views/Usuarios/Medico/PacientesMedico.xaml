@@ -4,11 +4,12 @@
     x:Class="PediAgenda.Views.Usuarios.Medico.PacientesMedico"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:PediAgenda.Controls"
     Title="Pacientes"
     BackgroundColor="{StaticResource PageBlue}">
 
     <Grid
-        RowDefinitions="Auto,Auto,*"
+        RowDefinitions="Auto,Auto,*,Auto"
         Padding="24,30,24,20"
         RowSpacing="20">
 
@@ -70,69 +71,53 @@
                     ItemSpacing="12" />
             </CollectionView.ItemsLayout>
 
+
             <CollectionView.ItemTemplate>
                 <DataTemplate>
 
                     <Border
-                        BackgroundColor="{StaticResource White}"
-                        Stroke="{StaticResource InputBlue}"
-                        StrokeThickness="1"
-                        Padding="14"
-                        StrokeShape="RoundRectangle 16">
+            BackgroundColor="{StaticResource White}"
+            Stroke="{StaticResource InputBlue}"
+            StrokeThickness="1"
+            Padding="16"
+            StrokeShape="RoundRectangle 16">
 
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="PacientesMedico_Clicked" />
+                            <TapGestureRecognizer
+                    Tapped="PacientesMedico_Clicked" />
                         </Border.GestureRecognizers>
 
                         <Grid
-                            ColumnDefinitions="70,*,Auto"
-                            ColumnSpacing="14">
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="12">
 
-                            <!-- FOTO -->
-                            <Border
-                                Grid.Column="0"
-                                WidthRequest="60"
-                                HeightRequest="60"
-                                StrokeThickness="0"
-                                StrokeShape="RoundRectangle 30"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center">
-
-                                <Image
-                                    Source="{Binding Foto}"
-                                    Aspect="AspectFill"
-                                    WidthRequest="60"
-                                    HeightRequest="60" />
-
-                            </Border>
-
-                            <!-- DADOS -->
+                            <!-- INFORMAÇÕES DO PACIENTE -->
                             <VerticalStackLayout
-                                Grid.Column="1"
-                                Spacing="5"
-                                VerticalOptions="Center">
+                    Grid.Column="0"
+                    Spacing="5"
+                    VerticalOptions="Center">
 
                                 <Label
-                                    Text="{Binding Nome}"
-                                    FontSize="17"
-                                    FontAttributes="Bold"
-                                    TextColor="{StaticResource TextDark}" />
+                        Text="{Binding Nome}"
+                        FontSize="17"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
 
                                 <Label
-                                    Text="{Binding UltimaConsultaTexto}"
-                                    FontSize="14"
-                                    TextColor="{StaticResource InputPlaceholder}" />
+                        Text="{Binding UltimaConsultaTexto}"
+                        FontSize="14"
+                        TextColor="{StaticResource InputPlaceholder}" />
 
                             </VerticalStackLayout>
 
                             <!-- SETA -->
                             <Label
-                                Grid.Column="2"
-                                Text="›"
-                                FontSize="30"
-                                TextColor="{StaticResource PrimaryBlue}"
-                                VerticalOptions="Center"
-                                HorizontalOptions="End" />
+                    Grid.Column="1"
+                    Text="›"
+                    FontSize="30"
+                    TextColor="{StaticResource PrimaryBlue}"
+                    VerticalOptions="Center"
+                    HorizontalOptions="End" />
 
                         </Grid>
 
@@ -140,6 +125,7 @@
 
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+
 
             <CollectionView.EmptyView>
 
@@ -167,6 +153,8 @@
 
         </CollectionView>
 
+        <!-- Retorno ao menu anterior -->
+        <controls:BotaoVoltar Grid.Row="3" />
     </Grid>
 
 </ContentPage>

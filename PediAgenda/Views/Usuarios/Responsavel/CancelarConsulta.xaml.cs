@@ -140,7 +140,8 @@ public partial class CancelarConsulta : ContentPage
         bool confirmar =
             await DisplayAlertAsync(
                 "Cancelar consulta",
-                "Deseja realmente cancelar esta consulta?",
+                "Deseja realmente cancelar esta consulta?\n\n" +
+                "Para reagendar, entre em contato com a recepção da clínica.",
                 "SIM",
                 "NÃO");
 
@@ -229,24 +230,7 @@ public partial class CancelarConsulta : ContentPage
 
         // NOTIFICAÇÃO
 
-        NotificacoesDados.Notificacoes.Add(
-            new Notificacao
-            {
-                Titulo =
-                    "Consulta cancelada",
-
-                Mensagem =
-                    $"A consulta de {Paciente} com {Medico} " +
-                    $"do dia {consulta.Data:dd/MM/yyyy} às " +
-                    $"{consulta.Horario:hh\\:mm} foi cancelada.",
-
-                DataHora =
-                    DateTime.Now,
-
-                Lida =
-                    false
-            });
-
+        // Notificacoes retiradas do escopo reduzido.
 
         cancelamentoConcluido =
             true;

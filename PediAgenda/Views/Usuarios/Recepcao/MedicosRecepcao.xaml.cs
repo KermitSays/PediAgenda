@@ -486,8 +486,11 @@ public partial class MedicosRecepcao : ContentPage
                 Especialidade =
                     "Pediatria Geral",
 
+                // Campo legado mantido por compatibilidade.
+                // A forma de pagamento é definida na clínica.
+                //Não remover ainda porque outros arquivos podem depender dela até a atualização do Núcleo e do banco.
                 TipoAtendimento =
-                    "Particular",
+                        string.Empty,
 
                 Status =
                     StatusConsulta.PorConfirmar

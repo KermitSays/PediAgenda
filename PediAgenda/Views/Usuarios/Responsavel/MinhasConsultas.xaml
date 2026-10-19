@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8" ?>
-
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -8,255 +7,103 @@
     BackgroundColor="{StaticResource PageBlue}"
     NavigationPage.HasNavigationBar="False">
 
-    <Grid
-        Padding="24,30,24,24"
-        RowDefinitions="Auto,*,Auto">
-
-
-        <!-- TÍTULO -->
-
-        <VerticalStackLayout
-            Grid.Row="0"
-            Spacing="5">
-
-            <Label
-                Text="Minhas consultas"
-                FontSize="28"
-                FontAttributes="Bold"
-                TextColor="{StaticResource TextDark}" />
-
-            <Label
-                Text="Selecione um paciente para visualizar suas consultas."
-                FontSize="15"
-                TextColor="{StaticResource TextDark}" />
-
+    <Grid Padding="24,30,24,24" RowDefinitions="Auto,*,Auto">
+        <VerticalStackLayout Grid.Row="0" Spacing="5">
+            <Label Text="Minhas consultas" FontSize="28" FontAttributes="Bold"
+                   TextColor="{StaticResource TextDark}" />
+            <Label Text="Selecione um paciente para visualizar suas consultas."
+                   FontSize="15" TextColor="{StaticResource TextDark}" />
         </VerticalStackLayout>
 
-
-        <!-- LISTA DE PACIENTES -->
-
-        <CollectionView
-            Grid.Row="1"
-            x:Name="PacientesCollectionView"
-            Margin="0,24,0,15"
-            SelectionMode="None">
-
+        <CollectionView Grid.Row="1" x:Name="PacientesCollectionView"
+                        Margin="0,24,0,15" SelectionMode="None">
             <CollectionView.ItemTemplate>
-
                 <DataTemplate>
-
-                    <VerticalStackLayout
-                        Spacing="10"
-                        Margin="0,0,0,14">
-
-
-                        <!-- CARD DO PACIENTE -->
-
-                        <Border
-                            BackgroundColor="{StaticResource White}"
-                            Stroke="{StaticResource InputBlue}"
-                            StrokeThickness="1"
-                            Padding="14"
-                            Margin="0,0,0,10"
-                            StrokeShape="RoundRectangle 14">
-
+                    <VerticalStackLayout Spacing="10" Margin="0,0,0,14">
+                        <!-- Sem avatar: card ocupa toda a largura. -->
+                        <Border BackgroundColor="{StaticResource White}"
+                                Stroke="{StaticResource InputBlue}"
+                                StrokeThickness="1" Padding="14"
+                                Margin="0,0,0,10"
+                                StrokeShape="RoundRectangle 14">
                             <Border.GestureRecognizers>
-
-                                <TapGestureRecognizer
-                                    Tapped="PacienteCard_Tapped" />
-
+                                <TapGestureRecognizer Tapped="PacienteCard_Tapped" />
                             </Border.GestureRecognizers>
-
-
-                            <HorizontalStackLayout
-                                Spacing="12">
-
-
-                                <!-- FOTO -->
-
-                                <Border
-                                    WidthRequest="52"
-                                    HeightRequest="52"
-                                    StrokeThickness="0"
-                                    StrokeShape="RoundRectangle 26">
-
-                                    <Image
-                                        Source="{Binding Foto}"
-                                        Aspect="AspectFill" />
-
-                                </Border>
-
-
-                                <!-- NOME -->
-
-                                <VerticalStackLayout
-                                    VerticalOptions="Center"
-                                    Spacing="2">
-
-                                    <Label
-                                        Text="{Binding Nome}"
-                                        FontSize="17"
-                                        FontAttributes="Bold"
-                                        TextColor="{StaticResource TextDark}" />
-
-                                    <Label
-                                        Text="Toque para ver as consultas"
-                                        FontSize="12"
-                                        TextColor="{StaticResource InputPlaceholder}" />
-
-                                </VerticalStackLayout>
-
-                            </HorizontalStackLayout>
-
-
-                            <!-- ESTILO ABERTO -->
-
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="{Binding Nome}" FontSize="17"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource TextDark}" />
+                                <Label Text="Toque para ver as consultas" FontSize="12"
+                                       TextColor="{StaticResource InputPlaceholder}" />
+                            </VerticalStackLayout>
                             <Border.Triggers>
-
-                                <DataTrigger
-                                    TargetType="Border"
-                                    Binding="{Binding IsExpanded}"
-                                    Value="True">
-
-                                    <Setter
-                                        Property="BackgroundColor"
-                                        Value="#E8F3FF" />
-
-                                    <Setter
-                                        Property="Stroke"
-                                        Value="{StaticResource PrimaryBlue}" />
-
-                                    <Setter
-                                        Property="StrokeThickness"
-                                        Value="2" />
-
+                                <DataTrigger TargetType="Border" Binding="{Binding IsExpanded}"
+                                             Value="True">
+                                    <Setter Property="BackgroundColor" Value="#E8F3FF" />
+                                    <Setter Property="Stroke" Value="{StaticResource PrimaryBlue}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
                                 </DataTrigger>
-
                             </Border.Triggers>
-
                         </Border>
 
-
-                        <!-- CONSULTAS ATIVAS -->
-
-                        <VerticalStackLayout
-                            BindableLayout.ItemsSource="{Binding ConsultasAtivasOrdenadas}"
-                            IsVisible="{Binding IsExpanded}"
-                            Spacing="10"
-                            Padding="12,0,0,0">
-
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding ConsultasAtivasOrdenadas}"
+                                             IsVisible="{Binding IsExpanded}"
+                                             Spacing="10" Padding="12,0,0,0">
                             <BindableLayout.ItemTemplate>
-
                                 <DataTemplate>
-
-                                    <Border
-                                        BackgroundColor="{StaticResource White}"
-                                        Stroke="{StaticResource InputBlue}"
-                                        StrokeThickness="1"
-                                        Padding="14"
-                                        Margin="20,0,0,8"
-                                        StrokeShape="RoundRectangle 12">
-
+                                    <!-- Toque abre diretamente a confirmação do cancelamento. -->
+                                    <Border BackgroundColor="{StaticResource White}"
+                                            Stroke="{StaticResource InputBlue}"
+                                            StrokeThickness="1" Padding="14"
+                                            Margin="12,0,0,8"
+                                            StrokeShape="RoundRectangle 12">
                                         <Border.GestureRecognizers>
-
-                                            <TapGestureRecognizer
-                                                Tapped="ConsultaCard_Tapped" />
-
+                                            <TapGestureRecognizer Tapped="ConsultaCard_Tapped" />
                                         </Border.GestureRecognizers>
-
-
-                                        <VerticalStackLayout
-                                            Spacing="4">
-
-                                            <Label
-                                                Text="{Binding Medico}"
-                                                FontSize="15"
-                                                FontAttributes="Bold"
-                                                TextColor="{StaticResource TextDark}" />
-
-                                            <Label
-                                                Text="{Binding Especialidade}"
-                                                FontSize="13"
-                                                TextColor="{StaticResource InputPlaceholder}" />
-
-                                            <Label
-                                                Text="{Binding DataHorario}"
-                                                FontSize="13"
-                                                TextColor="{StaticResource TextDark}" />
-
-                                            <Label
-                                                Text="{Binding Status}"
-                                                FontSize="12"
-                                                FontAttributes="Bold"
-                                                TextColor="{StaticResource PrimaryBlue}" />
-
+                                        <VerticalStackLayout Spacing="4">
+                                            <Label Text="{Binding Medico}" FontSize="15"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextDark}" />
+                                            <Label Text="{Binding Especialidade}" FontSize="13"
+                                                   TextColor="{StaticResource InputPlaceholder}" />
+                                            <Label Text="{Binding DataHorario}" FontSize="13"
+                                                   TextColor="{StaticResource TextDark}" />
+                                            <Label Text="{Binding Status}" FontSize="12"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource PrimaryBlue}" />
+                                            <Label Text="Toque para cancelar a consulta" FontSize="12"
+                                                   TextColor="{StaticResource PrimaryBlue}"
+                                                   Margin="0,5,0,0" />
                                         </VerticalStackLayout>
-
                                     </Border>
-
                                 </DataTemplate>
-
                             </BindableLayout.ItemTemplate>
-
                         </VerticalStackLayout>
 
-
-                        <!-- SEM CONSULTAS ATIVAS -->
-
-                        <Border
-                            IsVisible="{Binding SemConsultasAtivas}"
-                            BackgroundColor="{StaticResource White}"
-                            Stroke="{StaticResource InputBlue}"
-                            StrokeThickness="1"
-                            Padding="14"
-                            Margin="32,0,0,8"
-                            StrokeShape="RoundRectangle 12">
-
+                        <Border IsVisible="{Binding SemConsultasAtivas}"
+                                BackgroundColor="{StaticResource White}"
+                                Stroke="{StaticResource InputBlue}"
+                                StrokeThickness="1" Padding="14"
+                                Margin="24,0,0,8" StrokeShape="RoundRectangle 12">
                             <Border.Triggers>
-
-                                <DataTrigger
-                                    TargetType="Border"
-                                    Binding="{Binding IsExpanded}"
-                                    Value="False">
-
-                                    <Setter
-                                        Property="IsVisible"
-                                        Value="False" />
-
+                                <DataTrigger TargetType="Border" Binding="{Binding IsExpanded}"
+                                             Value="False">
+                                    <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
-
                             </Border.Triggers>
-
-
-                            <Label
-                                Text="Nenhuma consulta ativa para este paciente."
-                                FontSize="13"
-                                TextColor="{StaticResource InputPlaceholder}"
-                                HorizontalTextAlignment="Center" />
-
+                            <Label Text="Nenhuma consulta ativa para este paciente."
+                                   FontSize="13" TextColor="{StaticResource InputPlaceholder}"
+                                   HorizontalTextAlignment="Center" />
                         </Border>
-
                     </VerticalStackLayout>
-
                 </DataTemplate>
-
             </CollectionView.ItemTemplate>
-
         </CollectionView>
 
-
-        <!-- VOLTAR -->
-
         <Button
+            Text="Voltar"
             Grid.Row="2"
-            Text="VOLTAR"
-            HeightRequest="52"
-            CornerRadius="14"
-            BackgroundColor="{StaticResource PrimaryBlue}"
-            TextColor="{StaticResource White}"
-            FontAttributes="Bold"
-            Clicked="VoltarButton_Clicked" />
-
+            Clicked="VoltarButton_Clicked"
+            Style="{StaticResource BotaoVoltarSimples}" />
     </Grid>
-
 </ContentPage>

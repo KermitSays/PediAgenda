@@ -10,7 +10,6 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 [QueryProperty(nameof(HorarioId), "HorarioId")]
 [QueryProperty(nameof(Data), "Data")]
 [QueryProperty(nameof(Horario), "Horario")]
-[QueryProperty(nameof(TipoAtendimento), "TipoAtendimento")]
 [QueryProperty(nameof(FotoMedico), "FotoMedico")]
 public partial class AgendarConfirmacao : ContentPage
 {
@@ -29,9 +28,6 @@ public partial class AgendarConfirmacao : ContentPage
     private string? data;
 
     private string? horario;
-
-    private string? tipoAtendimento;
-
     private string? fotoMedico;
 
     private bool agendamentoSalvo;
@@ -65,7 +61,12 @@ public partial class AgendarConfirmacao : ContentPage
     {
         get => paciente ?? string.Empty;
 
-        set => paciente = value;
+        set
+        {
+            paciente = value;
+            if (PacienteLabel != null)
+                PacienteLabel.Text = value;
+        }
     }
 
 
@@ -143,25 +144,6 @@ public partial class AgendarConfirmacao : ContentPage
             if (HorarioLabel != null)
             {
                 HorarioLabel.Text =
-                    value;
-            }
-        }
-    }
-
-
-    public string TipoAtendimento
-    {
-        get => tipoAtendimento ?? string.Empty;
-
-        set
-        {
-            tipoAtendimento =
-                value;
-
-
-            if (TipoAtendimentoLabel != null)
-            {
-                TipoAtendimentoLabel.Text =
                     value;
             }
         }
@@ -268,30 +250,7 @@ public partial class AgendarConfirmacao : ContentPage
             + 1;
 
 
-        string modalidade;
-
-        string valor;
-
-
-        if (TipoAtendimento.StartsWith(
-            "Particular",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            modalidade =
-                "Particular";
-
-            valor =
-                "R$ 200,00";
-        }
-        else
-        {
-            modalidade =
-                "Convênio";
-
-            valor =
-                TipoAtendimento;
-        }
-
+        // Pagamento e convenio serao definidos na recepcao.
 
         ConsultaResponsavelItem novaConsulta =
             new ConsultaResponsavelItem
@@ -317,12 +276,6 @@ public partial class AgendarConfirmacao : ContentPage
                 Horario =
                     horarioConsulta,
 
-                Modalidade =
-                    modalidade,
-
-                Valor =
-                    valor,
-
                 Status =
                     "Por confirmar"
             };
@@ -332,25 +285,7 @@ public partial class AgendarConfirmacao : ContentPage
             novaConsulta);
 
 
-        NotificacoesDados.Notificacoes.Add(
-            new Notificacao
-            {
-                Titulo =
-                    "Consulta agendada",
-
-                Mensagem =
-                    $"A consulta de {Paciente} com {Medico} " +
-                    $"foi agendada para " +
-                    $"{dataConsulta:dd/MM/yyyy} às " +
-                    $"{horarioConsulta:hh\\:mm}.",
-
-                DataHora =
-                    DateTime.Now,
-
-                Lida =
-                    false
-            });
-
+        // Notificacoes retiradas do escopo reduzido.
 
         agendamentoSalvo =
             true;
