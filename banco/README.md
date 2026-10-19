@@ -1,31 +1,39 @@
-# Banco de dados
+# Banco MySQL 8 — PediAgenda
 
-Scripts do banco `pediagenda` (MySQL 8.0), na ordem em que se roda.
+| Arquivo | Uso |
+| --- | --- |
+| `01_Schema.sql` | Cria banco e 12 tabelas em uma base NOVA e vazia; não executa DROP DATABASE |
+| `02_popula_tabelas.sql` | Carga fictícia para uma base de testes vazia, criada pelo 01 |
+| `03_remover_verificacao_email.sql` | Migração de um banco existente para o cadastro sem confirmação e sem código |
+| `03_modelo_completo.sql` | Arquivo antigo desativado; interrompe a execução sem recriar o banco |
+| `04_validacao_modelo_completo.sql` | Exercício manual de restrições em banco de teste vazio, sem a carga 02; alguns erros são esperados |
 
-| Arquivo | O que faz |
-|---|---|
-| `03_modelo_completo.sql` | Cria o banco inteiro: 12 tabelas, chaves, índices e restrições |
-| `04_validacao_modelo_completo.sql` | 21 testes que conferem se as regras do modelo pegam |
+## Banco novo
 
-**Atenção: o `03` apaga o banco `pediagenda` e recria tudo do zero.** Só rode
-enquanto houver apenas dados de teste.
+Execute `01_Schema.sql`. Se a conta Aiven não puder criar bancos, crie `pediagenda` no painel e execute a partir de `USE pediagenda;`. Não execute a carga fictícia no banco compartilhado com dados reais.
 
-No MySQL Workbench: abra a conexão primeiro e, de dentro dela, *File → Open SQL
-Script*, depois o raio ⚡. Ao final devem aparecer 12 tabelas.
+A carga 02 mantém os IDs de demonstração e gera horários nos próximos três dias úteis. As contas completas dessa carga usam **senhaDemo123**:
 
-O `04` é opcional: ele cria um cenário de teste, tenta violar cada regra (CPF
-repetido, horário duplicado na mesma agenda, consulta sem horário, prontuário
-em consulta que já tem um) e no fim apaga o que criou. As mensagens de erro
-que aparecem são o resultado esperado — é o banco recusando o que deve recusar.
+| Perfil | E-mail |
+| --- | --- |
+| Responsável | `maria@teste.local` |
+| Responsável de outra família | `ana.oliveira@example.com` |
+| Médico | `medico.teste@example.com` |
+| Outro médico | `helena.duarte@example.com` |
+| Recepção | `recepcao.teste@example.com` |
 
-## Perfis de usuário
+Há também um pré-cadastro sem senha: CPF `52998224725`, e-mail `precadastro@example.com`. Complete-o pela API escolhendo uma senha e aceitando os termos.
 
-Não existe tabela de perfis. O perfil de cada usuário vem da especialização que
-aponta para ele: `responsavel`, `medico` ou `recepcionista`. Um usuário sem
-nenhuma das três é tratado pelo login como conta inativa.
+## Banco existente
 
-## Senhas
+Execute somente `03_remover_verificacao_email.sql` antes de iniciar a nova API. O script:
 
-A tabela `usuario` não guarda senha em texto puro: guarda `senha_hash`,
-`senha_salt` e `senha_iteracoes` (PBKDF2-SHA256). Quem grava isso é a API; pelo
-SQL não dá para criar usuário com senha utilizável.
+- Permite credenciais nulas nos pré-cadastros.
+- Adiciona `usuario.termos_aceitos_em`, sem inventar datas para registros antigos.
+- Remove as colunas antigas de verificação de e-mail e código de ativação que existirem.
+- Preserva nomes, CPF, e-mail, hashes de senha, estado ativo/inativo e atendimentos.
+- Pode ser repetido; não recria tabelas nem apaga registros.
+
+DDL no MySQL faz commit implícito; a migração não é uma transação com rollback integral. Contas antigas inativas continuam inativas: a clínica deve avaliar esses cadastros. Um pré-cadastro sem senha precisa ter o e-mail informado pela recepção antes de concluir o acesso. Não é necessário reaplicar a carga 02.
+
+O e-mail continua sendo o identificador de login. O aceite dos termos é registrado em UTC no momento em que a senha é definida.

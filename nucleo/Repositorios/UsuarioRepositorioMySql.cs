@@ -28,10 +28,6 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
                 u.senha_salt,
                 u.senha_iteracoes,
                 u.ativo,
-                u.email_verificado,
-                u.token_verificacao_hash,
-                u.token_verificacao_expira_em,
-                u.email_verificado_em,
                 u.tentativas_invalidas,
                 u.bloqueado_ate,
 
@@ -117,34 +113,6 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
                 r.GetBoolean("ativo")
                 && !semPerfil,
 
-            EmailVerificado =
-                r.GetBoolean(
-                    "email_verificado"),
-
-            TokenVerificacaoHash =
-                r.IsDBNull(
-                    r.GetOrdinal(
-                        "token_verificacao_hash"))
-                            ? null
-                            : (byte[])r[
-                                "token_verificacao_hash"],
-
-            TokenVerificacaoExpiraEm =
-                r.IsDBNull(
-                    r.GetOrdinal(
-                        "token_verificacao_expira_em"))
-                            ? null
-                            : r.GetDateTime(
-                                "token_verificacao_expira_em"),
-
-            EmailVerificadoEm =
-                r.IsDBNull(
-                    r.GetOrdinal(
-                        "email_verificado_em"))
-                            ? null
-                            : r.GetDateTime(
-                                "email_verificado_em"),
-
             TentativasInvalidas =
                 r.GetInt32(
                     "tentativas_invalidas"),
@@ -171,10 +139,6 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
                 u.senha_salt,
                 u.senha_iteracoes,
                 u.ativo,
-                u.email_verificado,
-                u.token_verificacao_hash,
-                u.token_verificacao_expira_em,
-                u.email_verificado_em,
                 u.tentativas_invalidas,
                 u.bloqueado_ate
 
@@ -240,34 +204,6 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
             Ativo =
                 r.GetBoolean("ativo"),
 
-            EmailVerificado =
-                r.GetBoolean(
-                    "email_verificado"),
-
-            TokenVerificacaoHash =
-                r.IsDBNull(
-                    r.GetOrdinal(
-                        "token_verificacao_hash"))
-                            ? null
-                            : (byte[])r[
-                                "token_verificacao_hash"],
-
-            TokenVerificacaoExpiraEm =
-                r.IsDBNull(
-                    r.GetOrdinal(
-                        "token_verificacao_expira_em"))
-                            ? null
-                            : r.GetDateTime(
-                                "token_verificacao_expira_em"),
-
-            EmailVerificadoEm =
-                r.IsDBNull(
-                    r.GetOrdinal(
-                        "email_verificado_em"))
-                            ? null
-                            : r.GetDateTime(
-                                "email_verificado_em"),
-
             TentativasInvalidas =
                 r.GetInt32(
                     "tentativas_invalidas"),
@@ -281,159 +217,63 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
         };
     }
 
-    public void CompletarCadastroResponsavel(
-        int usuarioId,
-        string email,
-        string senha,
-        byte[] tokenVerificacaoHash,
-        DateTime tokenExpiraEm)
+    public bool CompletarCadastroResponsavel(int usuarioId, string email, string senha)
     {
-        if (!PoliticaSenha.Valida(
-            senha,
-            out var erro))
-        {
-            throw new ArgumentException(
-                erro,
-                nameof(senha));
-        }
+        if (!PoliticaSenha.Valida(senha, out var erro))
+            throw new ArgumentException(erro, nameof(senha));
 
-        var (hash, salt, iteracoes) =
-            HashSenha.Gerar(senha);
-
+        var (hash, salt, iteracoes) = HashSenha.Gerar(senha);
+        // Só conclui um pré-cadastro sem senha e com o e-mail da clínica.
+        // Duas chamadas concorrentes não podem substituir a senha uma da outra.
         const string sql = """
             UPDATE usuario u
-
-            INNER JOIN responsavel r
-                ON r.id_usuario = u.id_usuario
-
-            SET
-                u.senha_hash = @hash,
-                u.senha_salt = @salt,
-                u.senha_iteracoes = @iteracoes,
-
-                u.ativo = 0,
-                u.email_verificado = 0,
-
-                u.token_verificacao_hash = @token,
-                u.token_verificacao_expira_em = @expira,
-                u.email_verificado_em = NULL,
-
-                u.tentativas_invalidas = 0,
-                u.bloqueado_ate = NULL
-
-            WHERE u.id_usuario = @id
-              AND u.email = @email
-              AND u.ativo = 0
-              AND u.email_verificado = 0
+            INNER JOIN responsavel r ON r.id_usuario = u.id_usuario
+            SET u.senha_hash = @hash, u.senha_salt = @salt,
+                u.senha_iteracoes = @iteracoes, u.ativo = 1,
+                u.tentativas_invalidas = 0, u.bloqueado_ate = NULL,
+                u.termos_aceitos_em = UTC_TIMESTAMP()
+            WHERE u.id_usuario = @id AND u.email = @email
+              AND u.senha_hash IS NULL AND u.senha_salt IS NULL
             """;
+        using var con = Abrir();
+        using var cmd = new MySqlCommand(sql, con);
+        cmd.Parameters.AddWithValue("@id", usuarioId);
+        cmd.Parameters.AddWithValue("@email", email);
+        cmd.Parameters.AddWithValue("@hash", hash);
+        cmd.Parameters.AddWithValue("@salt", salt);
+        cmd.Parameters.AddWithValue("@iteracoes", iteracoes);
+        return cmd.ExecuteNonQuery() == 1;
+    }
 
+    public int PreCadastrarResponsavel(string nome, string cpf, string email, string telefone)
+    {
         try
         {
             using var con = Abrir();
-            using var cmd =
-                new MySqlCommand(sql, con);
-
-            cmd.Parameters.AddWithValue(
-                "@email",
-                email);
-
-            cmd.Parameters.AddWithValue(
-                "@hash",
-                hash);
-
-            cmd.Parameters.AddWithValue(
-                "@salt",
-                salt);
-
-            cmd.Parameters.AddWithValue(
-                "@iteracoes",
-                iteracoes);
-
-            cmd.Parameters.AddWithValue(
-                "@token",
-                tokenVerificacaoHash);
-
-            cmd.Parameters.AddWithValue(
-                "@expira",
-                tokenExpiraEm);
-
-            cmd.Parameters.AddWithValue(
-                "@id",
-                usuarioId);
-
-            var alterados =
-                cmd.ExecuteNonQuery();
-
-            if (alterados == 0)
-            {
-                throw new InvalidOperationException(
-                    "O cadastro não está disponível para este responsável. Confira CPF e e-mail na clínica.");
-            }
+            using var tx = con.BeginTransaction();
+            using var usuario = new MySqlCommand("""
+                INSERT INTO usuario (nome, cpf, email, ativo)
+                VALUES (@nome, @cpf, @email, FALSE)
+                """, con, tx);
+            usuario.Parameters.AddWithValue("@nome", nome);
+            usuario.Parameters.AddWithValue("@cpf", cpf);
+            usuario.Parameters.AddWithValue("@email", email);
+            usuario.ExecuteNonQuery();
+            var id = (int)usuario.LastInsertedId;
+            using var responsavel = new MySqlCommand("""
+                INSERT INTO responsavel (telefone, id_usuario) VALUES (@telefone, @id)
+                """, con, tx);
+            responsavel.Parameters.AddWithValue("@telefone", telefone);
+            responsavel.Parameters.AddWithValue("@id", id);
+            responsavel.ExecuteNonQuery();
+            tx.Commit();
+            return id;
         }
-        catch (MySqlException e)
-            when (
-                e.ErrorCode
-                == MySqlErrorCode.DuplicateKeyEntry)
+        catch (MySqlException e) when (e.ErrorCode == MySqlErrorCode.DuplicateKeyEntry)
         {
             throw new CadastroDuplicadoException(
-                "e-mail");
+                e.Message.Contains("cpf", StringComparison.OrdinalIgnoreCase) ? "CPF" : "e-mail");
         }
-    }
-
-    public bool ConfirmarEmailResponsavel(
-    byte[] tokenHash,
-    DateTime confirmadoEm)
-    {
-        const string sql = """
-        UPDATE usuario u
-
-        INNER JOIN responsavel r
-            ON r.id_usuario = u.id_usuario
-
-        SET
-            u.email_verificado = 1,
-            u.email_verificado_em = @confirmadoEm,
-            u.ativo = 1,
-
-            u.token_verificacao_hash = NULL,
-            u.token_verificacao_expira_em = NULL,
-
-            u.tentativas_invalidas = 0,
-            u.bloqueado_ate = NULL
-
-        WHERE u.token_verificacao_hash = @token
-
-          AND u.token_verificacao_expira_em IS NOT NULL
-
-          AND u.token_verificacao_expira_em >= @confirmadoEm
-
-          AND u.email_verificado = 0
-
-          AND u.email IS NOT NULL
-
-          AND u.senha_hash IS NOT NULL
-
-          AND u.senha_salt IS NOT NULL
-
-        """;
-
-        using var con = Abrir();
-
-        using var cmd =
-            new MySqlCommand(sql, con);
-
-        cmd.Parameters.AddWithValue(
-            "@token",
-            tokenHash);
-
-        cmd.Parameters.AddWithValue(
-            "@confirmadoEm",
-            confirmadoEm);
-
-        var alterados =
-            cmd.ExecuteNonQuery();
-
-        return alterados > 0;
     }
 
     public void Atualizar(
@@ -467,6 +307,34 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
             usuario.Id);
 
         cmd.ExecuteNonQuery();
+    }
+
+    public (bool Bloqueado, int Restantes) RegistrarFalhaSenha(
+        int usuarioId, DateTime agora, int limite, TimeSpan duracao)
+    {
+        using var con = Abrir();
+        using var tx = con.BeginTransaction();
+        int tentativas;
+        using (var leitura = new MySqlCommand(
+            "SELECT tentativas_invalidas, bloqueado_ate FROM usuario WHERE id_usuario = @id FOR UPDATE", con, tx))
+        {
+            leitura.Parameters.AddWithValue("@id", usuarioId);
+            using var r = leitura.ExecuteReader();
+            if (!r.Read()) return (false, 0);
+            if (!r.IsDBNull(1) && r.GetDateTime(1) > agora) return (true, 0);
+            tentativas = r.GetInt32(0) + 1;
+        }
+        var bloquear = tentativas >= limite;
+        using var escrita = new MySqlCommand("""
+            UPDATE usuario SET tentativas_invalidas = @tentativas, bloqueado_ate = @ate
+            WHERE id_usuario = @id
+            """, con, tx);
+        escrita.Parameters.AddWithValue("@id", usuarioId);
+        escrita.Parameters.AddWithValue("@tentativas", bloquear ? 0 : tentativas);
+        escrita.Parameters.AddWithValue("@ate", bloquear ? (object)agora.Add(duracao) : DBNull.Value);
+        escrita.ExecuteNonQuery();
+        tx.Commit();
+        return (bloquear, bloquear ? 0 : limite - tentativas);
     }
 
     public void RegistrarTentativa(
@@ -504,7 +372,7 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
 
         cmd.Parameters.AddWithValue(
             "@email",
-            emailInformado);
+            emailInformado[..Math.Min(emailInformado.Length, 160)]);
 
         cmd.Parameters.AddWithValue(
             "@sucesso",
@@ -613,9 +481,7 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
                     senha_hash,
                     senha_salt,
                     senha_iteracoes,
-                    ativo,
-                    email_verificado,
-                    email_verificado_em
+                    ativo
                 )
 
                 VALUES
@@ -626,9 +492,7 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
                     @hash,
                     @salt,
                     @iteracoes,
-                    1,
-                    1,
-                    CURRENT_TIMESTAMP
+                    1
                 )
                 """,
                 con,

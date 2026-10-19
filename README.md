@@ -1,56 +1,52 @@
-# PediAgenda: Sistema de Agendamento e Atendimento Pediátrico
+# PediAgenda
 
-> Sistema digital voltado para o agendamento e gerenciamento de consultas pediátricas, alinhado ao Objetivo de Desenvolvimento Sustentável ODS-3 (Saúde e Bem-estar) da ONU.
+Sistema de agendamento e atendimento pediátrico desenvolvido por Talita Barbara Cardanha Lopes, Sara Helena de Oliveira Nunes Ribeiro e Lara Vitoria Araujo Moreira.
 
-## 👥 Equipe e Papéis
-* **Talita Barbara Cardanha Lopes** - Product Owner
-* **Sara Helena de Oliveira Nunes Ribeiro** - Scrum Master
-* **Gustavo de Oliveira** - Dev Team
-* **Joab Antonio de Souza** - Dev Team
-* **Lara Vitoria Araujo Moreira** - Dev Team
+## Projetos
 
-## 📋 Sobre o Projeto
-O **PediAgenda** foi desenvolvido para modernizar e otimizar o fluxo de atendimentos em clínicas pediátricas. O sistema mitiga problemas comuns como filas e atrasos organizando a rotina através de perfis distintos:
-* **Pacientes/Responsáveis:** Cadastro, login, busca de pediatras por especialidade e agendamento prático (particular ou convênio).
-* **Profissionais (Médicos e Recepção):** Gerenciamento completo da agenda, prontuário eletrônico básico e geração de relatórios.
+| Pasta | Função |
+| --- | --- |
+| `PediAgenda/` | Aplicativo .NET MAUI; usa .NET 10 e os workloads da plataforma |
+| `api/` | API HTTP em .NET 9 com autenticação JWT |
+| `nucleo/` | Regras de negócio e repositórios MySQL, compartilhados pela API |
+| `banco/` | Schema MySQL 8, carga fictícia e migração de bancos existentes |
+| `login/` | Demonstração em console do login |
+| `testes/` | Testes HTTP com API e MySQL locais descartáveis |
 
-*Nota de Privacidade: O sistema foi estruturado seguindo os princípios da LGPD (Art. 14 da Lei nº 13.709/2018) para o tratamento seguro de dados de menores de idade.*
+## Executar a API
 
-## 🛠️ Tecnologias e Ferramentas
-* **Ambiente de Desenvolvimento:** .NET
-* **Banco de Dados:** Relacional (SQL Server/PostgreSQL)
-* **Metodologia Ágil:** Scrum (Organizado em 4 Sprints)
+É necessário o SDK .NET 9 e um MySQL 8 acessível. O backend usa MySqlConnector diretamente; não usa Entity Framework nem `dotnet ef`.
 
-## 🗓️ Planejamento das Sprints
-A evolução do projeto foi dividida em blocos de entrega de valor:
-* **Sprint 1:** Infraestrutura Inicial, Módulo de Cadastro e Login *(Responsáveis: Joab, Sara, Talita)*.
-* **Sprint 2:** Infraestrutura de Agendas e Módulo de Agendamento *(Responsáveis: Gustavo, Sara, Talita)*.
-* **Sprint 3:** Gerenciamento de Agenda Médica e Mecanismo de Notificações *(Responsáveis: Sara, Lara, Gustavo)*.
-* **Sprint 4:** Relatórios de Atendimento, Estabilização e Homologação *(Responsáveis: Sara, Lara, Equipe)*.
+- Banco novo e vazio: execute `banco/01_Schema.sql`; a carga `02_popula_tabelas.sql` é opcional e exclusiva de testes.
+- Banco existente: execute `banco/03_remover_verificacao_email.sql` antes de iniciar esta versão da API. A migração preserva usuários, credenciais, contas inativas e atendimentos.
 
-## Como Executar o Projeto
+No PowerShell, na raiz do repositório, configure a sessão atual:
 
-### Pré-requisitos
-Antes de começar, você vai precisar ter instalado em sua máquina:
-* SDK do [.NET](https://microsoft.com) (Versão utilizada no curso)
-* Um SGBD compatível (Ex: SQL Server Management Studio ou PostgreSQL)
-* Git
-
-### Passo a Passo
-
-```bash
-# 1. Clonar o repositório do grupo
-git clone https://github.com
-
-# 2. Entrar na pasta raiz do projeto
-cd pediagenda
-
-# 3. Restaurar as dependências do .NET
-dotnet restore
-
-# 4. Atualizar o banco de dados (caso use Entity Framework Migrations)
-dotnet ef database update
-
-# 5. Rodar a aplicação
-dotnet run
+```powershell
+$env:PEDIAGENDA_CONEXAO = "Server=localhost;Port=3306;Database=pediagenda;User ID=SEU_USUARIO;Password=SUA_SENHA;"
+$b = New-Object byte[] 48
+[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b)
+$env:PEDIAGENDA_JWT_CHAVE = [Convert]::ToBase64String($b)
+dotnet run --project api/PediAgenda.Api.csproj --urls http://localhost:5000
 ```
+
+`GET http://localhost:5000/api/saude` deve retornar `{"status":"ok"}`. Essa rota verifica a aplicação; os testes de integração verificam também o banco.
+
+Para guardar as variáveis entre sessões, use `setx` e reabra o terminal e o Visual Studio. No Render, configure as mesmas variáveis no serviço; use o host, porta, credenciais e opções SSL fornecidos pelo Aiven, com `Database=pediagenda`.
+
+## Cadastro e sessão
+
+A recepção pré-cadastra nome, CPF, e-mail e telefone em `POST /api/responsaveis`. O responsável conclui seu acesso em `POST /api/cadastro/responsavel`, informando o CPF e e-mail cadastrados pela clínica, sua senha e o aceite dos termos. O cadastro não envia e-mail nem exige código de ativação. A API retorna 201; o próximo passo é fazer login.
+
+O JWT de **login** continua obrigatório nas rotas protegidas. Uma conta que já definiu senha não pode sobrescrevê-la pelo cadastro, inclusive quando está inativa. Recuperação de senha e reativação de contas pela clínica não são implementadas por esta rota.
+
+Horários de consulta usam `America/Sao_Paulo`, inclusive no Render; vencimento de JWT, bloqueios de login e novos prontuários usam UTC.
+
+## Referências
+
+- [Rotas e exemplos da API](api/README.md)
+- [Scripts do banco e migração](banco/README.md)
+- [Como executar os testes](testes/README.md)
+- [Resultado da revisão e validação](api/VALIDACAO.md)
+
+As telas têm seus próprios fluxos de integração. Executar a API local não altera automaticamente o endereço usado pelo aplicativo.

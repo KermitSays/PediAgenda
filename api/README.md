@@ -1,115 +1,100 @@
-# PediAgenda — API
+# PediAgenda — API HTTP
 
-API que o app chama para autenticar, cadastrar e, daqui em diante, agendar.
-.NET 9, banco MySQL `pediagenda`.
+.NET 9 + MySQL 8. Configuração e comando de execução: [README principal](../README.md).
 
-## Rodar
+## Sessão e erros
 
-A senha do banco e a chave do token vêm de variáveis de ambiente, nunca do
-código:
+Login público:
 
-    setx PEDIAGENDA_CONEXAO "Server=localhost;Port=3306;Database=pediagenda;User ID=SEU_USUARIO;Password=SUA_SENHA;"
+```http
+POST /api/auth/login
+Content-Type: application/json
 
-A chave do token é aleatória, cada um gera a sua (PowerShell):
+{"email":"medico.teste@example.com","senha":"senhaDemo123"}
+```
 
-    $b = New-Object byte[] 48; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); setx PEDIAGENDA_JWT_CHAVE ([Convert]::ToBase64String($b))
+Resposta 200: `id`, `nome`, `email`, `perfil`, `token` e `expiraEm`. Os perfis são `RESPONSAVEL`, `MEDICO` e `RECEPCIONISTA`. Nas demais chamadas envie `Authorization: Bearer SEU_TOKEN`. O JWT dura 8 horas e precisa corresponder a uma conta ativa e ao perfil atual no banco.
 
-Feche e reabra o terminal, e:
+Falhas têm `codigo` e `mensagem`; erros de validação incluem `campos`. Exemplos: 400 dados inválidos, 401 sessão ausente/vencida, 403 perfil sem acesso, 404 registro não encontrado, 409 conflito, 423 login bloqueado e 503 falha de acesso ao banco. JSON malformado e métodos incorretos também têm resposta JSON. Cinco senhas incorretas que atendam à política de formato bloqueiam a conta por 15 minutos. O contador é atômico, inclusive para chamadas simultâneas.
 
-    dotnet run --project api/PediAgenda.Api.csproj --urls http://localhost:5000
+## Cadastro sem confirmação
 
-`GET /api/saude` responde `{"status":"ok"}` se subiu.
+Apenas a recepção autenticada pode pré-cadastrar um responsável:
 
-## POST /api/auth/login
+```http
+POST /api/responsaveis
 
-Entra:
+{"nome":"Maria Silva","cpf":"12345678901","email":"maria@example.com","telefone":"11912345678"}
+```
 
-    { "email": "maria@exemplo.com", "senha": "senhaSegura123" }
+Retorna 201 com `id` do usuário, nome, e-mail e `ativo: false`. CPF/e-mail duplicados retornam 409. Não recebe senha.
 
-Sai (200):
+O responsável conclui o acesso publicamente:
 
-    {
-      "id": 7,
-      "nome": "Maria Silva",
-      "email": "maria@exemplo.com",
-      "perfil": "RESPONSAVEL",
-      "token": "eyJhbGciOiJIUzI1NiIs...",
-      "expiraEm": "2026-09-24T21:00:00Z"
-    }
+```http
+POST /api/cadastro/responsavel
 
-`perfil` é RESPONSAVEL, MEDICO ou RECEPCIONISTA — é por ele que o app escolhe a tela.
+{"cpf":"12345678901","email":"maria@example.com","senha":"senhaSegura123","aceiteTermos":true}
+```
 
-Erro (400, 401, 403 ou 423):
+CPF e e-mail devem corresponder ao pré-cadastro. Senha de 8 a 1.024 caracteres. Retorna 201 com `mensagem` e `usuario: {id, nome, email}`. Não gera sessão: faça login depois. Uma conta com senha já definida retorna 409 e mantém sua senha, inclusive se estiver inativa. O aceite é gravado em `usuario.termos_aceitos_em`.
 
-    { "codigo": "CREDENCIAIS_INVALIDAS", "mensagem": "E-mail ou senha inválidos." }
+Não há envio de e-mail, rota de confirmação, código de ativação, dependência Brevo ou variáveis de serviço de e-mail. O token JWT de login continua necessário para autenticação.
 
-A tela pode exibir o `mensagem` direto.
+## Rotas (25 combinações de método e caminho)
 
-## O token
+| Método | Rota | Perfil / comportamento |
+| --- | --- | --- |
+| GET | `/api/saude` | Público; aplicação em execução |
+| POST | `/api/auth/login` | Público; autenticar |
+| GET | `/api/auth/eu` | Autenticado; dados do usuário |
+| POST | `/api/cadastro/responsavel` | Público; concluir pré-cadastro |
+| POST | `/api/responsaveis` | Recepção; pré-cadastrar |
+| GET | `/api/pacientes` | Responsável; seus dependentes |
+| POST | `/api/pacientes` | Responsável; cadastrar dependente |
+| GET | `/api/horarios` | Autenticado; horários disponíveis |
+| POST | `/api/consultas` | Responsável; agendar |
+| GET | `/api/consultas` | Responsável; suas consultas |
+| PATCH | `/api/consultas/{id}/cancelar` | Responsável; cancelar antes do início |
+| POST | `/api/horarios` | Médico / recepção; abrir blocos |
+| GET | `/api/agenda` | Médico / recepção; agenda do dia |
+| PATCH | `/api/horarios/{id}/bloquear` | Médico / recepção; bloquear se não tiver consulta |
+| PATCH | `/api/horarios/{id}/desbloquear` | Médico / recepção; liberar |
+| PATCH | `/api/consultas/{id}/confirmar` | Médico / recepção; confirmar AGENDADA antes do início |
+| PATCH | `/api/consultas/{id}/realizar` | Médico; concluir consulta que já começou |
+| POST | `/api/relatorios` | Médico / recepção; gerar por médico/período |
+| GET | `/api/relatorios` | Médico / recepção; histórico |
+| GET | `/api/relatorios/{id}` | Médico / recepção; abrir |
+| GET | `/api/relatorios/{id}/exportar` | Médico / recepção; exportar CSV |
+| GET | `/api/medico/pacientes` | Médico; pacientes com consultas não canceladas em sua agenda |
+| GET | `/api/pacientes/{id}/prontuarios` | Médico; histórico dos próprios atendimentos desse paciente |
+| GET | `/api/consultas/{id}/prontuario` | Médico; prontuário da própria consulta |
+| POST | `/api/consultas/{id}/prontuario` | Médico; registrar e concluir o atendimento atomicamente |
 
-O app guarda o `token` e manda em todas as chamadas que exigem login, no
-cabeçalho `Authorization`:
+## Pacientes e agendamento
 
-    http.DefaultRequestHeaders.Authorization =
-        new AuthenticationHeaderValue("Bearer", sessao.Token);
+`POST /api/pacientes`: `{"nome":"Ana","dataNascimento":"2021-03-14"}`. Aceita pacientes de 0 a 17 anos; recusa datas futuras e duplicação do mesmo nome/nascimento na família, inclusive sob concorrência.
 
-Ele vale 8 horas. Depois disso, ou se estiver ausente ou alterado, a API
-responde 401 e o app deve voltar para a tela de login:
+`GET /api/horarios?data=2026-12-01&medico=2&especialidade=Pediatria`: `data` é obrigatória; os outros filtros são opcionais. Horários bloqueados, ocupados, passados ou de médicos inativos não aparecem.
 
-    { "codigo": "NAO_AUTENTICADO", "mensagem": "Sessão expirada ou inválida. Faça login novamente." }
+`POST /api/consultas`: `{"idPaciente":1,"idHorario":123,"tipoAtendimento":"PARTICULAR"}`. Os tipos são `PARTICULAR` e `CONVENIO`. O paciente precisa pertencer ao responsável autenticado. A mesma criança não pode ser reservada em agendas sobrepostas; um bloco não recebe duas consultas ativas. Cancelar mantém o histórico e devolve o bloco à lista de horários livres.
 
-Rota certa, mas perfil errado (por exemplo, responsável tentando abrir a agenda
-do médico), responde 403 com `SEM_PERMISSAO`.
+## Agenda e relatórios
 
-Para guardar o token no celular, use `SecureStorage` do MAUI, não
-`Preferences`: ele fica criptografado pelo sistema.
+`POST /api/horarios`: `{"idMedico":2,"data":"2026-12-01","inicio":"08:00","fim":"12:00","duracao":30}`. Durações permitidas: 15, 20, 30, 40, 45 e 60 minutos. Retorna `criados` e `ignorados`; não cria sobreposições. Datas/horas usam o fuso `America/Sao_Paulo`.
 
-## GET /api/auth/eu
+`GET /api/agenda?data=2026-12-01&medico=2`: a recepção pode consultar todas as agendas ou filtrar um médico. O médico sempre acessa a própria agenda, mesmo que informe outro ID.
 
-Exige token. Devolve o dono dele:
+`POST /api/relatorios`: `{"idMedico":2,"inicio":"2026-12-01","fim":"2026-12-31"}`. Período máximo de 366 dias. O médico sempre gera o próprio relatório; a recepção precisa escolher o médico. O relatório registra o período e recalcula os dados ao ser reaberto. Exportação CSV protege textos que possam ser interpretados como fórmulas.
 
-    { "id": 7, "nome": "Maria Silva", "email": "maria@exemplo.com", "perfil": "RESPONSAVEL" }
+## Prontuário
 
-Serve para o app conferir, ao abrir, se o token guardado ainda vale. Se vier
-401, pede login.
+`POST /api/consultas/123/prontuario`: `{"observacoes":"Avaliação e orientações do atendimento."}`. A consulta deve ser do médico autenticado, já ter começado e não estar cancelada. Salva um único registro e muda o status para `REALIZADA` na mesma transação. Aceita texto não vazio de até 65.535 bytes UTF-8.
 
-## POST /api/cadastro/responsavel
+Retorna 201 com `id`, `idConsulta`, `idPaciente`, `observacoes` e `dataRegistro` em UTC. Um segundo registro retorna 409, sem sobrescrever o primeiro. A rota de realização sem prontuário continua disponível; é possível registrar depois o prontuário dessa consulta realizada. O histórico só inclui registros das consultas do médico autenticado; recepção e responsáveis não acessam essas rotas.
 
-Cria a conta do responsável. Médico e recepcionista são criados pela clínica.
+## Limites desta entrega
 
-Entra:
+Não implementa recuperação de senha, reativação de contas ou envio de lembretes. A tabela de notificações permanece compatível com o modelo, mas não há serviço externo de envio. As telas MAUI não foram modificadas; as novas rotas precisam ser chamadas pelos respectivos fluxos do app.
 
-    {
-      "nome": "Maria Silva",
-      "cpf": "12345678901",
-      "email": "maria@exemplo.com",
-      "telefone": "11999990000",
-      "senha": "senhaSegura123",
-      "aceiteTermos": true
-    }
-
-Todos obrigatórios. O CPF pode vir com ponto e traço. A senha segue a mesma
-regra do login, mínimo de 8 caracteres.
-
-Sai (201) igual ao login, com token — dá para ir direto para a tela inicial,
-sem pedir login de novo.
-
-Campo inválido (400) vem com a lista, para a tela marcar cada um:
-
-    {
-      "codigo": "DADOS_INVALIDOS",
-      "mensagem": "Verifique os campos destacados.",
-      "campos": { "cpf": "O CPF deve ter 11 dígitos." }
-    }
-
-E-mail ou CPF repetido (409):
-
-    { "codigo": "EMAIL_JA_CADASTRADO", "mensagem": "Já existe uma conta com esse e-mail." }
-
-### Pendente
-
-O `aceiteTermos` é exigido, mas **ainda não é gravado**: não existe coluna para
-isso no banco. Para a LGPD, o que vale é poder provar depois que a pessoa
-aceitou e quando. Falta decidir com o grupo onde registrar — a proposta é uma
-coluna `termos_aceitos_em` em `usuario`, o que mexe no modelo e precisa do aval
-de quem cuida da modelagem.
+[Validação executada](VALIDACAO.md) · [Reproduzir testes](../testes/README.md)

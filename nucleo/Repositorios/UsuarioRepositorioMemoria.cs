@@ -1,6 +1,5 @@
 using PediAgenda.Nucleo.Modelos;
 using PediAgenda.Nucleo.Seguranca;
-using System.Security.Cryptography;
 
 namespace PediAgenda.Nucleo.Repositorios;
 
@@ -54,9 +53,7 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
             SenhaIteracoes = iteracoes,
 
             // Os usuários semeados já representam contas completas.
-            Ativo = true,
-            EmailVerificado = true,
-            EmailVerificadoEm = DateTime.Now
+            Ativo = true
         });
     }
 
@@ -75,42 +72,28 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
                 u.Cpf == cpf
                 && u.Perfil == Perfil.Responsavel);
 
-    public bool ConfirmarEmailResponsavel(
-    byte[] tokenHash,
-    DateTime confirmadoEm)
-    {
-        var usuario =
-            _usuarios.FirstOrDefault(
-                u =>
-                    u.Perfil == Perfil.Responsavel
-                    && !u.EmailVerificado
-                    && u.TokenVerificacaoHash is not null
-                    && u.TokenVerificacaoExpiraEm is not null
-                    && u.TokenVerificacaoExpiraEm >= confirmadoEm
-                    && CryptographicOperations.FixedTimeEquals(
-                        u.TokenVerificacaoHash,
-                        tokenHash));
-
-        if (usuario is null)
-            return false;
-
-        usuario.EmailVerificado = true;
-        usuario.EmailVerificadoEm = confirmadoEm;
-        usuario.Ativo = true;
-
-        usuario.TokenVerificacaoHash = null;
-        usuario.TokenVerificacaoExpiraEm = null;
-
-        usuario.TentativasInvalidas = 0;
-        usuario.BloqueadoAte = null;
-
-        return true;
-    }
-
     public void Atualizar(Usuario usuario)
     {
         // Como trabalhamos com o mesmo objeto armazenado na lista,
         // as alterações já ficam refletidas em memória.
+    }
+
+    public (bool Bloqueado, int Restantes) RegistrarFalhaSenha(
+        int usuarioId, DateTime agora, int limite, TimeSpan duracao)
+    {
+        lock (_usuarios)
+        {
+            var usuario = _usuarios.Single(u => u.Id == usuarioId);
+            if (usuario.EstaBloqueado(agora)) return (true, 0);
+            usuario.TentativasInvalidas++;
+            if (usuario.TentativasInvalidas >= limite)
+            {
+                usuario.TentativasInvalidas = 0;
+                usuario.BloqueadoAte = agora.Add(duracao);
+                return (true, 0);
+            }
+            return (false, limite - usuario.TentativasInvalidas);
+        }
     }
 
     public void RegistrarTentativa(
@@ -150,72 +133,43 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
    
     /// Completa o cadastro de acesso de um responsável
     /// que já havia sido pré-cadastrado.
-    public void CompletarCadastroResponsavel(
-        int usuarioId,
-        string email,
-        string senha,
-        byte[] tokenVerificacaoHash,
-        DateTime tokenExpiraEm)
+    public bool CompletarCadastroResponsavel(int usuarioId, string email, string senha)
     {
-        if (ExisteEmailDeOutroUsuario(email, usuarioId))
+        lock (_usuarios)
         {
-            throw new CadastroDuplicadoException(
-                "e-mail");
+            if (!PoliticaSenha.Valida(senha, out var erro))
+                throw new ArgumentException(erro, nameof(senha));
+            var usuario = _usuarios.FirstOrDefault(u => u.Id == usuarioId
+                && u.Perfil == Perfil.Responsavel
+                && string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase)
+                && u.SenhaHash is null && u.SenhaSalt is null);
+            if (usuario is null)
+                return false;
+            var (hash, salt, iteracoes) = HashSenha.Gerar(senha);
+            usuario.SenhaHash = hash;
+            usuario.SenhaSalt = salt;
+            usuario.SenhaIteracoes = iteracoes;
+            usuario.Ativo = true;
+            usuario.TentativasInvalidas = 0;
+            usuario.BloqueadoAte = null;
+            return true;
         }
+    }
 
-        if (!PoliticaSenha.Valida(
-            senha,
-            out var erro))
+    public int PreCadastrarResponsavel(string nome, string cpf, string email, string telefone)
+    {
+        lock (_usuarios)
         {
-            throw new ArgumentException(
-                erro,
-                nameof(senha));
+            if (ExisteEmail(email)) throw new CadastroDuplicadoException("e-mail");
+            if (ExisteCpf(cpf)) throw new CadastroDuplicadoException("CPF");
+            var id = _usuarios.Count + 1;
+            _usuarios.Add(new Usuario
+            {
+                Id = id, Nome = nome, Cpf = cpf, Email = email,
+                Perfil = Perfil.Responsavel, Ativo = false
+            });
+            return id;
         }
-
-        var usuario =
-            _usuarios.FirstOrDefault(
-                u =>
-                    u.Id == usuarioId
-                    && u.Perfil == Perfil.Responsavel);
-
-        if (usuario is null)
-        {
-            throw new InvalidOperationException(
-                "O responsável informado não foi encontrado.");
-        }
-
-        if (string.IsNullOrWhiteSpace(usuario.Email)
-            || !string.Equals(usuario.Email.Trim(), email, StringComparison.OrdinalIgnoreCase)
-            || usuario.Ativo || usuario.EmailVerificado)
-        {
-            throw new InvalidOperationException(
-                "O cadastro não está disponível para este responsável.");
-        }
-
-        var (hash, salt, iteracoes) =
-            HashSenha.Gerar(senha);
-
-        // E-mail foi registrado anteriormente pela clínica.
-
-        usuario.SenhaHash = hash;
-        usuario.SenhaSalt = salt;
-        usuario.SenhaIteracoes = iteracoes;
-
-        // Ainda não pode entrar:
-        // primeiro precisa confirmar o e-mail.
-        usuario.Ativo = false;
-        usuario.EmailVerificado = false;
-
-        usuario.TokenVerificacaoHash =
-            tokenVerificacaoHash;
-
-        usuario.TokenVerificacaoExpiraEm =
-            tokenExpiraEm;
-
-        usuario.EmailVerificadoEm = null;
-
-        usuario.TentativasInvalidas = 0;
-        usuario.BloqueadoAte = null;
     }
 
     public int Inserir(

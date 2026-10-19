@@ -26,39 +26,17 @@ public record ResultadoCadastro(
     string Mensagem,
     MotivoRecusa Motivo,
     Usuario? Usuario = null,
-    IReadOnlyDictionary<string, string>? Campos = null,
-
-    // Será utilizado depois pelo serviço responsável
-    // por enviar a mensagem de confirmação por e-mail.
-    string? TokenVerificacaoEmail = null)
+    IReadOnlyDictionary<string, string>? Campos = null)
 {
-    public static ResultadoCadastro Ok(
-        Usuario usuario,
-        string token) =>
-        new(
-            true,
-            $"Cadastro iniciado para {usuario.Nome}. Confirme o e-mail para ativar a conta.",
-            MotivoRecusa.Nenhum,
-            usuario,
-            TokenVerificacaoEmail: token);
+    public static ResultadoCadastro Ok(Usuario usuario) =>
+        new(true, $"Cadastro concluído para {usuario.Nome}.", MotivoRecusa.Nenhum, usuario);
 
-    public static ResultadoCadastro Invalido(
-        IReadOnlyDictionary<string, string> campos) =>
-        new(
-            false,
-            "Verifique os campos destacados.",
-            MotivoRecusa.DadosInvalidos,
-            Campos: campos);
+    public static ResultadoCadastro Invalido(IReadOnlyDictionary<string, string> campos) =>
+        new(false, "Verifique os campos destacados.", MotivoRecusa.DadosInvalidos, Campos: campos);
 
-    public static ResultadoCadastro Falha(
-        MotivoRecusa motivo,
-        string mensagem) =>
-        new(
-            false,
-            mensagem,
-            motivo);
+    public static ResultadoCadastro Falha(MotivoRecusa motivo, string mensagem) =>
+        new(false, mensagem, motivo);
 }
-
 
 /// Conclusão do cadastro de acesso do responsável.
 ///
@@ -70,9 +48,6 @@ public partial class CadastroService(
     IUsuarioRepositorio repositorio)
 {
     public const int TamanhoMaximoEmail = 160;
-
-    public static readonly TimeSpan DuracaoTokenEmail =
-        TimeSpan.FromHours(24);
 
     private readonly IUsuarioRepositorio _repo =
         repositorio;
@@ -147,17 +122,13 @@ public partial class CadastroService(
                 "Não foi encontrado um responsável cadastrado pela clínica com esse CPF.");
         }
 
-        // Se a conta já foi efetivamente ativada, não permite
-        // iniciar o cadastro novamente.
-        //
-        // Se ela apenas possui e-mail/senha, mas ainda não confirmou
-        // o e-mail, permitimos uma nova tentativa. Isso é importante
-        // caso o envio do e-mail tenha falhado ou não tenha chegado.
-        if (responsavel.EmailVerificado || responsavel.Ativo)
+        // Cadastro não é recuperação de senha: não altera credenciais existentes,
+        // inclusive quando a clínica desativou o acesso.
+        if (responsavel.SenhaHash is { Length: > 0 } || responsavel.SenhaSalt is { Length: > 0 })
         {
             return ResultadoCadastro.Falha(
                 MotivoRecusa.CadastroJaIniciado,
-                "O acesso deste responsável já está ativo.");
+                "Este responsável já definiu suas credenciais. Procure a recepção se precisar recuperar o acesso.");
         }
 
         // O e-mail precisa ter sido registrado pela clínica
@@ -184,27 +155,15 @@ public partial class CadastroService(
                 "Já existe outra conta utilizando esse e-mail.");
         }
 
-        var agora =
-            DateTime.UtcNow;
-
-        // Token aleatório que depois será enviado para
-        // o endereço de e-mail informado pelo responsável.
-        var (tokenEmail, tokenEmailHash) =
-            TokenVerificacaoEmail.Gerar();
-
-        var tokenExpiraEm =
-            agora.Add(DuracaoTokenEmail);
-
         try
         {
-            // Salva a senha no MESMO usuário, preservando o e-mail
-            // que já foi registrado pela clínica.
-            _repo.CompletarCadastroResponsavel(
-                responsavel.Id,
-                email,
-                dados.Senha!,
-                tokenEmailHash,
-                tokenExpiraEm);
+            // A condição também é conferida pelo repositório de forma atômica.
+            if (!_repo.CompletarCadastroResponsavel(responsavel.Id, email, dados.Senha!))
+            {
+                return ResultadoCadastro.Falha(
+                    MotivoRecusa.CadastroJaIniciado,
+                    "O cadastro já foi concluído ou alterado. Procure a recepção.");
+            }
         }
         catch (CadastroDuplicadoException)
         {
@@ -212,26 +171,39 @@ public partial class CadastroService(
                 MotivoRecusa.EmailJaCadastrado,
                 "Já existe uma conta utilizando esse e-mail.");
         }
+        responsavel.Email = email;
+        responsavel.Ativo = true;
+        return ResultadoCadastro.Ok(responsavel);
+    }
 
-        responsavel.Email =
-            email;
-
-        // Continua inativo até a confirmação do e-mail.
-        responsavel.Ativo =
-            false;
-
-        responsavel.EmailVerificado =
-            false;
-
-        responsavel.TokenVerificacaoHash =
-            tokenEmailHash;
-
-        responsavel.TokenVerificacaoExpiraEm =
-            tokenExpiraEm;
-
-        return ResultadoCadastro.Ok(
-            responsavel,
-            tokenEmail);
+    public ResultadoCadastro PreCadastrar(string? nomeInformado, string? cpfInformado,
+                                           string? emailInformado, string? telefoneInformado)
+    {
+        var nome = (nomeInformado ?? "").Trim();
+        var cpf = SoDigitos(cpfInformado ?? "");
+        var email = (emailInformado ?? "").Trim();
+        var telefone = SoDigitos(telefoneInformado ?? "");
+        var campos = new Dictionary<string, string>();
+        if (nome.Length is < 1 or > 120) campos["nome"] = "Informe um nome de até 120 caracteres.";
+        if (cpf.Length != 11) campos["cpf"] = "O CPF deve ter 11 dígitos.";
+        if (email.Length > TamanhoMaximoEmail || !EmailValido().IsMatch(email))
+            campos["email"] = "Informe um e-mail válido de até 160 caracteres.";
+        if (telefone.Length is < 10 or > 15) campos["telefone"] = "Informe um telefone com DDD.";
+        if (campos.Count > 0) return ResultadoCadastro.Invalido(campos);
+        try
+        {
+            var id = _repo.PreCadastrarResponsavel(nome, cpf, email, telefone);
+            return ResultadoCadastro.Ok(new Usuario
+            {
+                Id = id, Nome = nome, Cpf = cpf, Email = email,
+                Perfil = Perfil.Responsavel, Ativo = false
+            });
+        }
+        catch (CadastroDuplicadoException e)
+        {
+            return ResultadoCadastro.Falha(MotivoRecusa.CadastroJaIniciado,
+                $"Já existe cadastro com esse {e.Campo}.");
+        }
     }
 
     private static string SoDigitos(

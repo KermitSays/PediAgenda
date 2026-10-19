@@ -1,7 +1,7 @@
 -- =====================================================================
 -- PediAgenda - Validacao do modelo completo (12 tabelas)
 --
--- Pre-requisito: ter rodado o 03_modelo_completo.sql.
+-- Pre-requisito: ter rodado 01_Schema.sql em um banco de TESTE vazio, sem a carga 02.
 --
 -- COMO RODAR NO WORKBENCH:
 --   PARTE 1 -> pode rodar tudo de uma vez (raio). So consulta, nao altera nada.
