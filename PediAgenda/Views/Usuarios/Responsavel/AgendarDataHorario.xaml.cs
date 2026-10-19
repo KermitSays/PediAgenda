@@ -447,7 +447,7 @@ public partial class AgendarDataHorario : ContentPage
 
 
         await Shell.Current.GoToAsync(
-            nameof(AgendarTipoAtendimento),
+            nameof(AgendarConfirmacao),
             new Dictionary<string, object>
             {
                 {

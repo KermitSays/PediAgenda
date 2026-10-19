@@ -75,7 +75,7 @@ public partial class AgendarMedico : ContentPage
                         {
                             IdMedico = 1,
                             Nome = "Dra. Ana Oliveira",
-                            Rqe = "RQE 12345",
+                            Crm = "CRM-SP 12345 (exemplo)",
                             Foto = "user.png"
                         },
 
@@ -83,7 +83,7 @@ public partial class AgendarMedico : ContentPage
                         {
                             IdMedico = 2,
                             Nome = "Dr. Carlos Mendes",
-                            Rqe = "RQE 23456",
+                            Crm = "CRM-SP 23456 (exemplo)",
                             Foto = "user.png"
                         },
 
@@ -91,7 +91,7 @@ public partial class AgendarMedico : ContentPage
                         {
                             IdMedico = 3,
                             Nome = "Dra. Juliana Santos",
-                            Rqe = "RQE 34567",
+                            Crm = "CRM-SP 34567 (exemplo)",
                             Foto = "user.png"
                         }
                     },
@@ -104,7 +104,7 @@ public partial class AgendarMedico : ContentPage
                         {
                             IdMedico = 4,
                             Nome = "Dra. Mariana Costa",
-                            Rqe = "RQE 45678",
+                            Crm = "CRM-SP 45678 (exemplo)",
                             Foto = "user.png"
                         },
 
@@ -112,7 +112,7 @@ public partial class AgendarMedico : ContentPage
                         {
                             IdMedico = 5,
                             Nome = "Dr. Rafael Almeida",
-                            Rqe = "RQE 56789",
+                            Crm = "CRM-SP 56789 (exemplo)",
                             Foto = "user.png"
                         }
                     },
@@ -125,7 +125,7 @@ public partial class AgendarMedico : ContentPage
                         {
                             IdMedico = 6,
                             Nome = "Dr. Felipe Martins",
-                            Rqe = "RQE 67890",
+                            Crm = "CRM-SP 67890 (exemplo)",
                             Foto = "user.png"
                         },
 
@@ -133,7 +133,7 @@ public partial class AgendarMedico : ContentPage
                         {
                             IdMedico = 7,
                             Nome = "Dra. Camila Rodrigues",
-                            Rqe = "RQE 78901",
+                            Crm = "CRM-SP 78901 (exemplo)",
                             Foto = "user.png"
                         }
                     },
@@ -146,7 +146,7 @@ public partial class AgendarMedico : ContentPage
                         {
                             IdMedico = 8,
                             Nome = "Dra. Beatriz Lima",
-                            Rqe = "RQE 89012",
+                            Crm = "CRM-SP 89012 (exemplo)",
                             Foto = "user.png"
                         },
 
@@ -154,7 +154,7 @@ public partial class AgendarMedico : ContentPage
                         {
                             IdMedico = 9,
                             Nome = "Dr. Lucas Ferreira",
-                            Rqe = "RQE 90123",
+                            Crm = "CRM-SP 90123 (exemplo)",
                             Foto = "user.png"
                         }
                     },
@@ -288,7 +288,7 @@ public class Medico : INotifyPropertyChanged
         string.Empty;
 
 
-    public string Rqe { get; set; } =
+    public string Crm { get; set; } =
         string.Empty;
 
 

@@ -5,7 +5,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
-    Title="Consultas"
+    Title="Agenda Médica"
     BackgroundColor="{StaticResource PageBlue}">
 
     <Grid
@@ -17,7 +17,7 @@
 
         <Label
             Grid.Row="0"
-            Text="Consultas"
+            Text="Agenda Médica"
             FontSize="28"
             FontAttributes="Bold"
             TextColor="{StaticResource TextDark}" />
@@ -221,13 +221,8 @@
 
             <Button
                 Text="Voltar"
-                HeightRequest="48"
-                CornerRadius="16"
-                BackgroundColor="{StaticResource White}"
-                TextColor="{StaticResource PrimaryBlue}"
-                BorderColor="{StaticResource PrimaryBlue}"
-                BorderWidth="1"
-                Clicked="VoltarButton_Clicked" />
+                Clicked="VoltarButton_Clicked"
+                Style="{StaticResource BotaoVoltarSimples}" />
 
         </VerticalStackLayout>
 

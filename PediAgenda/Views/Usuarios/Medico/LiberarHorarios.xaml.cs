@@ -1,246 +1,183 @@
+
 using System.Collections.ObjectModel;
 using PediAgenda.Views.Usuarios.Responsavel;
 
 namespace PediAgenda.Views.Usuarios.Medico;
 
-[QueryProperty(
-    nameof(IdMedico),
-    "IdMedico")]
+[QueryProperty(nameof(IdMedico), "IdMedico")]
 public partial class LiberarHorarios : ContentPage
 {
-    public ObservableCollection<BloqueioExibicao>
-        Bloqueios
-    {
-        get;
-        set;
-    } =
-        new();
+    public ObservableCollection<BloqueioExibicao> Bloqueios
+    { get; set; } = new();
 
-
-    private int idMedicoAgenda =
-        1;
-
-
-    private string idMedico =
-        "1";
-
+    private int idMedicoAgenda = 1;
+    private string idMedico = "1";
 
     public string IdMedico
     {
-        get =>
-            idMedico;
+        get => idMedico;
 
         set
         {
-            idMedico =
-                value;
+            idMedico = value;
 
-
-            if (
-                int.TryParse(
-                    value,
-                    out int id)
-
-                &&
-
-                id > 0)
+            if (int.TryParse(value, out int id) && id > 0)
             {
-                idMedicoAgenda =
-                    id;
+                idMedicoAgenda = id;
             }
 
-
-            if (
-                BloqueiosCollectionView !=
-                null)
+            if (BloqueiosCollectionView != null)
             {
                 CarregarBloqueios();
             }
         }
     }
 
-
     public LiberarHorarios()
     {
         InitializeComponent();
 
-
         CarregarBloqueios();
     }
-
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
 
-
         CarregarBloqueios();
     }
 
+    // ============================================
+    // CARREGAR BLOQUEIOS DO MÉDICO
+    // ============================================
 
     private void CarregarBloqueios()
     {
         Bloqueios.Clear();
 
-
-        foreach (
-            BloqueioHorario bloqueio
-            in BloqueiosMedico.Bloqueios
-                .Where(b =>
-                    b.IdMedico ==
-                    idMedicoAgenda))
+        foreach (BloqueioHorario bloqueio
+                 in BloqueiosMedico.Bloqueios
+                     .Where(b => b.IdMedico == idMedicoAgenda))
         {
-            Bloqueios.Add(
-                new BloqueioExibicao
-                {
-                    Id =
-                        bloqueio.Id,
+            Bloqueios.Add(new BloqueioExibicao
+            {
+                Id = bloqueio.Id,
 
-                    PeriodoData =
-                        bloqueio.DataInicial.Date ==
-                        bloqueio.DataFinal.Date
+                PeriodoData =
+                    bloqueio.DataInicial.Date ==
+                    bloqueio.DataFinal.Date
 
-                            ? bloqueio.DataInicial
-                                .ToString(
-                                    "dd/MM/yyyy")
+                        ? bloqueio.DataInicial.ToString("dd/MM/yyyy")
 
-                            : $"{bloqueio.DataInicial:dd/MM/yyyy} até " +
-                              $"{bloqueio.DataFinal:dd/MM/yyyy}",
+                        : $"{bloqueio.DataInicial:dd/MM/yyyy} até " +
+                          $"{bloqueio.DataFinal:dd/MM/yyyy}",
 
-                    PeriodoHorario =
-                        $"{bloqueio.HorarioInicial:hh\\:mm} às " +
-                        $"{bloqueio.HorarioFinal:hh\\:mm}",
-
-                    MotivoTexto =
-                        $"Motivo: {bloqueio.Motivo}"
-                });
+                PeriodoHorario =
+                    $"{bloqueio.HorarioInicial:hh\\:mm} às " +
+                    $"{bloqueio.HorarioFinal:hh\\:mm}"
+            });
         }
 
-
-        BloqueiosCollectionView.ItemsSource =
-            Bloqueios;
+        BloqueiosCollectionView.ItemsSource = Bloqueios;
     }
 
-
-    private async void EditarBloqueioButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        if (
-            sender is Button button
-
-            &&
-
-            button.BindingContext
-                is BloqueioExibicao bloqueio)
-        {
-            await Shell.Current.GoToAsync(
-                nameof(EditarBloqueio),
-
-                new Dictionary<string, object>
-                {
-                    {
-                        "IdBloqueio",
-                        bloqueio.Id.ToString()
-                    }
-                });
-        }
-    }
-
+    // ============================================
+    // LIBERAR PERÍODO BLOQUEADO
+    // ============================================
 
     private async void LiberarPeriodoButton_Clicked(
         object sender,
         EventArgs e)
     {
-        if (
-            sender is not Button button
-
-            ||
-
-            button.BindingContext
-                is not BloqueioExibicao item)
+        if (sender is not Button button ||
+            button.BindingContext is not BloqueioExibicao item)
         {
             return;
         }
 
-
+        // Encontrar o bloqueio selecionado
         BloqueioHorario? bloqueio =
             BloqueiosMedico.Bloqueios
-                .FirstOrDefault(b =>
-                    b.Id ==
-                    item.Id);
-
+                .FirstOrDefault(b => b.Id == item.Id);
 
         if (bloqueio == null)
-            return;
-
-
-        bool confirmar =
+        {
             await DisplayAlertAsync(
-                "Liberar período",
+                "Atenção",
+                "O período selecionado não foi encontrado.",
+                "OK");
 
-                $"Deseja liberar todo este período?\n\n" +
-                $"Data: {item.PeriodoData}\n" +
-                $"Horário: {item.PeriodoHorario}\n" +
-                $"{item.MotivoTexto}",
+            CarregarBloqueios();
+            return;
+        }
 
-                "Liberar",
-                "Cancelar");
+        // ========================================
+        // CONFIRMAÇÃO
+        // ========================================
 
+        bool confirmar = await DisplayAlertAsync(
+            "Liberar período",
+
+            $"Deseja liberar todo este período?\n\n" +
+            $"Data: {item.PeriodoData}\n" +
+            $"Horário: {item.PeriodoHorario}\n\n" +
+            "As consultas canceladas pelo bloqueio " +
+            "não serão restauradas.",
+
+            "Liberar",
+            "Cancelar");
 
         if (!confirmar)
+        {
             return;
+        }
 
+        // ========================================
+        // LIBERAÇÃO LOCAL
+        // ========================================
 
-        HorarioAgendamentoDados
-            .LiberarBloqueio(
-                bloqueio.Id);
-
+        HorarioAgendamentoDados.LiberarBloqueio(
+            bloqueio.Id);
 
         BloqueiosMedico.Bloqueios.Remove(
             bloqueio);
 
-
+        // Atualizar a lista
         CarregarBloqueios();
 
+        // ========================================
+        // CONFIRMAÇÃO FINAL
+        // ========================================
 
         await DisplayAlertAsync(
             "Período liberado",
-            "Todo o período foi liberado com sucesso.",
+            "O período foi liberado com sucesso.",
             "OK");
     }
 
+    // ============================================
+    // BOTÃO VOLTAR
+    // ============================================
+
+    private async void VoltarButton_Clicked(
+        object sender,
+        EventArgs e)
+    {
+        await Shell.Current.GoToAsync("..");
+    }
+
+    // ============================================
+    // MODELO DE EXIBIÇÃO
+    // ============================================
 
     public class BloqueioExibicao
     {
-        public Guid Id
-        {
-            get;
-            set;
-        }
+        public Guid Id { get; set; }
 
-
-        public string PeriodoData
-        {
-            get;
-            set;
-        } =
+        public string PeriodoData { get; set; } =
             string.Empty;
 
-
-        public string PeriodoHorario
-        {
-            get;
-            set;
-        } =
-            string.Empty;
-
-
-        public string MotivoTexto
-        {
-            get;
-            set;
-        } =
+        public string PeriodoHorario { get; set; } =
             string.Empty;
     }
 }

@@ -1,33 +1,22 @@
+
 namespace PediAgenda.Views.Usuarios.Medico;
 
-[QueryProperty(
-    nameof(IdConsulta),
-    "IdConsulta")]
+[QueryProperty(nameof(IdConsulta), "IdConsulta")]
 public partial class RegistrarAtendimento : ContentPage
 {
     private Guid idConsulta;
 
+    private ConsultaMedico? consultaAtual;
 
-    private ConsultaMedico?
-        consultaAtual;
-
-
-    private PacienteMedicoItem?
-        pacienteAtual;
-
+    private PacienteMedicoItem? pacienteAtual;
 
     public string IdConsulta
     {
         set
         {
-            if (
-                Guid.TryParse(
-                    value,
-                    out Guid id))
+            if (Guid.TryParse(value, out Guid id))
             {
-                idConsulta =
-                    id;
-
+                idConsulta = id;
 
                 if (PacienteLabel != null)
                 {
@@ -37,165 +26,169 @@ public partial class RegistrarAtendimento : ContentPage
         }
     }
 
-
     public RegistrarAtendimento()
     {
         InitializeComponent();
     }
 
+    // ============================================
+    // VERIFICAR SE A CONSULTA ESTÁ CONFIRMADA
+    // ============================================
 
-    protected override void OnAppearing()
+    private static bool EhConsultaConfirmada(
+        string? status)
+    {
+        return
+            string.Equals(
+                status?.Trim(),
+                "Confirmada",
+                StringComparison.OrdinalIgnoreCase)
+            ||
+            string.Equals(
+                status?.Trim(),
+                "Confirmado",
+                StringComparison.OrdinalIgnoreCase);
+    }
+
+    // ============================================
+    // ABERTURA DA TELA
+    // ============================================
+
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-
         CarregarConsulta();
+
+        // Proteção adicional:
+        // impede acesso por outra rota.
+
+        if (consultaAtual != null &&
+            !EhConsultaConfirmada(consultaAtual.Status))
+        {
+            await DisplayAlertAsync(
+                "Atendimento indisponível",
+                "Esta consulta não está confirmada. " +
+                "O registro do atendimento ainda não está disponível.",
+                "Entendi");
+
+            await Shell.Current.GoToAsync("..");
+        }
     }
 
-
-    // =============================================
-    // CARREGA CONSULTA
-    // =============================================
+    // ============================================
+    // CARREGAR CONSULTA
+    // ============================================
 
     private void CarregarConsulta()
     {
-        FinalizarAtendimentoButton.IsEnabled =
-            false;
+        FinalizarAtendimentoButton.IsEnabled = false;
 
+        consultaAtual = null;
+        pacienteAtual = null;
 
-        if (
-            idConsulta ==
-            Guid.Empty)
+        if (idConsulta == Guid.Empty)
         {
             return;
         }
 
-
         consultaAtual =
-            ConsultasMedicoDados
-                .ObterConsultaPorId(
-                    idConsulta);
-
+            ConsultasMedicoDados.ObterConsultaPorId(
+                idConsulta);
 
         if (consultaAtual == null)
         {
             PacienteLabel.Text =
                 "Consulta não encontrada";
 
-
             return;
         }
 
+        // ========================================
+        // PACIENTE NÃO VINCULADO
+        // ========================================
 
         if (!consultaAtual.IdPaciente.HasValue)
         {
             PacienteLabel.Text =
                 consultaAtual.Paciente;
 
-
             ResponsavelLabel.Text =
                 "Paciente ainda não vinculado";
 
-
             DataLabel.Text =
-                consultaAtual.Data
-                    .ToString(
-                        "dd/MM/yyyy");
-
+                consultaAtual.Data.ToString("dd/MM/yyyy");
 
             HorarioLabel.Text =
                 consultaAtual.HorarioTexto;
 
-
             TipoConsultaLabel.Text =
                 consultaAtual.TipoConsulta;
-
 
             return;
         }
 
+        // ========================================
+        // BUSCAR PACIENTE
+        // ========================================
 
         pacienteAtual =
-            MedicoDados
-                .ObterPacientePorId(
-                    consultaAtual.IdPaciente.Value);
-
+            MedicoDados.ObterPacientePorId(
+                consultaAtual.IdPaciente.Value);
 
         if (pacienteAtual == null)
         {
             PacienteLabel.Text =
                 consultaAtual.Paciente;
 
-
             ResponsavelLabel.Text =
                 "Paciente não encontrado";
-
 
             return;
         }
 
+        // ========================================
+        // EXIBIR DADOS DA CONSULTA
+        // ========================================
 
         PacienteLabel.Text =
             pacienteAtual.Nome;
 
-
         ResponsavelLabel.Text =
             pacienteAtual.Responsavel;
 
-
         DataLabel.Text =
-            consultaAtual.Data
-                .ToString(
-                    "dd/MM/yyyy");
-
+            consultaAtual.Data.ToString("dd/MM/yyyy");
 
         HorarioLabel.Text =
             consultaAtual.HorarioTexto;
 
-
         TipoConsultaLabel.Text =
             consultaAtual.TipoConsulta;
 
+        // ========================================
+        // HABILITAR FINALIZAÇÃO
+        // SOMENTE SE CONFIRMADA
+        // ========================================
 
         bool podeRegistrar =
-            !consultaAtual.Status.Equals(
-                "Realizada",
-                StringComparison.OrdinalIgnoreCase)
-
+            EhConsultaConfirmada(consultaAtual.Status)
             &&
-
-            !consultaAtual.Status.Equals(
-                "Cancelado",
-                StringComparison.OrdinalIgnoreCase)
-
-            &&
-
-            !consultaAtual.Status.Equals(
-                "Cancelada",
-                StringComparison.OrdinalIgnoreCase)
-
-            &&
-
-            consultaAtual.Data.Date <=
-                DateTime.Today;
-
+            consultaAtual.Data.Date <= DateTime.Today;
 
         FinalizarAtendimentoButton.IsEnabled =
             podeRegistrar;
     }
 
-
-    // =============================================
-    // FINALIZA ATENDIMENTO
-    // =============================================
+    // ============================================
+    // FINALIZAR ATENDIMENTO
+    // ============================================
 
     private async void FinalizarAtendimentoButton_Clicked(
         object sender,
         EventArgs e)
     {
-        if (
-            consultaAtual == null ||
-
+        if (consultaAtual == null ||
             pacienteAtual == null)
         {
             await DisplayAlertAsync(
@@ -203,37 +196,35 @@ public partial class RegistrarAtendimento : ContentPage
                 "Não foi possível localizar os dados desta consulta.",
                 "OK");
 
-
             return;
         }
 
+        // ========================================
+        // NÃO PERMITE CONSULTA FUTURA
+        // ========================================
 
-        // NÃO PERMITE REGISTRAR CONSULTA FUTURA
-
-        if (
-            consultaAtual.Data.Date >
-            DateTime.Today)
+        if (consultaAtual.Data.Date > DateTime.Today)
         {
             await DisplayAlertAsync(
                 "Atendimento ainda indisponível",
                 "O atendimento só pode ser registrado no dia da consulta.",
                 "OK");
 
-
             return;
         }
 
-
+        // ========================================
         // NÃO PERMITE CONSULTA CANCELADA
+        // ========================================
 
         if (
-            consultaAtual.Status.Equals(
+            string.Equals(
+                consultaAtual.Status,
                 "Cancelado",
                 StringComparison.OrdinalIgnoreCase)
-
             ||
-
-            consultaAtual.Status.Equals(
+            string.Equals(
+                consultaAtual.Status,
                 "Cancelada",
                 StringComparison.OrdinalIgnoreCase))
         {
@@ -242,28 +233,38 @@ public partial class RegistrarAtendimento : ContentPage
                 "Não é possível registrar atendimento em uma consulta cancelada.",
                 "OK");
 
+            return;
+        }
+
+        // ========================================
+        // NÃO PERMITE CONSULTA NÃO CONFIRMADA
+        // NOVA VALIDAÇÃO
+        // ========================================
+
+        if (!EhConsultaConfirmada(consultaAtual.Status))
+        {
+            await DisplayAlertAsync(
+                "Consulta não confirmada",
+                "Não é possível finalizar um atendimento " +
+                "sem a confirmação da consulta.",
+                "OK");
 
             return;
         }
 
+        // ========================================
+        // VERIFICAR PRONTUÁRIO EXISTENTE
+        // ========================================
 
-        // VERIFICA SE JÁ EXISTE PRONTUÁRIO
-        // PARA ESTA CONSULTA
-
-        ConsultaHistoricoMedicoItem?
-            registroExistente =
-                MedicoDados
-                    .ObterHistoricoPorConsulta(
-                        consultaAtual.Id);
-
+        ConsultaHistoricoMedicoItem? registroExistente =
+            MedicoDados.ObterHistoricoPorConsulta(
+                consultaAtual.Id);
 
         if (
-            registroExistente !=
-            null
-
+            registroExistente != null
             ||
-
-            consultaAtual.Status.Equals(
+            string.Equals(
+                consultaAtual.Status,
                 "Realizada",
                 StringComparison.OrdinalIgnoreCase))
         {
@@ -272,28 +273,30 @@ public partial class RegistrarAtendimento : ContentPage
                 "Esta consulta já possui um atendimento registrado no prontuário.",
                 "OK");
 
-
             return;
         }
 
+        // ========================================
+        // VALIDAR OBSERVAÇÕES
+        // ========================================
 
         string observacoes =
             ObservacoesEditor.Text?.Trim()
             ?? string.Empty;
 
-
-        if (string.IsNullOrWhiteSpace(
-            observacoes))
+        if (string.IsNullOrWhiteSpace(observacoes))
         {
             await DisplayAlertAsync(
                 "Observações obrigatórias",
                 "Digite as observações do atendimento antes de finalizar.",
                 "OK");
 
-
             return;
         }
 
+        // ========================================
+        // CONFIRMAR FINALIZAÇÃO
+        // ========================================
 
         bool confirmar =
             await DisplayAlertAsync(
@@ -307,19 +310,20 @@ public partial class RegistrarAtendimento : ContentPage
                 "FINALIZAR",
                 "VOLTAR");
 
-
         if (!confirmar)
+        {
             return;
+        }
 
-
-        // CRIA O REGISTRO NO PRONTUÁRIO
+        // ========================================
+        // CRIAR REGISTRO NO PRONTUÁRIO LOCAL
+        // ========================================
 
         pacienteAtual.Historico.Add(
             new ConsultaHistoricoMedicoItem
             {
                 IdHistorico =
-                    MedicoDados
-                        .ProximoIdHistorico(),
+                    MedicoDados.ProximoIdHistorico(),
 
                 IdConsulta =
                     consultaAtual.Id,
@@ -334,33 +338,28 @@ public partial class RegistrarAtendimento : ContentPage
                     observacoes
             });
 
+        // ========================================
+        // MARCAR CONSULTA COMO REALIZADA
+        // ========================================
 
-        // ALTERA O STATUS DA CONSULTA
-
-        consultaAtual.Status =
-            "Realizada";
-
+        consultaAtual.Status = "Realizada";
 
         await DisplayAlertAsync(
             "Atendimento registrado",
             "A consulta foi marcada como realizada e o prontuário foi atualizado.",
             "OK");
 
-
-        await Shell.Current.GoToAsync(
-            "..");
+        await Shell.Current.GoToAsync("..");
     }
 
-
-    // =============================================
+    // ============================================
     // VOLTAR
-    // =============================================
+    // ============================================
 
     private async void VoltarButton_Clicked(
         object sender,
         EventArgs e)
     {
-        await Shell.Current.GoToAsync(
-            "..");
+        await Shell.Current.GoToAsync("..");
     }
 }

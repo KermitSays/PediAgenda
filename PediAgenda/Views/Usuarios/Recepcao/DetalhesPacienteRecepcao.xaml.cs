@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 
 namespace PediAgenda.Views.Usuarios.Recepcao;
 
@@ -7,35 +6,19 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 {
     private int _pacienteId;
 
+    private PacienteRecepcaoItem? _paciente;
 
-    private PacienteRecepcaoItem?
-        _paciente;
-
-
-    private ConsultaPacienteRecepcaoItem?
-        _proximaConsulta;
-
-
-    public ObservableCollection<ConsultaPacienteRecepcaoItem>
-        ConsultasPaciente
-    {
-        get;
-        set;
-    } = new();
-
+    // ============================================
+    // IDENTIFICAÇÃO DO PACIENTE
+    // ============================================
 
     public string PacienteId
     {
         set
         {
-            if (
-                int.TryParse(
-                    value,
-                    out int id))
+            if (int.TryParse(value, out int id) && id > 0)
             {
-                _pacienteId =
-                    id;
-
+                _pacienteId = id;
 
                 if (NomePacienteLabel != null)
                 {
@@ -45,21 +28,14 @@ public partial class DetalhesPacienteRecepcao : ContentPage
         }
     }
 
-
     public DetalhesPacienteRecepcao()
     {
         InitializeComponent();
-
-
-        BindingContext =
-            this;
     }
-
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
-
 
         if (_pacienteId != 0)
         {
@@ -67,290 +43,88 @@ public partial class DetalhesPacienteRecepcao : ContentPage
         }
     }
 
-
-    // =============================================
-    // CARREGA PACIENTE
-    // =============================================
+    // ============================================
+    // CARREGAR DADOS DO PACIENTE
+    // ============================================
 
     private void CarregarPaciente()
     {
-        _paciente =
-            PacientesRecepcaoDados.Pacientes
-                .FirstOrDefault(p =>
-                    p.Id ==
-                    _pacienteId);
-
+        _paciente = PacientesRecepcaoDados.Pacientes
+            .FirstOrDefault(p => p.Id == _pacienteId);
 
         if (_paciente == null)
-            return;
+        {
+            NomePacienteLabel.Text = "Paciente não encontrado";
+            NascimentoLabel.Text = string.Empty;
+            StatusPacienteLabel.Text = string.Empty;
 
+            ResponsavelLabel.Text = string.Empty;
+            TelefoneLabel.Text = string.Empty;
+            EmailLabel.Text = string.Empty;
+
+            return;
+        }
+
+        // DADOS DO PACIENTE
 
         NomePacienteLabel.Text =
             _paciente.Nome;
 
-
         NascimentoLabel.Text =
-            $"Nascimento: " +
-            $"{_paciente.DataNascimento:dd/MM/yyyy}";
-
+            $"Nascimento: {_paciente.DataNascimento:dd/MM/yyyy}";
 
         StatusPacienteLabel.Text =
             $"Status: {_paciente.Status}";
 
+        // DADOS DO RESPONSÁVEL
 
         ResponsavelLabel.Text =
             _paciente.Responsavel;
 
-
         TelefoneLabel.Text =
-            $"Telefone: " +
-            $"{_paciente.TelefoneResponsavel}";
-
+            $"Telefone: {_paciente.TelefoneResponsavel}";
 
         EmailLabel.Text =
-            $"E-mail: " +
-            $"{_paciente.EmailResponsavel}";
-
-
-        // =========================================
-        // CONSULTAS
-        // =========================================
-
-        ConsultasPaciente.Clear();
-
-
-        foreach (
-            ConsultaPacienteRecepcaoItem consulta
-            in _paciente.Consultas
-                .OrderByDescending(c =>
-                    c.Data)
-                .ThenByDescending(c =>
-                    c.Horario))
-        {
-            ConsultasPaciente.Add(
-                consulta);
-        }
-
-
-        QuantidadeConsultasLabel.Text =
-            $"{ConsultasPaciente.Count} consulta(s)";
-
-
-        CarregarProximaConsulta();
+            $"E-mail: {_paciente.EmailResponsavel}";
     }
 
+    // ============================================
+    // AGENDAR CONSULTA
+    // ============================================
 
-    // =============================================
-    // PRÓXIMA CONSULTA
-    // =============================================
-
-    private void CarregarProximaConsulta()
+    private async void AgendarConsultaButton_Clicked(
+        object sender,
+        EventArgs e)
     {
         if (_paciente == null)
-            return;
-
-
-        _proximaConsulta =
-            _paciente.Consultas
-                .Where(c =>
-                    c.Data.Date >=
-                        DateTime.Today
-
-                    &&
-
-                    !c.Status.Equals(
-                        "Cancelado",
-                        StringComparison.OrdinalIgnoreCase)
-
-                    &&
-
-                    !c.Status.Equals(
-                        "Cancelada",
-                        StringComparison.OrdinalIgnoreCase)
-
-                    &&
-
-                    !c.Status.Equals(
-                        "Realizado",
-                        StringComparison.OrdinalIgnoreCase)
-
-                    &&
-
-                    !c.Status.Equals(
-                        "Realizada",
-                        StringComparison.OrdinalIgnoreCase))
-                .OrderBy(c =>
-                    c.Data)
-                .ThenBy(c =>
-                    c.Horario)
-                .FirstOrDefault();
-
-
-        if (_proximaConsulta == null)
-        {
-            ProximaConsultaCard.IsVisible =
-                false;
-
-
-            SemProximaConsultaLabel.IsVisible =
-                true;
-
-
-            return;
-        }
-
-
-        ProximaConsultaCard.IsVisible =
-            true;
-
-
-        SemProximaConsultaLabel.IsVisible =
-            false;
-
-
-        ProximaConsultaDataLabel.Text =
-            _proximaConsulta
-                .DataHoraFormatada;
-
-
-        ProximaConsultaMedicoLabel.Text =
-            _proximaConsulta
-                .Medico;
-
-
-        ProximaConsultaEspecialidadeLabel.Text =
-            $"{_proximaConsulta.Especialidade} • " +
-            $"{_proximaConsulta.TipoAtendimento}";
-
-
-        ProximaConsultaStatusLabel.Text =
-            $"Status: " +
-            $"{_proximaConsulta.Status}";
-    }
-
-
-    // =============================================
-    // PRÓXIMA CONSULTA - CLIQUE
-    // =============================================
-
-    private async void ProximaConsultaButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        if (_proximaConsulta == null)
-            return;
-
-
-        await AbrirConsultaAsync(
-            _proximaConsulta);
-    }
-
-
-    // =============================================
-    // HISTÓRICO - CLIQUE
-    // =============================================
-
-    private async void ConsultaHistoricoButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        if (
-            sender is not Button botao
-
-            ||
-
-            botao.CommandParameter
-                is not ConsultaPacienteRecepcaoItem consulta)
-        {
-            return;
-        }
-
-
-        await AbrirConsultaAsync(
-            consulta);
-    }
-
-
-    // =============================================
-    // ABRIR CONSULTA
-    // =============================================
-
-    private async Task AbrirConsultaAsync(
-        ConsultaPacienteRecepcaoItem consulta)
-    {
-        // =========================================
-        // CONSULTA SEM HORÁRIO ATIVO
-        // =========================================
-
-        if (!consulta.HorarioId.HasValue)
         {
             await DisplayAlertAsync(
-                "Consulta do histórico",
-
-                $"Médico: {consulta.Medico}\n" +
-                $"Data: {consulta.Data:dd/MM/yyyy}\n" +
-                $"Horário: {consulta.Horario:hh\\:mm}\n" +
-                $"Status: {consulta.Status}\n\n" +
-                "Esta consulta não possui um horário ativo na agenda.",
-
+                "Atenção",
+                "Nenhum paciente foi selecionado.",
                 "OK");
-
 
             return;
         }
 
-
-        // =========================================
-        // CONSULTA ATIVA
-        // =========================================
-
         await Shell.Current.GoToAsync(
-            nameof(DetalhesConsultaRecepcao),
-
+            nameof(AgendarConsultaRecepcao),
             new Dictionary<string, object>
             {
                 {
-                    "HorarioId",
-                    consulta.HorarioId.Value.ToString()
+                    "PacienteId",
+                    _paciente.Id.ToString()
                 }
             });
     }
 
-
-    // =============================================
-    // AGENDAR NOVA CONSULTA
-    // =============================================
-
-    private async void AgendarConsultaButton_Clicked(
-    object sender,
-    EventArgs e)
-    {
-        if (_paciente == null)
-            return;
-
-
-        await Shell.Current.GoToAsync(
-            nameof(AgendarConsultaRecepcao),
-
-            new Dictionary<string, object>
-            {
-            {
-                "PacienteId",
-                _paciente.Id.ToString()
-            }
-            });
-    }
-
-
-    // =============================================
+    // ============================================
     // VOLTAR
-    // =============================================
+    // ============================================
 
     private async void VoltarButton_Clicked(
         object sender,
         EventArgs e)
     {
-        await Shell.Current.GoToAsync(
-            "..");
+        await Shell.Current.GoToAsync("..");
     }
 }

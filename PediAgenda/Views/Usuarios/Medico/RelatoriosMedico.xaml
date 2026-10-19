@@ -7,486 +7,210 @@
     Title="Relatórios"
     BackgroundColor="{StaticResource PageBlue}">
 
-    <Grid RowDefinitions="Auto,*">
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="24,30,24,24"
+            Spacing="20">
 
-        <!-- CABEÇALHO -->
-        <Grid
-            Grid.Row="0"
-            BackgroundColor="{StaticResource PrimaryBlue}"
-            Padding="24,18">
+            <!-- TÍTULO -->
+            <Label
+                Text="Relatório de atendimentos"
+                FontSize="26"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
 
             <Label
-                Text="Relatórios"
-                FontSize="22"
-                FontAttributes="Bold"
-                TextColor="White"
-                VerticalOptions="Center" />
+                Text="Consulte as consultas realizadas em um determinado período."
+                FontSize="14"
+                TextColor="{StaticResource InputPlaceholder}" />
 
-        </Grid>
+            <!-- FILTRO POR PERÍODO -->
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 16"
+                Padding="16">
 
-
-        <ScrollView Grid.Row="1">
-
-            <VerticalStackLayout
-                Padding="24,24"
-                Spacing="20">
-
-                <!-- INTRODUÇÃO -->
-                <VerticalStackLayout Spacing="4">
+                <VerticalStackLayout Spacing="14">
 
                     <Label
-                        Text="Relatório de atendimentos"
-                        FontSize="25"
+                        Text="Período"
+                        FontSize="18"
                         FontAttributes="Bold"
                         TextColor="{StaticResource TextDark}" />
 
+                    <!-- DATA INICIAL -->
                     <Label
-                        Text="Consulte os atendimentos realizados em um determinado período."
-                        FontSize="14"
-                        TextColor="{StaticResource InputPlaceholder}" />
+                        Text="Data inicial"
+                        FontSize="15"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Border
+                        BackgroundColor="{StaticResource PageBlue}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="10,4">
+
+                        <DatePicker
+                            x:Name="DataInicialPicker"
+                            Format="dd/MM/yyyy"
+                            TextColor="{StaticResource TextDark}" />
+                    </Border>
+
+                    <!-- DATA FINAL -->
+                    <Label
+                        Text="Data final"
+                        FontSize="15"
+                        TextColor="{StaticResource TextDark}" />
+
+                    <Border
+                        BackgroundColor="{StaticResource PageBlue}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="10,4">
+
+                        <DatePicker
+                            x:Name="DataFinalPicker"
+                            Format="dd/MM/yyyy"
+                            TextColor="{StaticResource TextDark}" />
+                    </Border>
+
+                    <!-- BUSCAR -->
+                    <Button
+                        Text="BUSCAR ATENDIMENTOS"
+                        HeightRequest="52"
+                        CornerRadius="16"
+                        BackgroundColor="{StaticResource PrimaryBlue}"
+                        TextColor="{StaticResource White}"
+                        FontAttributes="Bold"
+                        Clicked="BuscarButton_Clicked" />
 
                 </VerticalStackLayout>
+            </Border>
 
+            <!-- RESUMO -->
+            <Label
+                Text="Resumo"
+                FontSize="20"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
 
-                <!-- FILTROS -->
-                <Border
-                    BackgroundColor="White"
-                    Stroke="{StaticResource InputBlue}"
-                    StrokeThickness="1"
-                    Padding="18"
-                    StrokeShape="RoundRectangle 18">
+            <Border
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 16"
+                Padding="18">
 
-                    <VerticalStackLayout Spacing="18">
+                <VerticalStackLayout
+                    Spacing="6"
+                    HorizontalOptions="Center">
 
-                        <Label
-                            Text="Filtros"
-                            FontSize="19"
-                            FontAttributes="Bold"
-                            TextColor="{StaticResource TextDark}" />
+                    <Label
+                        x:Name="TotalRealizadasLabel"
+                        Text="0"
+                        FontSize="30"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource PrimaryBlue}"
+                        HorizontalTextAlignment="Center" />
 
+                    <Label
+                        Text="Consultas realizadas"
+                        FontSize="15"
+                        TextColor="{StaticResource TextDark}"
+                        HorizontalTextAlignment="Center" />
 
-                        <!-- PERÍODO -->
-                        <Label
-                            Text="Período"
-                            FontSize="15"
-                            FontAttributes="Bold"
-                            TextColor="{StaticResource TextDark}" />
+                </VerticalStackLayout>
+            </Border>
 
-                        <Grid
-                            ColumnDefinitions="*,Auto,*"
-                            ColumnSpacing="10">
+            <!-- LISTA DE ATENDIMENTOS -->
+            <Label
+                Text="Atendimentos encontrados"
+                FontSize="20"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextDark}" />
 
-                            <!-- DATA INICIAL -->
-                            <Border
-                                Grid.Column="0"
-                                BackgroundColor="{StaticResource PageBlue}"
-                                StrokeThickness="0"
-                                Padding="8,3"
-                                StrokeShape="RoundRectangle 12">
+            <CollectionView
+                ItemsSource="{Binding Resultados}"
+                SelectionMode="None">
 
-                                <DatePicker
-                                    x:Name="DataInicialPicker"
-                                    Format="dd/MM/yyyy"
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout
+                        Orientation="Vertical"
+                        ItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+
+                        <Border
+                            BackgroundColor="{StaticResource White}"
+                            Stroke="{StaticResource InputBlue}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="16">
+
+                            <VerticalStackLayout Spacing="6">
+
+                                <Label
+                                    Text="{Binding Paciente}"
+                                    FontSize="17"
+                                    FontAttributes="Bold"
                                     TextColor="{StaticResource TextDark}" />
 
-                            </Border>
+                                <Label
+                                    Text="{Binding DataHoraFormatada}"
+                                    FontSize="14"
+                                    TextColor="{StaticResource PrimaryBlue}" />
 
+                            </VerticalStackLayout>
 
-                            <Label
-                                Grid.Column="1"
-                                Text="até"
-                                VerticalOptions="Center"
-                                TextColor="{StaticResource InputPlaceholder}" />
+                        </Border>
 
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
 
-                            <!-- DATA FINAL -->
-                            <Border
-                                Grid.Column="2"
-                                BackgroundColor="{StaticResource PageBlue}"
-                                StrokeThickness="0"
-                                Padding="8,3"
-                                StrokeShape="RoundRectangle 12">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout
+                        Padding="20"
+                        Spacing="8">
 
-                                <DatePicker
-                                    x:Name="DataFinalPicker"
-                                    Format="dd/MM/yyyy"
-                                    TextColor="{StaticResource TextDark}" />
-
-                            </Border>
-
-                        </Grid>
-
-
-                        <!-- PACIENTE -->
-                        <VerticalStackLayout Spacing="6">
-
-                            <Label
-                                Text="Paciente"
-                                FontSize="15"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource TextDark}" />
-
-                            <Border
-                                BackgroundColor="{StaticResource PageBlue}"
-                                StrokeThickness="0"
-                                Padding="10,3"
-                                StrokeShape="RoundRectangle 12">
-
-                                <Picker
-                                    x:Name="PacientePicker"
-                                    Title="Selecione o paciente"
-                                    TextColor="{StaticResource TextDark}"
-                                    TitleColor="{StaticResource InputPlaceholder}" />
-
-                            </Border>
-
-                        </VerticalStackLayout>
-
-
-                        <!-- STATUS -->
-                        <VerticalStackLayout Spacing="6">
-
-                            <Label
-                                Text="Status"
-                                FontSize="15"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource TextDark}" />
-
-                            <Border
-                                BackgroundColor="{StaticResource PageBlue}"
-                                StrokeThickness="0"
-                                Padding="10,3"
-                                StrokeShape="RoundRectangle 12">
-
-                                <Picker
-                                    x:Name="StatusPicker"
-                                    Title="Selecione o status"
-                                    TextColor="{StaticResource TextDark}"
-                                    TitleColor="{StaticResource InputPlaceholder}" />
-
-                            </Border>
-
-                        </VerticalStackLayout>
-
-
-                        <!-- BUSCAR -->
-                        <Button
-                            Text="BUSCAR ATENDIMENTOS"
-                            HeightRequest="48"
-                            CornerRadius="24"
-                            BackgroundColor="{StaticResource PrimaryBlue}"
-                            TextColor="White"
+                        <Label
+                            Text="Nenhum atendimento encontrado"
+                            FontSize="16"
                             FontAttributes="Bold"
-                            Clicked="BuscarButton_Clicked" />
+                            TextColor="{StaticResource TextDark}"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Não existem consultas realizadas no período selecionado."
+                            FontSize="14"
+                            TextColor="{StaticResource InputPlaceholder}"
+                            HorizontalTextAlignment="Center" />
 
                     </VerticalStackLayout>
-
-                </Border>
-
-
-                <!-- RESUMO -->
-                <Label
-                    Text="Resumo"
-                    FontSize="20"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}" />
-
-
-                <Grid
-                    ColumnDefinitions="*,*"
-                    RowDefinitions="Auto,Auto"
-                    ColumnSpacing="12"
-                    RowSpacing="12">
-
-
-                    <!-- TOTAL -->
-                    <Border
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        BackgroundColor="White"
-                        Stroke="{StaticResource InputBlue}"
-                        StrokeThickness="1"
-                        Padding="14"
-                        StrokeShape="RoundRectangle 16">
-
-                        <VerticalStackLayout
-                            Spacing="3"
-                            HorizontalOptions="Center">
-
-                            <Label
-                                x:Name="TotalConsultasLabel"
-                                Text="0"
-                                FontSize="27"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource PrimaryBlue}"
-                                HorizontalTextAlignment="Center" />
-
-                            <Label
-                                Text="Consultas"
-                                FontSize="13"
-                                TextColor="{StaticResource TextDark}"
-                                HorizontalTextAlignment="Center" />
-
-                        </VerticalStackLayout>
-
-                    </Border>
-
-
-                    <!-- CONFIRMADAS -->
-                    <Border
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        BackgroundColor="White"
-                        Stroke="{StaticResource InputBlue}"
-                        StrokeThickness="1"
-                        Padding="14"
-                        StrokeShape="RoundRectangle 16">
-
-                        <VerticalStackLayout
-                            Spacing="3"
-                            HorizontalOptions="Center">
-
-                            <Label
-                                x:Name="ConfirmadasLabel"
-                                Text="0"
-                                FontSize="27"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource PrimaryBlue}"
-                                HorizontalTextAlignment="Center" />
-
-                            <Label
-                                Text="Confirmadas"
-                                FontSize="13"
-                                TextColor="{StaticResource TextDark}"
-                                HorizontalTextAlignment="Center" />
-
-                        </VerticalStackLayout>
-
-                    </Border>
-
-
-                    <!-- CANCELADAS -->
-                    <Border
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        BackgroundColor="White"
-                        Stroke="{StaticResource InputBlue}"
-                        StrokeThickness="1"
-                        Padding="14"
-                        StrokeShape="RoundRectangle 16">
-
-                        <VerticalStackLayout
-                            Spacing="3"
-                            HorizontalOptions="Center">
-
-                            <Label
-                                x:Name="CanceladasLabel"
-                                Text="0"
-                                FontSize="27"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource PrimaryBlue}"
-                                HorizontalTextAlignment="Center" />
-
-                            <Label
-                                Text="Canceladas"
-                                FontSize="13"
-                                TextColor="{StaticResource TextDark}"
-                                HorizontalTextAlignment="Center" />
-
-                        </VerticalStackLayout>
-
-                    </Border>
-
-
-                    <!-- POR CONFIRMAR -->
-                    <Border
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        BackgroundColor="White"
-                        Stroke="{StaticResource InputBlue}"
-                        StrokeThickness="1"
-                        Padding="14"
-                        StrokeShape="RoundRectangle 16">
-
-                        <VerticalStackLayout
-                            Spacing="3"
-                            HorizontalOptions="Center">
-
-                            <Label
-                                x:Name="PorConfirmarLabel"
-                                Text="0"
-                                FontSize="27"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource PrimaryBlue}"
-                                HorizontalTextAlignment="Center" />
-
-                            <Label
-                                Text="Por confirmar"
-                                FontSize="13"
-                                TextColor="{StaticResource TextDark}"
-                                HorizontalTextAlignment="Center" />
-
-                        </VerticalStackLayout>
-
-                    </Border>
-
-                </Grid>
-
-
-                <!-- LISTA -->
-                <Grid ColumnDefinitions="*,Auto">
-
-                    <Label
-                        Text="Atendimentos encontrados"
-                        FontSize="20"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource TextDark}" />
-
-                    <Label
-                        x:Name="QuantidadeLabel"
-                        Grid.Column="1"
-                        Text="0 resultado(s)"
-                        FontSize="13"
-                        TextColor="{StaticResource InputPlaceholder}"
-                        VerticalOptions="Center" />
-
-                </Grid>
-
-
-                <CollectionView
-                    ItemsSource="{Binding Resultados}"
-                    SelectionMode="None">
-
-                    <CollectionView.ItemsLayout>
-
-                        <LinearItemsLayout
-                            Orientation="Vertical"
-                            ItemSpacing="12" />
-
-                    </CollectionView.ItemsLayout>
-
-
-                    <CollectionView.ItemTemplate>
-
-                        <DataTemplate>
-
-                            <Border
-                                BackgroundColor="White"
-                                Stroke="{StaticResource InputBlue}"
-                                StrokeThickness="1"
-                                Padding="16"
-                                StrokeShape="RoundRectangle 16">
-
-                                <Grid
-                                    RowDefinitions="Auto,Auto"
-                                    ColumnDefinitions="*,Auto"
-                                    RowSpacing="6">
-
-                                    <Label
-                                        Grid.Row="0"
-                                        Grid.Column="0"
-                                        Text="{Binding Paciente}"
-                                        FontSize="17"
-                                        FontAttributes="Bold"
-                                        TextColor="{StaticResource TextDark}" />
-
-
-                                    <Border
-                                        Grid.Row="0"
-                                        Grid.Column="1"
-                                        BackgroundColor="{StaticResource PageBlue}"
-                                        StrokeThickness="0"
-                                        Padding="10,5"
-                                        StrokeShape="RoundRectangle 10">
-
-                                        <Label
-                                            Text="{Binding Status}"
-                                            FontSize="12"
-                                            FontAttributes="Bold"
-                                            TextColor="{StaticResource PrimaryBlue}" />
-
-                                    </Border>
-
-
-                                    <Label
-                                        Grid.Row="1"
-                                        Grid.ColumnSpan="2"
-                                        Text="{Binding DataHoraFormatada}"
-                                        FontSize="14"
-                                        TextColor="{StaticResource InputPlaceholder}" />
-
-                                </Grid>
-
-                            </Border>
-
-                        </DataTemplate>
-
-                    </CollectionView.ItemTemplate>
-
-
-                    <CollectionView.EmptyView>
-
-                        <VerticalStackLayout
-                            Padding="20"
-                            Spacing="6"
-                            HorizontalOptions="Center">
-
-                            <Label
-                                Text="Nenhum atendimento encontrado"
-                                FontSize="16"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource TextDark}"
-                                HorizontalTextAlignment="Center" />
-
-                            <Label
-                                Text="Altere os filtros e tente novamente."
-                                FontSize="13"
-                                TextColor="{StaticResource InputPlaceholder}"
-                                HorizontalTextAlignment="Center" />
-
-                        </VerticalStackLayout>
-
-                    </CollectionView.EmptyView>
-
-                </CollectionView>
-
-
-                <!-- EXPORTAR -->
-                <VerticalStackLayout Spacing="12">
-
-                    <Button
-                        Text="GERAR PDF"
-                        HeightRequest="48"
-                        CornerRadius="24"
-                        BackgroundColor="{StaticResource PrimaryBlue}"
-                        TextColor="White"
-                        FontAttributes="Bold"
-                        Clicked="GerarPdfButton_Clicked" />
-
-                    <Button
-                        Text="GERAR EXCEL"
-                        HeightRequest="48"
-                        CornerRadius="24"
-                        BackgroundColor="{StaticResource PrimaryBlue}"
-                        TextColor="White"
-                        FontAttributes="Bold"
-                        Clicked="GerarExcelButton_Clicked" />
-
-                </VerticalStackLayout>
-
-
-                <!-- VOLTAR -->
-                <Button
-                    Text="← Voltar"
-                    BackgroundColor="Transparent"
-                    TextColor="{StaticResource TextDark}"
-                    FontSize="15"
-                    Clicked="VoltarButton_Clicked" />
-
-            </VerticalStackLayout>
-
-        </ScrollView>
-
-    </Grid>
+                </CollectionView.EmptyView>
+
+            </CollectionView>
+
+            <!-- EXPORTAR EXCEL -->
+            <Button
+                Text="GERAR EXCEL"
+                HeightRequest="52"
+                CornerRadius="16"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="GerarExcelButton_Clicked" />
+
+            <!-- VOLTAR -->
+            <Button
+                Text="Voltar"
+                Style="{StaticResource BotaoVoltarSimples}"
+                Clicked="VoltarButton_Clicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>

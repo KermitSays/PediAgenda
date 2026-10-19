@@ -248,6 +248,11 @@ public partial class MenuRecepcao : ContentPage
                 _ =>
                     $"{ConsultasHoje.Count} consultas"
             };
+
+        // O estado vazio so aparece apos a lista ser atualizada.
+        bool semConsultas = ConsultasHoje.Count == 0;
+        SemConsultasContainer.IsVisible = semConsultas;
+        ConsultasCollectionView.IsVisible = !semConsultas;
     }
 
 
@@ -295,19 +300,5 @@ public partial class MenuRecepcao : ContentPage
         await Shell.Current.GoToAsync(
             nameof(
                 MedicosRecepcao));
-    }
-
-
-    // =============================================
-    // ADICIONAR PACIENTE
-    // =============================================
-
-    private async void AdicionarPacienteButton_Clicked(
-        object sender,
-        TappedEventArgs e)
-    {
-        await Shell.Current.GoToAsync(
-            nameof(
-                AdicionarPacienteRecepcao));
     }
 }

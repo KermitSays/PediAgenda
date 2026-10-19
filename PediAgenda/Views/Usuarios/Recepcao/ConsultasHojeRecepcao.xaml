@@ -101,10 +101,10 @@
         </CollectionView>
 
         <Button
+            Text="Voltar"
             Grid.Row="2"
-            Text="VOLTAR"
-            Style="{StaticResource PrimaryButton}"
-            Clicked="VoltarButton_Clicked" />
+            Clicked="VoltarButton_Clicked"
+            Style="{StaticResource BotaoVoltarSimples}" />
 
     </Grid>
 </ContentPage>

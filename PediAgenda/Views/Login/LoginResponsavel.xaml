@@ -3,6 +3,7 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:PediAgenda.Controls"
     x:Class="PediAgenda.Views.Login.LoginResponsavel"
     Title="Login"
     BackgroundColor="{StaticResource PageBlue}"
@@ -106,16 +107,6 @@
 
             </Border>
 
-            <!-- Esqueci minha senha -->
-            <Button
-                Text="Esqueci minha senha"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource PrimaryBlue}"
-                FontSize="14"
-                HorizontalOptions="End"
-                Padding="0"
-                Margin="0,8,0,25"
-                Clicked="EsqueciSenhaButton_Clicked" />
 
             <!-- Mensagem de erro -->
             <Label
@@ -130,6 +121,7 @@
             <Button
                 x:Name="EntrarButton"
                 Text="Entrar"
+                Margin="0,20,0,0"
                 Style="{StaticResource PrimaryButton}"
                 Clicked="EntrarButton_Clicked" />
 
@@ -164,6 +156,9 @@
 
             </HorizontalStackLayout>
 
+
+                    <!-- Retorno para a tela de escolha de perfil -->
+            <controls:BotaoVoltar />
 
         </VerticalStackLayout>
 

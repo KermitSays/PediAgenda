@@ -232,10 +232,9 @@
 
 
             <Button
-                Text="← Voltar"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource TextDark}"
-                Clicked="VoltarButton_Clicked" />
+                Text="Voltar"
+                Clicked="VoltarButton_Clicked"
+                Style="{StaticResource BotaoVoltarSimples}" />
 
         </VerticalStackLayout>
 

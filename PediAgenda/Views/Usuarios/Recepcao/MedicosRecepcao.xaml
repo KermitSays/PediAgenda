@@ -293,13 +293,8 @@
 
             <Button
                 Text="Voltar"
-                HeightRequest="48"
-                CornerRadius="16"
-                BackgroundColor="White"
-                TextColor="{StaticResource PrimaryBlue}"
-                BorderColor="{StaticResource PrimaryBlue}"
-                BorderWidth="1"
-                Clicked="VoltarButton_Clicked" />
+                Clicked="VoltarButton_Clicked"
+                Style="{StaticResource BotaoVoltarSimples}" />
 
         </VerticalStackLayout>
 

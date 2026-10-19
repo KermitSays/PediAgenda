@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8" ?>
-
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -7,135 +6,57 @@
     Title="Confirmar consulta"
     BackgroundColor="{StaticResource PageBlue}"
     NavigationPage.HasNavigationBar="False">
-
     <ScrollView>
-        <VerticalStackLayout
-            Padding="24,30,24,24"
-            Spacing="22">
-
+        <VerticalStackLayout Padding="24,30,24,24" Spacing="22">
             <VerticalStackLayout Spacing="5">
-                <Label
-                    Text="Confirme sua consulta"
-                    FontSize="28"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}" />
-
-                <Label
-                    Text="Confira os dados antes de confirmar."
-                    FontSize="16"
-                    TextColor="{StaticResource PrimaryBlue}" />
+                <Label Text="Confirme sua consulta" FontSize="28"
+                       FontAttributes="Bold" TextColor="{StaticResource TextDark}" />
+                <Label Text="Confira os dados antes de confirmar."
+                       FontSize="16" TextColor="{StaticResource PrimaryBlue}" />
             </VerticalStackLayout>
 
-
-            <!-- DADOS DA CONSULTA -->
-
-            <Border
-                BackgroundColor="{StaticResource White}"
-                Stroke="{StaticResource InputBlue}"
-                StrokeThickness="1"
-                Padding="18"
-                StrokeShape="RoundRectangle 18">
-
+            <Border BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource InputBlue}" StrokeThickness="1"
+                    Padding="18" StrokeShape="RoundRectangle 18">
                 <VerticalStackLayout Spacing="14">
-
-                    <Label
-                        Text="Dados da consulta"
-                        FontSize="20"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource TextDark}" />
-
-
+                    <Label Text="Dados da consulta" FontSize="20"
+                           FontAttributes="Bold" TextColor="{StaticResource TextDark}" />
                     <VerticalStackLayout Spacing="3">
-                        <Label
-                            Text="Médico"
-                            FontSize="13"
-                            TextColor="{StaticResource InputPlaceholder}" />
-
-                        <Label
-                            x:Name="MedicoLabel"
-                            FontSize="17"
-                            FontAttributes="Bold"
-                            TextColor="{StaticResource TextDark}" />
+                        <Label Text="Paciente" FontSize="13" TextColor="{StaticResource InputPlaceholder}" />
+                        <Label x:Name="PacienteLabel" FontSize="17" FontAttributes="Bold"
+                               TextColor="{StaticResource TextDark}" />
                     </VerticalStackLayout>
-
-
                     <VerticalStackLayout Spacing="3">
-                        <Label
-                            Text="Especialidade"
-                            FontSize="13"
-                            TextColor="{StaticResource InputPlaceholder}" />
-
-                        <Label
-                            x:Name="EspecialidadeLabel"
-                            FontSize="17"
-                            TextColor="{StaticResource TextDark}" />
+                        <Label Text="Médico" FontSize="13" TextColor="{StaticResource InputPlaceholder}" />
+                        <Label x:Name="MedicoLabel" FontSize="17" FontAttributes="Bold"
+                               TextColor="{StaticResource TextDark}" />
                     </VerticalStackLayout>
-
-
                     <VerticalStackLayout Spacing="3">
-                        <Label
-                            Text="Data"
-                            FontSize="13"
-                            TextColor="{StaticResource InputPlaceholder}" />
-
-                        <Label
-                            x:Name="DataLabel"
-                            FontSize="17"
-                            TextColor="{StaticResource TextDark}" />
+                        <Label Text="Especialidade" FontSize="13" TextColor="{StaticResource InputPlaceholder}" />
+                        <Label x:Name="EspecialidadeLabel" FontSize="17"
+                               TextColor="{StaticResource PrimaryBlue}" />
                     </VerticalStackLayout>
-
-
                     <VerticalStackLayout Spacing="3">
-                        <Label
-                            Text="Horário"
-                            FontSize="13"
-                            TextColor="{StaticResource InputPlaceholder}" />
-
-                        <Label
-                            x:Name="HorarioLabel"
-                            FontSize="17"
-                            TextColor="{StaticResource TextDark}" />
+                        <Label Text="Data" FontSize="13" TextColor="{StaticResource InputPlaceholder}" />
+                        <Label x:Name="DataLabel" FontSize="17" TextColor="{StaticResource TextDark}" />
                     </VerticalStackLayout>
-
-
                     <VerticalStackLayout Spacing="3">
-                        <Label
-                            Text="Tipo de atendimento"
-                            FontSize="13"
-                            TextColor="{StaticResource InputPlaceholder}" />
-
-                        <Label
-                            x:Name="TipoAtendimentoLabel"
-                            FontSize="17"
-                            FontAttributes="Bold"
-                            TextColor="{StaticResource PrimaryBlue}" />
+                        <Label Text="Horário" FontSize="13" TextColor="{StaticResource InputPlaceholder}" />
+                        <Label x:Name="HorarioLabel" FontSize="17" TextColor="{StaticResource TextDark}" />
                     </VerticalStackLayout>
-
                 </VerticalStackLayout>
             </Border>
 
-
-            <!-- BOTÕES -->
-
+            <Label Text="A forma de pagamento será definida na recepção da clínica."
+                   FontSize="14" TextColor="{StaticResource InputPlaceholder}" />
+            <Button Text="CONFIRMAR AGENDAMENTO" HeightRequest="52" CornerRadius="14"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="{StaticResource White}" FontAttributes="Bold"
+                    Clicked="ConfirmarButton_Clicked" />
             <Button
-                Text="CONFIRMAR AGENDAMENTO"
-                HeightRequest="52"
-                CornerRadius="14"
-                BackgroundColor="{StaticResource PrimaryBlue}"
-                TextColor="{StaticResource White}"
-                FontAttributes="Bold"
-                Clicked="ConfirmarButton_Clicked" />
-
-            <Button
-                Text="VOLTAR"
-                HeightRequest="48"
-                CornerRadius="14"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource PrimaryBlue}"
-                FontAttributes="Bold"
-                Clicked="VoltarButton_Clicked" />
-
+                Text="Voltar"
+                Clicked="VoltarButton_Clicked"
+                Style="{StaticResource BotaoVoltarSimples}" />
         </VerticalStackLayout>
     </ScrollView>
-
 </ContentPage>
