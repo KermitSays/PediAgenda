@@ -399,7 +399,7 @@ static string Codigo(MotivoFalha motivo) => motivo switch
 
 // O que a tela manda e o que ela recebe. A senha só entra; nunca sai.
 record LoginRequisicao(string? Email, string? Senha);
-record CadastroRequisicao(  string? Cpf, string? CodigoAtivacao, string? Email, string? Senha, bool AceiteTermos);
+record CadastroRequisicao(string? Cpf, string? Email, string? Senha, bool AceiteTermos);
 record UsuarioLogado(int Id, string Nome, string Email, string Perfil);
 record SessaoIniciada(int Id, string Nome, string Email, string Perfil, string Token, DateTime ExpiraEm);
 record ErroApi(string Codigo, string Mensagem);

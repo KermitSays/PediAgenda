@@ -14,9 +14,7 @@
             Spacing="18">
 
             <!-- CABEÇALHO -->
-
-            <VerticalStackLayout
-                Spacing="4">
+            <VerticalStackLayout Spacing="4">
 
                 <Label
                     x:Name="NomePacienteLabel"
@@ -31,18 +29,15 @@
 
             </VerticalStackLayout>
 
-
             <!-- DADOS DO PACIENTE -->
-
             <Border
-                BackgroundColor="White"
+                BackgroundColor="{StaticResource White}"
                 Stroke="{StaticResource InputBlue}"
                 StrokeThickness="1"
                 Padding="18"
                 StrokeShape="RoundRectangle 18">
 
-                <VerticalStackLayout
-                    Spacing="10">
+                <VerticalStackLayout Spacing="10">
 
                     <Label
                         Text="Paciente"
@@ -64,18 +59,15 @@
 
             </Border>
 
-
-            <!-- RESPONSÁVEL -->
-
+            <!-- DADOS DO RESPONSÁVEL -->
             <Border
-                BackgroundColor="White"
+                BackgroundColor="{StaticResource White}"
                 Stroke="{StaticResource InputBlue}"
                 StrokeThickness="1"
                 Padding="18"
                 StrokeShape="RoundRectangle 18">
 
-                <VerticalStackLayout
-                    Spacing="10">
+                <VerticalStackLayout Spacing="10">
 
                     <Label
                         Text="Responsável"
@@ -103,214 +95,21 @@
 
             </Border>
 
-
-            <!-- PRÓXIMA CONSULTA -->
-
-            <Label
-                Text="Próxima consulta"
-                FontSize="20"
-                FontAttributes="Bold"
-                TextColor="{StaticResource TextDark}" />
-
-
-            <Border
-                x:Name="ProximaConsultaCard"
-                BackgroundColor="White"
-                Stroke="{StaticResource InputBlue}"
-                StrokeThickness="1"
-                Padding="18"
-                StrokeShape="RoundRectangle 18">
-
-                <Grid>
-
-                    <!-- CONTEÚDO VISUAL -->
-
-                    <VerticalStackLayout
-                        Spacing="7">
-
-                        <Label
-                            x:Name="ProximaConsultaDataLabel"
-                            FontSize="17"
-                            FontAttributes="Bold"
-                            TextColor="{StaticResource PrimaryBlue}" />
-
-                        <Label
-                            x:Name="ProximaConsultaMedicoLabel"
-                            FontSize="15"
-                            FontAttributes="Bold"
-                            TextColor="{StaticResource TextDark}" />
-
-                        <Label
-                            x:Name="ProximaConsultaEspecialidadeLabel"
-                            FontSize="14"
-                            TextColor="{StaticResource InputPlaceholder}" />
-
-                        <Label
-                            x:Name="ProximaConsultaStatusLabel"
-                            FontSize="14"
-                            TextColor="{StaticResource TextDark}" />
-
-                    </VerticalStackLayout>
-
-
-                    <!-- ÁREA DE CLIQUE -->
-
-                    <Button
-                        BackgroundColor="Transparent"
-                        BorderWidth="0"
-                        Padding="0"
-                        Clicked="ProximaConsultaButton_Clicked" />
-
-                </Grid>
-
-            </Border>
-
-
-            <Label
-                x:Name="SemProximaConsultaLabel"
-                Text="Nenhuma consulta futura encontrada."
-                IsVisible="False"
-                FontSize="14"
-                TextColor="{StaticResource InputPlaceholder}" />
-
-
-            <!-- HISTÓRICO -->
-
-            <Grid
-                ColumnDefinitions="*,Auto">
-
-                <Label
-                    Text="Histórico de consultas"
-                    FontSize="20"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}" />
-
-                <Label
-                    x:Name="QuantidadeConsultasLabel"
-                    Grid.Column="1"
-                    FontSize="13"
-                    TextColor="{StaticResource InputPlaceholder}"
-                    VerticalOptions="Center" />
-
-            </Grid>
-
-
-            <VerticalStackLayout
-                Spacing="10"
-                BindableLayout.ItemsSource="{Binding ConsultasPaciente}">
-
-                <BindableLayout.ItemTemplate>
-
-                    <DataTemplate>
-
-                        <Border
-                            BackgroundColor="White"
-                            Stroke="{StaticResource InputBlue}"
-                            StrokeThickness="1"
-                            Padding="14"
-                            StrokeShape="RoundRectangle 14">
-
-                            <Grid
-                                RowDefinitions="Auto,Auto,Auto"
-                                ColumnDefinitions="*,Auto"
-                                RowSpacing="5">
-
-                                <!-- MÉDICO -->
-
-                                <Label
-                                    Grid.Row="0"
-                                    Grid.Column="0"
-                                    Text="{Binding Medico}"
-                                    FontSize="16"
-                                    FontAttributes="Bold"
-                                    TextColor="{StaticResource TextDark}" />
-
-
-                                <!-- STATUS -->
-
-                                <Border
-                                    Grid.Row="0"
-                                    Grid.Column="1"
-                                    BackgroundColor="{StaticResource PageBlue}"
-                                    StrokeThickness="0"
-                                    Padding="8,4"
-                                    StrokeShape="RoundRectangle 10">
-
-                                    <Label
-                                        Text="{Binding Status}"
-                                        FontSize="11"
-                                        FontAttributes="Bold"
-                                        TextColor="{StaticResource PrimaryBlue}" />
-
-                                </Border>
-
-
-                                <!-- DATA E HORA -->
-
-                                <Label
-                                    Grid.Row="1"
-                                    Grid.Column="0"
-                                    Grid.ColumnSpan="2"
-                                    Text="{Binding DataHoraFormatada}"
-                                    FontSize="13"
-                                    TextColor="{StaticResource InputPlaceholder}" />
-
-
-                                <!-- INDICAÇÃO -->
-
-                                <Label
-                                    Grid.Row="2"
-                                    Grid.Column="0"
-                                    Grid.ColumnSpan="2"
-                                    Text="{Binding TextoAcesso}"
-                                    Margin="0,5,0,0"
-                                    FontSize="12"
-                                    FontAttributes="Bold"
-                                    TextColor="{StaticResource PrimaryBlue}" />
-
-
-                                <!--
-                                    BOTÃO TRANSPARENTE SOBRE O CARD INTEIRO
-                                -->
-
-                                <Button
-                                    Grid.Row="0"
-                                    Grid.RowSpan="3"
-                                    Grid.Column="0"
-                                    Grid.ColumnSpan="2"
-                                    BackgroundColor="Transparent"
-                                    BorderWidth="0"
-                                    Padding="0"
-                                    CommandParameter="{Binding .}"
-                                    Clicked="ConsultaHistoricoButton_Clicked" />
-
-                            </Grid>
-
-                        </Border>
-
-                    </DataTemplate>
-
-                </BindableLayout.ItemTemplate>
-
-            </VerticalStackLayout>
-
-
-            <!-- AÇÕES -->
-
+            <!-- AGENDAR CONSULTA -->
             <Button
                 Text="AGENDAR CONSULTA"
-                HeightRequest="48"
-                CornerRadius="24"
+                HeightRequest="52"
+                CornerRadius="16"
                 BackgroundColor="{StaticResource PrimaryBlue}"
-                TextColor="White"
+                TextColor="{StaticResource White}"
                 FontAttributes="Bold"
+                Margin="0,10,0,0"
                 Clicked="AgendarConsultaButton_Clicked" />
 
-
+            <!-- VOLTAR -->
             <Button
-                Text="← Voltar"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource TextDark}"
+                Text="Voltar"
+                Style="{StaticResource BotaoVoltarSimples}"
                 Clicked="VoltarButton_Clicked" />
 
         </VerticalStackLayout>

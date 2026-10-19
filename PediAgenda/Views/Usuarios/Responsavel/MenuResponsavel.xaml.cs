@@ -125,8 +125,6 @@ public partial class MenuResponsavel : ContentPage
             proxima.Consulta.HorarioFormatado;
 
 
-        ProximaModalidadeLabel.Text =
-            proxima.Consulta.Modalidade;
 
 
         ProximoStatusLabel.Text =
@@ -144,19 +142,6 @@ public partial class MenuResponsavel : ContentPage
     {
         await Shell.Current.GoToAsync(
             nameof(PacientesResponsavel));
-    }
-
-
-    // =============================================
-    // NOTIFICAÇÕES
-    // =============================================
-
-    private async void NotificacoesButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        await Shell.Current.GoToAsync(
-            nameof(Notificacoes));
     }
 
 

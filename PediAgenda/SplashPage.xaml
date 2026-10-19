@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PediAgenda.SplashPage"
+    BackgroundColor="#FAF9FC">
+
+    <Grid Padding="24">
+
+        <VerticalStackLayout
+            Spacing="0"
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
+
+            <!-- Logo com o nome PediAgenda -->
+            <Image
+                Source="pediagenda_logo.png"
+                WidthRequest="300"
+                HeightRequest="300"
+                Aspect="AspectFit"
+                HorizontalOptions="Center" />
+
+            <!-- Slogan -->
+            <Label
+                Text="Cuidando de quem&#10;importa."
+                TextColor="{StaticResource TextDark}"
+                FontSize="21"
+                HorizontalTextAlignment="Center"
+                HorizontalOptions="Center"
+                LineHeight="1.0"
+                Margin="0,10,0,0" />
+
+        </VerticalStackLayout>
+
+    </Grid>
+
+</ContentPage>

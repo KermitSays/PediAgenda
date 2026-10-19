@@ -8,7 +8,6 @@
     BackgroundColor="{StaticResource PageBlue}">
 
     <ScrollView>
-
         <VerticalStackLayout
             Padding="24,24"
             Spacing="18">
@@ -28,7 +27,6 @@
                     TextColor="{StaticResource InputPlaceholder}" />
 
             </VerticalStackLayout>
-
 
             <!-- PACIENTE -->
             <Border
@@ -60,7 +58,6 @@
 
             </Border>
 
-
             <!-- DADOS DA CONSULTA -->
             <Border
                 BackgroundColor="White"
@@ -83,9 +80,9 @@
                         ColumnSpacing="15"
                         RowSpacing="10">
 
+                        <!-- MÉDICO -->
                         <Label
                             Grid.Row="0"
-                            Grid.Column="0"
                             Text="Médico:"
                             FontAttributes="Bold"
                             TextColor="{StaticResource TextDark}" />
@@ -96,10 +93,9 @@
                             Grid.Column="1"
                             TextColor="{StaticResource TextDark}" />
 
-
+                        <!-- DATA -->
                         <Label
                             Grid.Row="1"
-                            Grid.Column="0"
                             Text="Data:"
                             FontAttributes="Bold"
                             TextColor="{StaticResource TextDark}" />
@@ -110,10 +106,9 @@
                             Grid.Column="1"
                             TextColor="{StaticResource TextDark}" />
 
-
+                        <!-- HORÁRIO -->
                         <Label
                             Grid.Row="2"
-                            Grid.Column="0"
                             Text="Horário:"
                             FontAttributes="Bold"
                             TextColor="{StaticResource TextDark}" />
@@ -124,10 +119,9 @@
                             Grid.Column="1"
                             TextColor="{StaticResource TextDark}" />
 
-
+                        <!-- STATUS -->
                         <Label
                             Grid.Row="3"
-                            Grid.Column="0"
                             Text="Status:"
                             FontAttributes="Bold"
                             TextColor="{StaticResource TextDark}" />
@@ -142,9 +136,7 @@
                     </Grid>
 
                 </VerticalStackLayout>
-
             </Border>
-
 
             <!-- AÇÕES -->
             <Label
@@ -153,36 +145,23 @@
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />
 
-
+            <!-- CONFIRMAR CONSULTA -->
             <Button
                 x:Name="ConfirmarButton"
                 Text="CONFIRMAR CONSULTA"
-                HeightRequest="48"
-                CornerRadius="24"
+                HeightRequest="52"
+                CornerRadius="16"
                 BackgroundColor="{StaticResource PrimaryBlue}"
                 TextColor="White"
                 FontAttributes="Bold"
                 Clicked="ConfirmarButton_Clicked" />
 
-
-            <Button
-                x:Name="ReagendarButton"
-                Text="REAGENDAR"
-                HeightRequest="48"
-                CornerRadius="24"
-                BackgroundColor="White"
-                BorderColor="{StaticResource PrimaryBlue}"
-                BorderWidth="1"
-                TextColor="{StaticResource PrimaryBlue}"
-                FontAttributes="Bold"
-                Clicked="ReagendarButton_Clicked" />
-
-
+            <!-- CANCELAR CONSULTA -->
             <Button
                 x:Name="CancelarButton"
                 Text="CANCELAR CONSULTA"
-                HeightRequest="48"
-                CornerRadius="24"
+                HeightRequest="52"
+                CornerRadius="16"
                 BackgroundColor="White"
                 BorderColor="#D9534F"
                 BorderWidth="1"
@@ -190,15 +169,13 @@
                 FontAttributes="Bold"
                 Clicked="CancelarButton_Clicked" />
 
-
+            <!-- VOLTAR -->
             <Button
-                Text="← Voltar"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource TextDark}"
+                Text="Voltar"
+                Style="{StaticResource BotaoVoltarSimples}"
                 Clicked="VoltarButton_Clicked" />
 
         </VerticalStackLayout>
-
     </ScrollView>
 
 </ContentPage>

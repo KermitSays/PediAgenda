@@ -4,6 +4,7 @@
     x:Class="PediAgenda.Views.Usuarios.Recepcao.MenuRecepcao"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:PediAgenda.Controls"
     Title="Menu Recepção"
     BackgroundColor="{StaticResource PageBlue}">
 
@@ -15,10 +16,8 @@
              CABEÇALHO
              ====================================== -->
 
-        <VerticalStackLayout
-            Grid.Row="0"
-            Spacing="4"
-            Margin="0,0,0,20">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Grid.Row="0" Margin="0,0,0,20">
+    <VerticalStackLayout Grid.Column="0" Spacing="4">
 
             <Label
                 x:Name="SaudacaoLabel"
@@ -33,6 +32,8 @@
                 TextColor="{StaticResource InputPlaceholder}" />
 
         </VerticalStackLayout>
+    <controls:BotaoLogoff Grid.Column="1" />
+</Grid>
 
 
         <!-- ======================================
@@ -41,7 +42,7 @@
 
         <Grid
             Grid.Row="1"
-            ColumnDefinitions="*,*,*"
+            ColumnDefinitions="*,*"
             ColumnSpacing="28"
             Margin="0,0,0,24">
 
@@ -105,35 +106,6 @@
             </VerticalStackLayout>
 
 
-            <!-- ADICIONAR PACIENTE -->
-
-            <VerticalStackLayout
-                Grid.Column="2"
-                Spacing="6"
-                HorizontalOptions="Center">
-
-                <VerticalStackLayout.GestureRecognizers>
-
-                    <TapGestureRecognizer
-                        Tapped="AdicionarPacienteButton_Clicked" />
-
-                </VerticalStackLayout.GestureRecognizers>
-
-                <Image
-                    Source="add_paciente_icon.png"
-                    WidthRequest="95"
-                    HeightRequest="95"
-                    Aspect="AspectFit" />
-
-                <Label
-                    Text="Adicionar Paciente"
-                    FontSize="15"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}"
-                    HorizontalTextAlignment="Center" />
-
-            </VerticalStackLayout>
-
         </Grid>
 
 
@@ -141,11 +113,13 @@
              CONSULTAS DO DIA
              ====================================== -->
 
-        <VerticalStackLayout
+        <Grid
             Grid.Row="2"
-            Spacing="14">
+            RowDefinitions="Auto,*"
+            RowSpacing="14">
 
             <Grid
+                Grid.Row="0"
                 ColumnDefinitions="*,Auto">
 
                 <Label
@@ -169,10 +143,12 @@
                  ================================== -->
 
             <RefreshView
+                Grid.Row="1"
                 x:Name="ConsultasRefreshView"
                 Refreshing="ConsultasRefreshView_Refreshing">
 
                 <CollectionView
+                    x:Name="ConsultasCollectionView"
                     ItemsSource="{Binding ConsultasHoje}"
                     SelectionMode="None">
 
@@ -260,35 +236,39 @@
                     </CollectionView.ItemTemplate>
 
 
-                    <CollectionView.EmptyView>
 
-                        <VerticalStackLayout
-                            Padding="20"
-                            Spacing="6"
-                            HorizontalOptions="Center">
-
-                            <Label
-                                Text="Nenhuma consulta hoje"
-                                FontSize="17"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource TextDark}"
-                                HorizontalTextAlignment="Center" />
-
-                            <Label
-                                Text="Não há consultas registradas para hoje."
-                                FontSize="14"
-                                TextColor="{StaticResource InputPlaceholder}"
-                                HorizontalTextAlignment="Center" />
-
-                        </VerticalStackLayout>
-
-                    </CollectionView.EmptyView>
 
                 </CollectionView>
 
             </RefreshView>
 
-        </VerticalStackLayout>
+            <!-- Estado vazio controlado apos carregar consultas; independente da altura da CollectionView. -->
+            <VerticalStackLayout
+                x:Name="SemConsultasContainer"
+                Grid.Row="1"
+                IsVisible="False"
+                InputTransparent="True"
+                Padding="20,18,20,0"
+                Spacing="6"
+                HorizontalOptions="Fill"
+                VerticalOptions="Start">
+
+                <Label
+                    Text="Nenhuma consulta hoje"
+                    FontSize="17"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextDark}"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    Text="Não há consultas agendadas para hoje."
+                    FontSize="14"
+                    TextColor="{StaticResource InputPlaceholder}"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+        </Grid>
 
     </Grid>
 

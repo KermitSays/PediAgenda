@@ -3,6 +3,7 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:PediAgenda.Controls"
     x:Class="PediAgenda.Views.Usuarios.Responsavel.MenuResponsavel"
     Title="PediAgenda"
     BackgroundColor="{StaticResource PageBlue}"
@@ -17,8 +18,8 @@
 
             <!-- CABEÇALHO -->
 
-            <VerticalStackLayout
-                Spacing="4">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+    <VerticalStackLayout Grid.Column="0" Spacing="4">
 
                 <Label
                     x:Name="SaudacaoLabel"
@@ -34,14 +35,16 @@
                     FontSize="20"
                     TextColor="{StaticResource PrimaryBlue}" />
 
-            </VerticalStackLayout>
+                </VerticalStackLayout>
+    <controls:BotaoLogoff Grid.Column="1" />
+</Grid>
 
 
             <!-- ATALHOS -->
 
             <Grid
-                RowDefinitions="Auto,Auto"
-                ColumnDefinitions="*,*"
+                RowDefinitions="Auto"
+                ColumnDefinitions="*,*,*"
                 RowSpacing="20"
                 ColumnSpacing="20">
 
@@ -113,8 +116,8 @@
                 <!-- PACIENTES -->
 
                 <VerticalStackLayout
-                    Grid.Row="1"
-                    Grid.Column="0"
+                    Grid.Row="0"
+                    Grid.Column="2"
                     Spacing="6"
                     HorizontalOptions="Center">
 
@@ -141,37 +144,6 @@
 
                 </VerticalStackLayout>
 
-
-                <!-- NOTIFICAÇÕES -->
-
-                <VerticalStackLayout
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Spacing="6"
-                    HorizontalOptions="Center">
-
-                    <VerticalStackLayout.GestureRecognizers>
-
-                        <TapGestureRecognizer
-                            Tapped="NotificacoesButton_Clicked" />
-
-                    </VerticalStackLayout.GestureRecognizers>
-
-
-                    <Image
-                        Source="notificacao_icon.png"
-                        WidthRequest="90"
-                        HeightRequest="90"
-                        Aspect="AspectFit" />
-
-
-                    <Label
-                        Text="Notificações"
-                        TextColor="Black"
-                        FontSize="16"
-                        HorizontalTextAlignment="Center" />
-
-                </VerticalStackLayout>
 
             </Grid>
 
@@ -314,32 +286,12 @@
                             </VerticalStackLayout>
 
 
-                            <!-- ATENDIMENTO -->
-
-                            <VerticalStackLayout
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Spacing="2">
-
-                                <Label
-                                    Text="tipo de atendimento"
-                                    FontSize="13"
-                                    TextColor="{StaticResource InputPlaceholder}" />
-
-                                <Label
-                                    x:Name="ProximaModalidadeLabel"
-                                    FontSize="16"
-                                    FontAttributes="Bold"
-                                    TextColor="{StaticResource TextDark}" />
-
-                            </VerticalStackLayout>
-
 
                             <!-- STATUS -->
 
                             <VerticalStackLayout
                                 Grid.Row="1"
-                                Grid.Column="1"
+                                Grid.Column="0"
                                 Spacing="2">
 
                                 <Label

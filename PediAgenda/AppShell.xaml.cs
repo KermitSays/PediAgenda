@@ -1,4 +1,5 @@
-﻿using PediAgenda.Views;
+
+using PediAgenda.Views;
 using PediAgenda.Views.Cadastro;
 using PediAgenda.Views.Usuarios.Responsavel;
 
@@ -10,7 +11,18 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
 
-        //ROTAS LOGIN E CADASTRO
+        // ========================================
+        // SOBRE OS DESENVOLVEDORES
+        // ========================================
+
+        Routing.RegisterRoute(
+            nameof(Views.SobreDesenvolvedores),
+            typeof(Views.SobreDesenvolvedores));
+
+        // ========================================
+        // LOGIN E CADASTRO
+        // ========================================
+
         Routing.RegisterRoute(
             nameof(Views.Login.LoginResponsavel),
             typeof(Views.Login.LoginResponsavel));
@@ -20,10 +32,6 @@ public partial class AppShell : Shell
             typeof(Views.Login.LoginFuncionario));
 
         Routing.RegisterRoute(
-            nameof(Views.Login.RecuperarSenha),
-            typeof(Views.Login.RecuperarSenha));
-
-        Routing.RegisterRoute(
             nameof(Views.Cadastro.CadastroCampo),
             typeof(Views.Cadastro.CadastroCampo));
 
@@ -31,7 +39,10 @@ public partial class AppShell : Shell
             nameof(Views.Cadastro.CadastroConcluido),
             typeof(Views.Cadastro.CadastroConcluido));
 
-        //ROTAS RESPONSÁVEL
+        // ========================================
+        // RESPONSÁVEL
+        // ========================================
+
         Routing.RegisterRoute(
             nameof(Views.Usuarios.Responsavel.MenuResponsavel),
             typeof(Views.Usuarios.Responsavel.MenuResponsavel));
@@ -49,10 +60,6 @@ public partial class AppShell : Shell
             typeof(Views.Usuarios.Responsavel.AgendarDataHorario));
 
         Routing.RegisterRoute(
-            nameof(Views.Usuarios.Responsavel.AgendarTipoAtendimento),
-            typeof(Views.Usuarios.Responsavel.AgendarTipoAtendimento));
-
-        Routing.RegisterRoute(
             nameof(Views.Usuarios.Responsavel.AgendarConfirmacao),
             typeof(Views.Usuarios.Responsavel.AgendarConfirmacao));
 
@@ -65,14 +72,6 @@ public partial class AppShell : Shell
             typeof(Views.Usuarios.Responsavel.MinhasConsultas));
 
         Routing.RegisterRoute(
-            nameof(Views.Usuarios.Responsavel.MinhasConsultasDetalhes),
-            typeof(Views.Usuarios.Responsavel.MinhasConsultasDetalhes));
-
-        Routing.RegisterRoute(
-            nameof(Views.Usuarios.Responsavel.ReagendarConsulta),
-            typeof(Views.Usuarios.Responsavel.ReagendarConsulta));
-
-        Routing.RegisterRoute(
             nameof(Views.Usuarios.Responsavel.CancelarConsulta),
             typeof(Views.Usuarios.Responsavel.CancelarConsulta));
 
@@ -80,11 +79,10 @@ public partial class AppShell : Shell
             nameof(Views.Usuarios.Responsavel.PacientesResponsavel),
             typeof(Views.Usuarios.Responsavel.PacientesResponsavel));
 
-        Routing.RegisterRoute(
-            nameof(Views.Usuarios.Responsavel.Notificacoes),
-            typeof(Views.Usuarios.Responsavel.Notificacoes));
+        // ========================================
+        // MÉDICO
+        // ========================================
 
-        //ROTAS MÉDICO
         Routing.RegisterRoute(
             nameof(Views.Usuarios.Medico.MenuMedico),
             typeof(Views.Usuarios.Medico.MenuMedico));
@@ -118,15 +116,13 @@ public partial class AppShell : Shell
             typeof(Views.Usuarios.Medico.LiberarHorarios));
 
         Routing.RegisterRoute(
-            nameof(Views.Usuarios.Medico.EditarBloqueio),
-            typeof(Views.Usuarios.Medico.EditarBloqueio));
-
-        Routing.RegisterRoute(
             nameof(Views.Usuarios.Medico.RelatoriosMedico),
             typeof(Views.Usuarios.Medico.RelatoriosMedico));
 
-        
-        //ROTAS RECEPÇÃO
+        // ========================================
+        // RECEPÇÃO
+        // ========================================
+
         Routing.RegisterRoute(
             nameof(Views.Usuarios.Recepcao.MenuRecepcao),
             typeof(Views.Usuarios.Recepcao.MenuRecepcao));
@@ -150,9 +146,5 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(
             nameof(Views.Usuarios.Recepcao.AgendarConsultaRecepcao),
             typeof(Views.Usuarios.Recepcao.AgendarConsultaRecepcao));
-
-        Routing.RegisterRoute(
-            nameof(Views.Usuarios.Recepcao.AdicionarPacienteRecepcao),
-            typeof(Views.Usuarios.Recepcao.AdicionarPacienteRecepcao));
     }
 }

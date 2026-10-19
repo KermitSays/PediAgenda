@@ -55,89 +55,30 @@ public partial class MinhasConsultas : ContentPage
     }
 
 
-    // ABRE OS DETALHES DA CONSULTA
-
-    private async void ConsultaCard_Tapped(
-        object sender,
-        TappedEventArgs e)
+    // Abre diretamente a tela de cancelamento, sem detalhes intermediarios.
+    private async void ConsultaCard_Tapped(object sender, TappedEventArgs e)
     {
-        if (sender is BindableObject elemento &&
-            elemento.BindingContext
-                is ConsultaResponsavelItem consulta)
-        {
-            PacienteResponsavelItem? paciente =
-                pacientes.FirstOrDefault(
-                    p =>
-                        p.Consultas.Contains(
-                            consulta));
+        if (sender is not BindableObject elemento ||
+            elemento.BindingContext is not ConsultaResponsavelItem consulta)
+            return;
 
+        PacienteResponsavelItem? paciente = pacientes.FirstOrDefault(p =>
+            p.Consultas.Contains(consulta));
 
-            if (paciente == null)
-                return;
+        if (paciente == null) return;
 
-
-            await AbrirDetalhesConsulta(
-                paciente,
-                consulta);
-        }
-    }
-
-
-    private async Task AbrirDetalhesConsulta(
-        PacienteResponsavelItem paciente,
-        ConsultaResponsavelItem consulta)
-    {
         await Shell.Current.GoToAsync(
-            nameof(MinhasConsultasDetalhes),
+            nameof(CancelarConsulta),
             new Dictionary<string, object>
             {
-                {
-                    "ConsultaId",
-                    consulta.Id
-                },
-
-                {
-                    "Medico",
-                    consulta.Medico
-                },
-
-                {
-                    "Especialidade",
-                    consulta.Especialidade
-                },
-
-                {
-                    "Paciente",
-                    paciente.Nome
-                },
-
-                {
-                    "Data",
-                    consulta.DataFormatada
-                },
-
-                {
-                    "Horario",
-                    consulta.HorarioFormatado
-                },
-
-                {
-                    "Modalidade",
-                    consulta.Modalidade
-                },
-
-                {
-                    "Valor",
-                    consulta.Valor
-                },
-
-                {
-                    "Status",
-                    consulta.Status
-                }
+                { "ConsultaId", consulta.Id },
+                { "Medico", consulta.Medico },
+                { "Especialidade", consulta.Especialidade },
+                { "Paciente", paciente.Nome },
+                { "Data", consulta.DataFormatada },
+                { "Horario", consulta.HorarioFormatado }
             });
     }
-
 
     // VOLTAR
 

@@ -95,13 +95,9 @@
             </Border>
 
             <Button
-                Text="← Voltar"
+                Text="Voltar"
                 Clicked="VoltarButton_Clicked"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource PrimaryBlue}"
-                FontAttributes="Bold"
-                FontSize="16"
-                HorizontalOptions="Center" />
+                Style="{StaticResource BotaoVoltarSimples}" />
 
         </VerticalStackLayout>
 

@@ -5,7 +5,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
-    Title="Bloquear Horário"
+    Title="Bloquear período"
     BackgroundColor="{StaticResource PageBlue}">
 
     <ScrollView>
@@ -16,16 +16,22 @@
 
             <!-- TÍTULO -->
             <Label
-                Text="Bloquear Horário"
+                Text="Bloquear período"
                 FontSize="28"
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />
+
+            <!-- AVISO -->
+            <Label
+                Text="Consultas agendadas no período serão canceladas. A liberação não restaura consultas."
+                FontSize="14"
+                TextColor="{StaticResource InputPlaceholder}" />
 
             <!-- DATA INICIAL -->
             <VerticalStackLayout Spacing="7">
 
                 <Label
-                    Text="Data Inicial"
+                    Text="Data inicial"
                     FontSize="15"
                     FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}" />
@@ -51,7 +57,7 @@
             <VerticalStackLayout Spacing="7">
 
                 <Label
-                    Text="Data Final"
+                    Text="Data final"
                     FontSize="15"
                     FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}" />
@@ -77,7 +83,7 @@
             <VerticalStackLayout Spacing="7">
 
                 <Label
-                    Text="Horário Inicial"
+                    Text="Horário inicial"
                     FontSize="15"
                     FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}" />
@@ -102,7 +108,7 @@
             <VerticalStackLayout Spacing="7">
 
                 <Label
-                    Text="Horário Final"
+                    Text="Horário final"
                     FontSize="15"
                     FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}" />
@@ -123,60 +129,21 @@
 
             </VerticalStackLayout>
 
-            <!-- MOTIVO -->
-            <VerticalStackLayout Spacing="7">
+            <!-- BOTÃO BLOQUEAR -->
+            <Button
+                Text="BLOQUEAR PERÍODO"
+                HeightRequest="52"
+                CornerRadius="16"
+                BackgroundColor="{StaticResource PrimaryBlue}"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                Clicked="BloquearHorarioButton_Clicked" />
 
-                <Label
-                    Text="Motivo"
-                    FontSize="15"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}" />
-
-                <Border
-                    BackgroundColor="{StaticResource White}"
-                    Stroke="{StaticResource InputBlue}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 14"
-                    Padding="12">
-
-                    <Editor
-                        x:Name="MotivoEditor"
-                        Placeholder="Informe o motivo do bloqueio..."
-                        PlaceholderColor="{StaticResource InputPlaceholder}"
-                        TextColor="{StaticResource TextDark}"
-                        FontSize="15"
-                        AutoSize="TextChanges"
-                        MinimumHeightRequest="100" />
-
-                </Border>
-
-            </VerticalStackLayout>
-
-            <!-- AÇÕES -->
-            <VerticalStackLayout
-                Spacing="10"
-                Margin="0,8,0,0">
-
-                <Button
-                    Text="BLOQUEAR HORÁRIO"
-                    HeightRequest="52"
-                    CornerRadius="16"
-                    BackgroundColor="{StaticResource PrimaryBlue}"
-                    TextColor="{StaticResource White}"
-                    FontAttributes="Bold"
-                    Clicked="BloquearHorarioButton_Clicked" />
-
-                <Button
-                    Text="Cancelar"
-                    HeightRequest="50"
-                    CornerRadius="16"
-                    BackgroundColor="{StaticResource White}"
-                    TextColor="{StaticResource PrimaryBlue}"
-                    BorderColor="{StaticResource PrimaryBlue}"
-                    BorderWidth="1"
-                    Clicked="CancelarButton_Clicked" />
-
-            </VerticalStackLayout>
+            <!-- BOTÃO VOLTAR -->
+            <Button
+                Text="Voltar"
+                Clicked="CancelarButton_Clicked"
+                Style="{StaticResource BotaoVoltarSimples}" />
 
         </VerticalStackLayout>
 

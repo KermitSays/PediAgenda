@@ -214,12 +214,9 @@
             <!-- VOLTAR -->
 
             <Button
-                Text="← Voltar"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource PrimaryBlue}"
-                FontAttributes="Bold"
-                FontSize="16"
-                Clicked="VoltarButton_Clicked" />
+                Text="Voltar"
+                Clicked="VoltarButton_Clicked"
+                Style="{StaticResource BotaoVoltarSimples}" />
 
         </VerticalStackLayout>
 
