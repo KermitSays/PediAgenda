@@ -26,39 +26,17 @@ public record ResultadoCadastro(
     string Mensagem,
     MotivoRecusa Motivo,
     Usuario? Usuario = null,
-    IReadOnlyDictionary<string, string>? Campos = null,
-
-    // Será utilizado depois pelo serviço responsável
-    // por enviar a mensagem de confirmação por e-mail.
-    string? TokenVerificacaoEmail = null)
+    IReadOnlyDictionary<string, string>? Campos = null)
 {
-    public static ResultadoCadastro Ok(
-        Usuario usuario,
-        string token) =>
-        new(
-            true,
-            $"Cadastro iniciado para {usuario.Nome}. Confirme o e-mail para ativar a conta.",
-            MotivoRecusa.Nenhum,
-            usuario,
-            TokenVerificacaoEmail: token);
+    public static ResultadoCadastro Ok(Usuario usuario) =>
+        new(true, $"Cadastro concluído para {usuario.Nome}.", MotivoRecusa.Nenhum, usuario);
 
-    public static ResultadoCadastro Invalido(
-        IReadOnlyDictionary<string, string> campos) =>
-        new(
-            false,
-            "Verifique os campos destacados.",
-            MotivoRecusa.DadosInvalidos,
-            Campos: campos);
+    public static ResultadoCadastro Invalido(IReadOnlyDictionary<string, string> campos) =>
+        new(false, "Verifique os campos destacados.", MotivoRecusa.DadosInvalidos, Campos: campos);
 
-    public static ResultadoCadastro Falha(
-        MotivoRecusa motivo,
-        string mensagem) =>
-        new(
-            false,
-            mensagem,
-            motivo);
+    public static ResultadoCadastro Falha(MotivoRecusa motivo, string mensagem) =>
+        new(false, mensagem, motivo);
 }
-
 
 /// Conclusão do cadastro de acesso do responsável.
 ///
@@ -70,9 +48,6 @@ public partial class CadastroService(
     IUsuarioRepositorio repositorio)
 {
     public const int TamanhoMaximoEmail = 160;
-
-    public static readonly TimeSpan DuracaoTokenEmail =
-        TimeSpan.FromHours(24);
 
     private readonly IUsuarioRepositorio _repo =
         repositorio;
@@ -147,13 +122,10 @@ public partial class CadastroService(
                 "Não foi encontrado um responsável cadastrado pela clínica com esse CPF.");
         }
 
-        // Se a conta já foi efetivamente ativada, não permite
-        // iniciar o cadastro novamente.
-        //
-        // Se ela apenas possui e-mail/senha, mas ainda não confirmou
-        // o e-mail, permitimos uma nova tentativa. Isso é importante
-        // caso o envio do e-mail tenha falhado ou não tenha chegado.
-        if (responsavel.EmailVerificado || responsavel.Ativo)
+        // Responsáveis com cadastro completo e ativo não podem se cadastrar de novo.
+        // Cadastros antigos que aguardavam e-mail podem ser refeitos com o código
+        // da clínica, desde que ele ainda não tenha sido utilizado.
+        if (responsavel.Ativo && responsavel.PossuiCredenciais)
         {
             return ResultadoCadastro.Falha(
                 MotivoRecusa.CadastroJaIniciado,
@@ -187,24 +159,25 @@ public partial class CadastroService(
         var agora =
             DateTime.UtcNow;
 
-        // Token aleatório que depois será enviado para
-        // o endereço de e-mail informado pelo responsável.
-        var (tokenEmail, tokenEmailHash) =
-            TokenVerificacaoEmail.Gerar();
-
-        var tokenExpiraEm =
-            agora.Add(DuracaoTokenEmail);
+        // CPF sozinho não é suficiente.
+        // Também precisa apresentar o código entregue
+        // pela clínica no momento do pré-cadastro.
+        if (!_repo.CodigoAtivacaoResponsavelValido(
+            responsavel.Id,
+            codigoAtivacao,
+            agora))
+        {
+            return ResultadoCadastro.Falha(
+                MotivoRecusa.CodigoAtivacaoInvalido,
+                "Código de ativação inválido, expirado ou já utilizado.");
+        }
 
         try
         {
-            // Salva a senha no MESMO usuário, preservando o e-mail
-            // que já foi registrado pela clínica.
+            // Completa o usuário já existente e consome o código de ativação
+            // na mesma instrução SQL (atômica), sem gerar token de e-mail.
             _repo.CompletarCadastroResponsavel(
-                responsavel.Id,
-                email,
-                dados.Senha!,
-                tokenEmailHash,
-                tokenExpiraEm);
+                responsavel.Id, email, dados.Senha!, agora);
         }
         catch (CadastroDuplicadoException)
         {
@@ -212,26 +185,16 @@ public partial class CadastroService(
                 MotivoRecusa.EmailJaCadastrado,
                 "Já existe uma conta utilizando esse e-mail.");
         }
+        catch (CodigoAtivacaoIndisponivelException)
+        {
+            return ResultadoCadastro.Falha(
+                MotivoRecusa.CodigoAtivacaoInvalido,
+                "Código de ativação inválido, expirado ou já utilizado.");
+        }
 
-        responsavel.Email =
-            email;
-
-        // Continua inativo até a confirmação do e-mail.
-        responsavel.Ativo =
-            false;
-
-        responsavel.EmailVerificado =
-            false;
-
-        responsavel.TokenVerificacaoHash =
-            tokenEmailHash;
-
-        responsavel.TokenVerificacaoExpiraEm =
-            tokenExpiraEm;
-
-        return ResultadoCadastro.Ok(
-            responsavel,
-            tokenEmail);
+        responsavel.Email = email;
+        responsavel.Ativo = true;
+        return ResultadoCadastro.Ok(responsavel);
     }
 
     private static string SoDigitos(

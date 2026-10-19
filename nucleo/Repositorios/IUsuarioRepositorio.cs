@@ -13,9 +13,10 @@ public interface IUsuarioRepositorio
     // decide criar seu acesso ao aplicativo.
     Usuario? BuscarResponsavelPorCpf(string cpf);
 
-    bool ConfirmarEmailResponsavel(
-    byte[] tokenHash,
-    DateTime confirmadoEm);
+    bool CodigoAtivacaoResponsavelValido(
+    int usuarioId,
+    string codigo,
+    DateTime agora);
 
     void Atualizar(Usuario usuario);
 
@@ -42,8 +43,7 @@ public interface IUsuarioRepositorio
         int usuarioId,
         string email,
         string senha,
-        byte[] tokenVerificacaoHash,
-        DateTime tokenExpiraEm);
+        DateTime ativadoEm);
 
     
     /// Cria uma conta completa.
@@ -67,3 +67,6 @@ public class CadastroDuplicadoException(string campo)
 {
     public string Campo { get; } = campo;
 }
+/// Código de ativação consumido, vencido ou cadastro já concluído.
+public class CodigoAtivacaoIndisponivelException()
+    : Exception("O código de ativação não está mais disponível.");

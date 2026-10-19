@@ -1,6 +1,5 @@
 using PediAgenda.Nucleo.Modelos;
 using PediAgenda.Nucleo.Seguranca;
-using System.Security.Cryptography;
 
 namespace PediAgenda.Nucleo.Repositorios;
 
@@ -54,9 +53,7 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
             SenhaIteracoes = iteracoes,
 
             // Os usuários semeados já representam contas completas.
-            Ativo = true,
-            EmailVerificado = true,
-            EmailVerificadoEm = DateTime.Now
+            Ativo = true
         });
     }
 
@@ -75,36 +72,14 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
                 u.Cpf == cpf
                 && u.Perfil == Perfil.Responsavel);
 
-    public bool ConfirmarEmailResponsavel(
-    byte[] tokenHash,
-    DateTime confirmadoEm)
+    public bool CodigoAtivacaoResponsavelValido(
+    int usuarioId,
+    string codigo,
+    DateTime agora)
     {
-        var usuario =
-            _usuarios.FirstOrDefault(
-                u =>
-                    u.Perfil == Perfil.Responsavel
-                    && !u.EmailVerificado
-                    && u.TokenVerificacaoHash is not null
-                    && u.TokenVerificacaoExpiraEm is not null
-                    && u.TokenVerificacaoExpiraEm >= confirmadoEm
-                    && CryptographicOperations.FixedTimeEquals(
-                        u.TokenVerificacaoHash,
-                        tokenHash));
-
-        if (usuario is null)
-            return false;
-
-        usuario.EmailVerificado = true;
-        usuario.EmailVerificadoEm = confirmadoEm;
-        usuario.Ativo = true;
-
-        usuario.TokenVerificacaoHash = null;
-        usuario.TokenVerificacaoExpiraEm = null;
-
-        usuario.TentativasInvalidas = 0;
-        usuario.BloqueadoAte = null;
-
-        return true;
+        // A versão em memória é apenas auxiliar para testes.
+        // O fluxo real de ativação utiliza o MySQL.
+        return false;
     }
 
     public void Atualizar(Usuario usuario)
@@ -151,69 +126,25 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
     /// Completa o cadastro de acesso de um responsável
     /// que já havia sido pré-cadastrado.
     public void CompletarCadastroResponsavel(
-        int usuarioId,
-        string email,
-        string senha,
-        byte[] tokenVerificacaoHash,
-        DateTime tokenExpiraEm)
+        int usuarioId, string email, string senha, DateTime ativadoEm)
     {
-        if (ExisteEmailDeOutroUsuario(email, usuarioId))
-        {
-            throw new CadastroDuplicadoException(
-                "e-mail");
-        }
+        if (!PoliticaSenha.Valida(senha, out var erro))
+            throw new ArgumentException(erro, nameof(senha));
 
-        if (!PoliticaSenha.Valida(
-            senha,
-            out var erro))
-        {
-            throw new ArgumentException(
-                erro,
-                nameof(senha));
-        }
-
-        var usuario =
-            _usuarios.FirstOrDefault(
-                u =>
-                    u.Id == usuarioId
-                    && u.Perfil == Perfil.Responsavel);
-
+        var usuario = _usuarios.FirstOrDefault(u => u.Id == usuarioId
+            && u.Perfil == Perfil.Responsavel && !u.Ativo);
         if (usuario is null)
-        {
-            throw new InvalidOperationException(
-                "O responsável informado não foi encontrado.");
-        }
-
-        if (string.IsNullOrWhiteSpace(usuario.Email)
-            || !string.Equals(usuario.Email.Trim(), email, StringComparison.OrdinalIgnoreCase)
-            || usuario.Ativo || usuario.EmailVerificado)
-        {
-            throw new InvalidOperationException(
-                "O cadastro não está disponível para este responsável.");
-        }
-
-        var (hash, salt, iteracoes) =
-            HashSenha.Gerar(senha);
-
-        // E-mail foi registrado anteriormente pela clínica.
-
+            throw new CodigoAtivacaoIndisponivelException();
+        if (ExisteEmailDeOutroUsuario(email, usuarioId))
+            throw new CadastroDuplicadoException("e-mail");
+        // O repositório em memória não contém códigos reais da clínica.
+        // A validação é realizada no MySQL em produção.
+        var (hash, salt, iteracoes) = HashSenha.Gerar(senha);
+        usuario.Email = email;
         usuario.SenhaHash = hash;
         usuario.SenhaSalt = salt;
         usuario.SenhaIteracoes = iteracoes;
-
-        // Ainda não pode entrar:
-        // primeiro precisa confirmar o e-mail.
-        usuario.Ativo = false;
-        usuario.EmailVerificado = false;
-
-        usuario.TokenVerificacaoHash =
-            tokenVerificacaoHash;
-
-        usuario.TokenVerificacaoExpiraEm =
-            tokenExpiraEm;
-
-        usuario.EmailVerificadoEm = null;
-
+        usuario.Ativo = true;
         usuario.TentativasInvalidas = 0;
         usuario.BloqueadoAte = null;
     }

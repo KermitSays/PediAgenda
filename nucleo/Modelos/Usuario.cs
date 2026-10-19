@@ -1,4 +1,4 @@
-﻿namespace PediAgenda.Nucleo.Modelos;
+namespace PediAgenda.Nucleo.Modelos;
 
 /// <summary>
 /// Classe base dos usuários do PediAgenda.
@@ -30,20 +30,9 @@ public class Usuario
 
     public int SenhaIteracoes { get; set; } = 100_000;
 
-    // Por segurança, uma conta nova começa inativa.
-    // Médico/recepção são ativados pela clínica.
-    // Responsável será ativado após concluir o cadastro
-    // e confirmar o e-mail.
+    // Contas pre-cadastradas pela clínica começam inativas; o responsável
+    // é ativado após validar o código da clínica e definir sua senha.
     public bool Ativo { get; set; }
-
-    // Controle da confirmação do endereço de e-mail.
-    public bool EmailVerificado { get; set; }
-
-    public byte[]? TokenVerificacaoHash { get; set; }
-
-    public DateTime? TokenVerificacaoExpiraEm { get; set; }
-
-    public DateTime? EmailVerificadoEm { get; set; }
 
     // RNF02 — bloquear acesso após 5 tentativas inválidas.
     public int TentativasInvalidas { get; set; }
