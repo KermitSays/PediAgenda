@@ -8,6 +8,7 @@
 
 SET NAMES utf8mb4;
 USE pediagenda;
+-- Senha de TODAS as contas completas desta carga fictícia: senhaDemo123
 START TRANSACTION;
 
 -- 1. Usuários: IDs originais preservados, colunas explícitas.
@@ -15,30 +16,30 @@ INSERT INTO usuario
   (id_usuario, nome, cpf, email, senha_hash, senha_salt,
    senha_iteracoes, ativo, tentativas_invalidas, bloqueado_ate)
 VALUES
-  (1, 'Maria de Teste', '11122233344', 'maria@teste.local', 0x565f8a1e7f55a704f708afbbae139e7319859053a54703da9ff882142473df89, 0x7064c86f220ff828c0b8a40d35753009, 100000, TRUE, 0, NULL),
-  (2, 'Pedro de Teste', '55566677788', 'pedro@teste.local', 0xdd3512676d0a4ae25405681484e2d09132accd2cf7413e959edd280bc50ac5b7, 0x0639dd3700381ba93af35688cd150cfe, 100000, TRUE, 0, NULL),
-  (4, 'Dra. Ana Teste', '99999999999', 'medico.teste@example.com', 0xbcba291439634000774f1f1a3283c3edfde971c643864f4b244432233f29d836, 0x43fa834313730dc736c6b6c6b2f06dd8, 100000, TRUE, 0, NULL),
-  (5, 'Carla Recepção Teste', '88888888888', 'recepcao.teste@example.com', 0x08693716fa2961829aab02b347c16c23d071d00270e40557fce90fa6699f412f, 0xa562a73e785826ae49d5c2922aff85c5, 100000, TRUE, 0, NULL),
-  (6, 'Ana Oliveira', '90000000001', 'ana.oliveira@example.com', 0x8dff8bb9d249a58a410468707b28ce6d04644636e97f11ecc34bf09783ee02d5, 0xe7382edadb17d00df76aadab3c960d29, 100000, TRUE, 0, NULL),
-  (7, 'Bruno Souza', '90000000002', 'bruno.souza@example.com', 0x76fe4a006302b8a3a9648d7a2cbc0f46faefe6e29efe25e47a50e86e6aa0bc3a, 0x86a1338ed12fd1f0d18e75f8e97f4766, 100000, TRUE, 0, NULL),
-  (8, 'Carla Santos', '90000000003', 'carla.santos@example.com', 0x0dd54c71fefd8c487bb4c57525e989a1016196e6d5feed08886e0b4d705a85ad, 0xa1787a274c056e57c57ca9832719faf5, 100000, TRUE, 0, NULL),
-  (9, 'Diego Lima', '90000000004', 'diego.lima@example.com', 0xfaddd8713e4631659b7f1572bffdcf7ed6a0fdcfdc6759fef677fccee8682902, 0xc324c3da40c4cdbd52034403b6f0d588, 100000, TRUE, 0, NULL),
-  (10, 'Dra. Helena Duarte', '90000000005', 'helena.duarte@example.com', 0x782e719cd05fe03983c277f7b525f6448cb1dfcb210aa6c50b6aa827bca59832, 0xc69ca28d9168cc5ef58d6c154a89ba37, 100000, TRUE, 0, NULL),
-  (11, 'Dr. Rafael Mendes', '90000000006', 'rafael.mendes@example.com', 0x45311780b34040c406cd5f978af8156f099a3e43a35da65559796d818d49e872, 0x76e0a4c1a087a7249adc3cec61c1cf73, 100000, TRUE, 0, NULL),
-  (12, 'Dra. Mariana Costa', '90000000007', 'mariana.costa@example.com', 0xb1de4e281d0de609246b0b0eaf2f57fee09b187356e20877e46c91d25cacba2c, 0xe446b982bad4f9c7452f46b9df9bfa53, 100000, TRUE, 0, NULL),
-  (13, 'Dr. Gustavo Almeida', '90000000008', 'gustavo.almeida@example.com', 0xc796c33e2ffd7c5021159e4ad7c27c02dfc885546194f59cec070a7a074c70e7, 0x1b957e3e5aa74c0518b0cdeacbc90fa1, 100000, TRUE, 0, NULL),
-  (14, 'Dra. Camila Rodrigues', '90000000009', 'camila.rodrigues@example.com', 0x61fd9075a3810451c38e53a7ef106702fd53252fdc2abffee2937992c8c8fe88, 0xc5974ff76c693600467d209d081a08ad, 100000, TRUE, 0, NULL),
-  (15, 'Dr. Felipe Martins', '90000000010', 'felipe.martins@example.com', 0x7729939f39c72f378aba0d77bc3fcbad6deefe39a6c201fbbde5c82624f8b722, 0x8c7a25a26705af132869e188c94d366b, 100000, TRUE, 0, NULL),
-  (16, 'Dra. Beatriz Ferreira', '90000000011', 'beatriz.ferreira@example.com', 0x81df9ff18be7b12626f8799db849a7dff8103f5688cd60038e8fe47a88fd5874, 0xa6e8d85d4ba3beeae9f9b11461cd381d, 100000, TRUE, 0, NULL),
-  (17, 'Dr. Lucas Rocha', '90000000012', 'lucas.rocha@example.com', 0x00abe8ca67b25d2135df54495845c20886104380234d0a06e78cecb47b31485f, 0xf8e7db505740a9bfe3a439468903ec32, 100000, TRUE, 0, NULL),
-  (18, 'Julia Barbosa', '90000000013', 'julia.barbosa@example.com', 0x437a0ecced6d554d281ce506b7e12ce3463432f3d6e8821acc52ecd3150aebff, 0xbc5c39fbbd09e98cf204b55fdbd04853, 100000, TRUE, 0, NULL),
-  (19, 'Marcos Ribeiro', '90000000014', 'marcos.ribeiro@example.com', 0x3a7fcc6fc69955939d78b34924e13a7fe1529eee6c67794f6ad91523eb9b427f, 0xae4d092dd3f9ed869f8543e79558318e, 100000, TRUE, 0, NULL);
+  (1, 'Maria de Teste', '11122233344', 'maria@teste.local', 0x41c21d45e7b4e90cd98529366dfb6257f8897391819e8052e8b357d9f16d7298, 0x7064c86f220ff828c0b8a40d35753009, 100000, TRUE, 0, NULL),
+  (2, 'Pedro de Teste', '55566677788', 'pedro@teste.local', 0x9d0e82354dcebc37128aacc0728ded6f20f48fb10460626b0a4f1dbdc5882b77, 0x0639dd3700381ba93af35688cd150cfe, 100000, TRUE, 0, NULL),
+  (4, 'Dra. Ana Teste', '99999999999', 'medico.teste@example.com', 0xcb9d1fa7dc779fef9b92b5097729ec62b070150c58f26e9985fa7647f6cd53ed, 0x43fa834313730dc736c6b6c6b2f06dd8, 100000, TRUE, 0, NULL),
+  (5, 'Carla Recepção Teste', '88888888888', 'recepcao.teste@example.com', 0x665dc48c436fd8bdbade96432c4da37fc42476ca37aa1f51575a0840014db624, 0xa562a73e785826ae49d5c2922aff85c5, 100000, TRUE, 0, NULL),
+  (6, 'Ana Oliveira', '90000000001', 'ana.oliveira@example.com', 0x4ae1dc522744ae0268bfff19dc60908c5696e3ed02605f8982f8e849173ef0e9, 0xe7382edadb17d00df76aadab3c960d29, 100000, TRUE, 0, NULL),
+  (7, 'Bruno Souza', '90000000002', 'bruno.souza@example.com', 0x8195c32be8c7f88f5be37e1bbb82bb4956dfdcd55da2f7d9352eb135ad7083ff, 0x86a1338ed12fd1f0d18e75f8e97f4766, 100000, TRUE, 0, NULL),
+  (8, 'Carla Santos', '90000000003', 'carla.santos@example.com', 0xc9909f02013cb74edb292888768bcb682b8f564a02ecf99ea0a57a521ce3e2cc, 0xa1787a274c056e57c57ca9832719faf5, 100000, TRUE, 0, NULL),
+  (9, 'Diego Lima', '90000000004', 'diego.lima@example.com', 0x3f9e1716815e1f088fd64c4f00b16490b6865ced307a8c810c7fbc2ef2e349fb, 0xc324c3da40c4cdbd52034403b6f0d588, 100000, TRUE, 0, NULL),
+  (10, 'Dra. Helena Duarte', '90000000005', 'helena.duarte@example.com', 0x34f64ef6c548cf99da51b32fb4196de99b6f6711e337594ff8e5f8e262a7c3a2, 0xc69ca28d9168cc5ef58d6c154a89ba37, 100000, TRUE, 0, NULL),
+  (11, 'Dr. Rafael Mendes', '90000000006', 'rafael.mendes@example.com', 0x41b7b46b548e949d1ee33eb51a9349b9767ccbb5bdc5cd6b568095e8c5dcbb1d, 0x76e0a4c1a087a7249adc3cec61c1cf73, 100000, TRUE, 0, NULL),
+  (12, 'Dra. Mariana Costa', '90000000007', 'mariana.costa@example.com', 0x1ed604d1ec02cfb069cde6a5eec94ee643886abfb5a02089f82e2f86e59b0266, 0xe446b982bad4f9c7452f46b9df9bfa53, 100000, TRUE, 0, NULL),
+  (13, 'Dr. Gustavo Almeida', '90000000008', 'gustavo.almeida@example.com', 0xad28e330252b33ff6e58299c77cd311b07d544307bf5405e6f3f04fb30dc039c, 0x1b957e3e5aa74c0518b0cdeacbc90fa1, 100000, TRUE, 0, NULL),
+  (14, 'Dra. Camila Rodrigues', '90000000009', 'camila.rodrigues@example.com', 0xce989a7aa6c2770e0f2e1af7e26cb56d50824ea570c368b850afb2191a1edb90, 0xc5974ff76c693600467d209d081a08ad, 100000, TRUE, 0, NULL),
+  (15, 'Dr. Felipe Martins', '90000000010', 'felipe.martins@example.com', 0xbceccb5c735558b4dc5c479684bc6cdd0a9248419ee1c24df5428b51a947f0cf, 0x8c7a25a26705af132869e188c94d366b, 100000, TRUE, 0, NULL),
+  (16, 'Dra. Beatriz Ferreira', '90000000011', 'beatriz.ferreira@example.com', 0x5b3c1960038ca0468db0fd6ff1b02ace0f6f32248365a32c13d723f4cc3137fe, 0xa6e8d85d4ba3beeae9f9b11461cd381d, 100000, TRUE, 0, NULL),
+  (17, 'Dr. Lucas Rocha', '90000000012', 'lucas.rocha@example.com', 0x905b48666e2a2aaa76a5500a3a61b43a68b41a1f81c03d8e5ae54ac5a19cd6fe, 0xf8e7db505740a9bfe3a439468903ec32, 100000, TRUE, 0, NULL),
+  (18, 'Julia Barbosa', '90000000013', 'julia.barbosa@example.com', 0x2f07e74759d731a542a78eba0971855cb880534c00f5c4ec541c01c2d7cafc99, 0xbc5c39fbbd09e98cf204b55fdbd04853, 100000, TRUE, 0, NULL),
+  (19, 'Marcos Ribeiro', '90000000014', 'marcos.ribeiro@example.com', 0xe3a9206c22a5e6a1f614e2188f002292ca9c4404afe250f35ec4d992f20847a9, 0xae4d092dd3f9ed869f8543e79558318e, 100000, TRUE, 0, NULL);
 
--- Conta pré-cadastrada: ainda sem e-mail e senha, como o fluxo da clínica exige.
+-- Pré-cadastro com e-mail informado pela clínica e sem senha.
 INSERT INTO usuario
   (id_usuario, nome, cpf, email, senha_hash, senha_salt, ativo)
 VALUES
-  (20, 'Responsável Pré-Cadastrado (Teste)', '52998224725', NULL, NULL, NULL, FALSE);
+  (20, 'Responsável Pré-Cadastrado (Teste)', '52998224725', 'precadastro@example.com', NULL, NULL, FALSE);
 
 -- 2. Responsáveis: chave estrangeira id_usuario incluída em TODOS os registros.
 INSERT INTO responsavel (id_responsavel, telefone, id_usuario)
@@ -49,14 +50,8 @@ VALUES
   (4, '11000000003', 8),
   (5, '11000000004', 9);
 
--- Código da clínica para responsável ainda não ativado; expira em 30 dias.
-INSERT INTO responsavel
-  (id_responsavel, telefone, id_usuario,
-   codigo_ativacao_hash, codigo_ativacao_expira_em, codigo_ativacao_usado_em)
-VALUES
-  (6, '11900000000', 20,
-   0x859155cf577f1cec05aa5f4041840ef5cdec7ae216d8688159643faf6b287ac8,
-   DATE_ADD(UTC_TIMESTAMP(), INTERVAL 30 DAY), NULL);
+INSERT INTO responsavel (id_responsavel, telefone, id_usuario)
+VALUES (6, '11900000000', 20);
 
 -- 3. Médicos (a especialidade é um atributo de médico neste schema).
 INSERT INTO medico (id_medico, crm, especialidade, id_usuario)

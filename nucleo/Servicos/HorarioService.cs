@@ -18,7 +18,7 @@ public record ResultadoHorarios(bool Sucesso, DateOnly Data, IReadOnlyList<Horar
 public class HorarioService(IHorarioRepositorio repositorio, TimeProvider? relogio = null)
 {
     private readonly IHorarioRepositorio _repo = repositorio;
-    private readonly TimeProvider _relogio = relogio ?? TimeProvider.System;
+    private readonly TimeProvider _relogio = relogio ?? RelogioClinica.Instancia;
 
     public ResultadoHorarios Livres(string? dataInformada, string? especialidade, int? idMedico)
     {
@@ -34,6 +34,9 @@ public class HorarioService(IHorarioRepositorio repositorio, TimeProvider? relog
             campos["data"] = "Data inválida. Use o formato AAAA-MM-DD.";
         else if (data < hoje)
             campos["data"] = "Não dá para agendar em data que já passou.";
+
+        if (idMedico is <= 0)
+            campos["medico"] = "Informe um médico válido.";
 
         if (campos.Count > 0)
             return new ResultadoHorarios(false, data, [], campos);

@@ -10,6 +10,7 @@
 public static class PoliticaSenha
 {
     public const int TamanhoMinimo = 8;
+    public const int TamanhoMaximo = 1024;
 
     public static bool Valida(string? senha, out string erro)
     {
@@ -22,6 +23,12 @@ public static class PoliticaSenha
         if (senha.Length < TamanhoMinimo)
         {
             erro = $"A senha deve ter no mínimo {TamanhoMinimo} caracteres.";
+            return false;
+        }
+
+        if (senha.Length > TamanhoMaximo)
+        {
+            erro = $"A senha deve ter no máximo {TamanhoMaximo} caracteres.";
             return false;
         }
 

@@ -1,3 +1,4 @@
+using PediAgenda.Api;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -50,7 +51,13 @@ builder.Services.AddScoped<AgendaService>();
 builder.Services.AddSingleton<IRelatorioRepositorio>(
     _ => new RelatorioRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<RelatorioService>();
-builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<TimeProvider>(RelogioClinica.Instancia);
+builder.Services.AddSingleton<IProntuarioRepositorio>(
+    _ => new ProntuarioRepositorioMySql(Configuracao.StringDeConexao!));
+builder.Services.AddScoped<ProntuarioService>();
+builder.Services.AddExceptionHandler<TratamentoErros>();
+builder.Services.AddProblemDetails();
+builder.Services.Configure<RouteHandlerOptions>(o => o.ThrowOnBadRequest = true);
 builder.Services.AddSingleton<GeradorToken>();
 
 builder.Services
@@ -73,6 +80,22 @@ builder.Services
         // ele segue o mesmo formato de erro do resto da API.
         opcoes.Events = new JwtBearerEvents
         {
+            OnTokenValidated = contexto =>
+            {
+                var principal = contexto.Principal!;
+                if (!int.TryParse(principal.FindFirstValue("sub"), out var id) || id <= 0
+                    || string.IsNullOrWhiteSpace(principal.FindFirstValue("email")))
+                {
+                    contexto.Fail("Token sem identificação válida.");
+                    return Task.CompletedTask;
+                }
+                var repo = contexto.HttpContext.RequestServices.GetRequiredService<IUsuarioRepositorio>();
+                var usuario = repo.BuscarPorEmail(principal.FindFirstValue("email")!);
+                if (usuario is null || usuario.Id != id || !usuario.Ativo || !usuario.PossuiCredenciais
+                    || usuario.Perfil.ToString().ToUpperInvariant() != principal.FindFirstValue("role"))
+                    contexto.Fail("Usuário inativo ou perfil alterado.");
+                return Task.CompletedTask;
+            },
             OnChallenge = async contexto =>
             {
                 contexto.HandleResponse();
@@ -92,6 +115,17 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+app.UseStatusCodePages(async contexto =>
+{
+    var resposta = contexto.HttpContext.Response;
+    var codigo = resposta.StatusCode switch
+    {
+        400 => "REQUISICAO_INVALIDA", 404 => "ROTA_NAO_ENCONTRADA",
+        405 => "METODO_NAO_PERMITIDO", _ => "ERRO_HTTP"
+    };
+    await resposta.WriteAsJsonAsync(new ErroApi(codigo, "Confira a rota, o método e os dados enviados."));
+});
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -122,12 +156,12 @@ app.MapGet("/api/auth/eu", (ClaimsPrincipal usuario) =>
    .RequireAuthorization();
 
 // O responsável previamente cadastrado pela clínica completa seu acesso com
-// CPF, código de ativação, e-mail, senha e aceite dos termos. O cadastro fica
+// CPF, e-mail, senha e aceite dos termos. O cadastro fica
 // ativo imediatamente; não existe confirmação por link enviado por e-mail.
 app.MapPost("/api/cadastro/responsavel", (CadastroRequisicao req, CadastroService cadastro) =>
 {
     var resultado = cadastro.Cadastrar(new DadosResponsavel(
-        req.Cpf, req.CodigoAtivacao, req.Email, req.Senha, req.AceiteTermos));
+        req.Cpf, req.Email, req.Senha, req.AceiteTermos));
 
     if (resultado.Sucesso)
     {
@@ -151,14 +185,50 @@ app.MapPost("/api/cadastro/responsavel", (CadastroRequisicao req, CadastroServic
             statusCode: StatusCodes.Status400BadRequest),
         MotivoRecusa.ResponsavelNaoEncontrado => Erro(
             "RESPONSAVEL_NAO_ENCONTRADO", resultado.Mensagem, StatusCodes.Status404NotFound),
-        MotivoRecusa.CodigoAtivacaoInvalido => Erro(
-            "CODIGO_ATIVACAO_INVALIDO", resultado.Mensagem, StatusCodes.Status400BadRequest),
+        MotivoRecusa.DadosCadastraisNaoConferem => Erro(
+            "DADOS_CADASTRAIS_NAO_CONFEREM", resultado.Mensagem, StatusCodes.Status400BadRequest),
         MotivoRecusa.EmailJaCadastrado => Erro(
             "EMAIL_JA_CADASTRADO", resultado.Mensagem, StatusCodes.Status409Conflict),
         MotivoRecusa.CadastroJaIniciado => Erro(
             "CADASTRO_JA_INICIADO", resultado.Mensagem, StatusCodes.Status409Conflict),
         _ => Erro("ERRO_CADASTRO", resultado.Mensagem, StatusCodes.Status400BadRequest)
     };
+});
+
+// Pré-cadastro pela recepção. Ainda não gera senha nem sessão.
+app.MapPost("/api/responsaveis", (PreCadastroRequisicao req, CadastroService cadastro) =>
+{
+    var r = cadastro.PreCadastrar(req.Nome, req.Cpf, req.Email, req.Telefone);
+    if (r.Sucesso)
+        return Results.Json(new { id = r.Usuario!.Id, nome = r.Usuario.Nome,
+            email = r.Usuario.Email, ativo = false }, statusCode: StatusCodes.Status201Created);
+    return r.Motivo == MotivoRecusa.DadosInvalidos
+        ? Results.Json(new ErroValidacao("DADOS_INVALIDOS", r.Mensagem, r.Campos!), statusCode: 400)
+        : Erro("CADASTRO_DUPLICADO", r.Mensagem, 409);
+}).RequireAuthorization(p => p.RequireRole("RECEPCIONISTA"));
+
+// Prontuários: acesso restrito ao médico dono da consulta.
+var rotasMedico = app.MapGroup("/api").RequireAuthorization(p => p.RequireRole("MEDICO"));
+rotasMedico.MapGet("/medico/pacientes", (ClaimsPrincipal usuario, ProntuarioService servico) =>
+{
+    var r = servico.Pacientes(AtorDe(usuario));
+    return r.Sucesso ? Results.Ok(r.Valor) : FalhaClinica(r);
+});
+rotasMedico.MapGet("/pacientes/{id:int}/prontuarios", (int id, ClaimsPrincipal usuario, ProntuarioService servico) =>
+{
+    var r = servico.Historico(AtorDe(usuario), id);
+    return r.Sucesso ? Results.Ok(r.Valor) : FalhaClinica(r);
+});
+rotasMedico.MapGet("/consultas/{id:int}/prontuario", (int id, ClaimsPrincipal usuario, ProntuarioService servico) =>
+{
+    var r = servico.Buscar(AtorDe(usuario), id);
+    return r.Sucesso ? Results.Ok(r.Valor) : FalhaClinica(r);
+});
+rotasMedico.MapPost("/consultas/{id:int}/prontuario", (int id, ProntuarioRequisicao req,
+    ClaimsPrincipal usuario, ProntuarioService servico) =>
+{
+    var r = servico.Registrar(AtorDe(usuario), id, req.Observacoes);
+    return r.Sucesso ? Results.Json(r.Valor, statusCode: 201) : FalhaClinica(r);
 });
 
 // Pacientes (as crianças) do responsável logado. Só o perfil RESPONSAVEL
@@ -375,8 +445,8 @@ static int IdUsuario(ClaimsPrincipal usuario) => int.Parse(usuario.FindFirstValu
 static SessaoIniciada Sessao(Usuario u, GeradorToken tokens)
 {
     var perfil = u.Perfil.ToString().ToUpperInvariant();
-    var (token, expiraEm) = tokens.Gerar(u.Id, u.Nome, u.Email, perfil);
-    return new SessaoIniciada(u.Id, u.Nome, u.Email, perfil, token, expiraEm);
+    var (token, expiraEm) = tokens.Gerar(u.Id, u.Nome, u.Email!, perfil);
+    return new SessaoIniciada(u.Id, u.Nome, u.Email!, perfil, token, expiraEm);
 }
 
 static int Status(MotivoFalha motivo) => motivo switch
@@ -399,6 +469,8 @@ static string Codigo(MotivoFalha motivo) => motivo switch
 
 // O que a tela manda e o que ela recebe. A senha só entra; nunca sai.
 record LoginRequisicao(string? Email, string? Senha);
+record PreCadastroRequisicao(string? Nome, string? Cpf, string? Email, string? Telefone);
+record ProntuarioRequisicao(string? Observacoes);
 record CadastroRequisicao(string? Cpf, string? Email, string? Senha, bool AceiteTermos);
 record UsuarioLogado(int Id, string Nome, string Email, string Perfil);
 record SessaoIniciada(int Id, string Nome, string Email, string Perfil, string Token, DateTime ExpiraEm);
@@ -461,5 +533,5 @@ record PacienteResposta(int Id, string Nome, string DataNascimento, int Idade)
 {
     public static PacienteResposta De(Paciente p) =>
         new(p.Id, p.Nome, p.DataNascimento.ToString("yyyy-MM-dd"),
-            p.IdadeEm(DateOnly.FromDateTime(DateTime.Today)));
+            p.IdadeEm(DateOnly.FromDateTime(RelogioClinica.Instancia.GetLocalNow().DateTime)));
 }

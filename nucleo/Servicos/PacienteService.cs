@@ -31,7 +31,7 @@ public class PacienteService(IPacienteRepositorio repositorio, TimeProvider? rel
     public const int IdadeMaxima = 17;
 
     private readonly IPacienteRepositorio _repo = repositorio;
-    private readonly TimeProvider _relogio = relogio ?? TimeProvider.System;
+    private readonly TimeProvider _relogio = relogio ?? RelogioClinica.Instancia;
 
     /// <summary>
     /// Os pacientes do responsável logado, ou null se o usuário não for responsável.
@@ -78,7 +78,16 @@ public class PacienteService(IPacienteRepositorio repositorio, TimeProvider? rel
             return new ResultadoPaciente(false, "Esse paciente já está cadastrado.",
                                          MotivoRecusaPaciente.JaCadastrado);
 
-        var id = _repo.Inserir(idResponsavel.Value, nome, nascimento);
+        int id;
+        try
+        {
+            id = _repo.Inserir(idResponsavel.Value, nome, nascimento);
+        }
+        catch (PacienteDuplicadoException)
+        {
+            return new ResultadoPaciente(false, "Esse paciente já está cadastrado.",
+                MotivoRecusaPaciente.JaCadastrado);
+        }
         var paciente = new Paciente
         {
             Id = id,

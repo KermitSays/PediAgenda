@@ -13,12 +13,11 @@ public interface IUsuarioRepositorio
     // decide criar seu acesso ao aplicativo.
     Usuario? BuscarResponsavelPorCpf(string cpf);
 
-    bool CodigoAtivacaoResponsavelValido(
-    int usuarioId,
-    string codigo,
-    DateTime agora);
-
     void Atualizar(Usuario usuario);
+
+    // Incremento atômico para não perder tentativas simultâneas.
+    (bool Bloqueado, int Restantes) RegistrarFalhaSenha(
+        int usuarioId, DateTime agora, int limite, TimeSpan duracao);
 
     void RegistrarTentativa(
         string emailInformado,
@@ -37,13 +36,15 @@ public interface IUsuarioRepositorio
     
     /// Completa o acesso de um responsável que já existe no banco.
     ///
-    /// Não cria outro usuário: apenas adiciona e-mail e senha ao
-    /// registro que foi previamente criado pela clínica.
-    void CompletarCadastroResponsavel(
+    /// Confere o e-mail e grava a senha somente se ainda não houver credenciais.
+    /// Retorna false se o cadastro mudou ou já foi concluído por outra requisição.
+    bool CompletarCadastroResponsavel(
         int usuarioId,
         string email,
-        string senha,
-        DateTime ativadoEm);
+        string senha);
+
+    /// Pré-cadastro pela recepção; ainda não permite login.
+    int PreCadastrarResponsavel(string nome, string cpf, string email, string telefone);
 
     
     /// Cria uma conta completa.
@@ -67,6 +68,3 @@ public class CadastroDuplicadoException(string campo)
 {
     public string Campo { get; } = campo;
 }
-/// Código de ativação consumido, vencido ou cadastro já concluído.
-public class CodigoAtivacaoIndisponivelException()
-    : Exception("O código de ativação não está mais disponível.");
