@@ -72,20 +72,28 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
                 u.Cpf == cpf
                 && u.Perfil == Perfil.Responsavel);
 
-    public bool CodigoAtivacaoResponsavelValido(
-    int usuarioId,
-    string codigo,
-    DateTime agora)
-    {
-        // A versão em memória é apenas auxiliar para testes.
-        // O fluxo real de ativação utiliza o MySQL.
-        return false;
-    }
-
     public void Atualizar(Usuario usuario)
     {
         // Como trabalhamos com o mesmo objeto armazenado na lista,
         // as alterações já ficam refletidas em memória.
+    }
+
+    public (bool Bloqueado, int Restantes) RegistrarFalhaSenha(
+        int usuarioId, DateTime agora, int limite, TimeSpan duracao)
+    {
+        lock (_usuarios)
+        {
+            var usuario = _usuarios.Single(u => u.Id == usuarioId);
+            if (usuario.EstaBloqueado(agora)) return (true, 0);
+            usuario.TentativasInvalidas++;
+            if (usuario.TentativasInvalidas >= limite)
+            {
+                usuario.TentativasInvalidas = 0;
+                usuario.BloqueadoAte = agora.Add(duracao);
+                return (true, 0);
+            }
+            return (false, limite - usuario.TentativasInvalidas);
+        }
     }
 
     public void RegistrarTentativa(
@@ -125,28 +133,43 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
    
     /// Completa o cadastro de acesso de um responsável
     /// que já havia sido pré-cadastrado.
-    public void CompletarCadastroResponsavel(
-        int usuarioId, string email, string senha, DateTime ativadoEm)
+    public bool CompletarCadastroResponsavel(int usuarioId, string email, string senha)
     {
-        if (!PoliticaSenha.Valida(senha, out var erro))
-            throw new ArgumentException(erro, nameof(senha));
+        lock (_usuarios)
+        {
+            if (!PoliticaSenha.Valida(senha, out var erro))
+                throw new ArgumentException(erro, nameof(senha));
+            var usuario = _usuarios.FirstOrDefault(u => u.Id == usuarioId
+                && u.Perfil == Perfil.Responsavel
+                && string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase)
+                && u.SenhaHash is null && u.SenhaSalt is null);
+            if (usuario is null)
+                return false;
+            var (hash, salt, iteracoes) = HashSenha.Gerar(senha);
+            usuario.SenhaHash = hash;
+            usuario.SenhaSalt = salt;
+            usuario.SenhaIteracoes = iteracoes;
+            usuario.Ativo = true;
+            usuario.TentativasInvalidas = 0;
+            usuario.BloqueadoAte = null;
+            return true;
+        }
+    }
 
-        var usuario = _usuarios.FirstOrDefault(u => u.Id == usuarioId
-            && u.Perfil == Perfil.Responsavel && !u.Ativo);
-        if (usuario is null)
-            throw new CodigoAtivacaoIndisponivelException();
-        if (ExisteEmailDeOutroUsuario(email, usuarioId))
-            throw new CadastroDuplicadoException("e-mail");
-        // O repositório em memória não contém códigos reais da clínica.
-        // A validação é realizada no MySQL em produção.
-        var (hash, salt, iteracoes) = HashSenha.Gerar(senha);
-        usuario.Email = email;
-        usuario.SenhaHash = hash;
-        usuario.SenhaSalt = salt;
-        usuario.SenhaIteracoes = iteracoes;
-        usuario.Ativo = true;
-        usuario.TentativasInvalidas = 0;
-        usuario.BloqueadoAte = null;
+    public int PreCadastrarResponsavel(string nome, string cpf, string email, string telefone)
+    {
+        lock (_usuarios)
+        {
+            if (ExisteEmail(email)) throw new CadastroDuplicadoException("e-mail");
+            if (ExisteCpf(cpf)) throw new CadastroDuplicadoException("CPF");
+            var id = _usuarios.Count + 1;
+            _usuarios.Add(new Usuario
+            {
+                Id = id, Nome = nome, Cpf = cpf, Email = email,
+                Perfil = Perfil.Responsavel, Ativo = false
+            });
+            return id;
+        }
     }
 
     public int Inserir(

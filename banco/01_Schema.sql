@@ -4,16 +4,13 @@
 -- Responsavel pela modelagem: Lara vitória araujo moreira
 -- SGBD: MySQL 8.0
 --
--- ATENCAO: este script SUBSTITUI qualquer estrutura criada. Ele apaga o schema pediagenda e recria
--- tudo do zero, seguindo o diagrama de classes. So rode se o banco
--- estiver vazio ou caso deseje recriar a estrutura.
+-- Use em um banco NOVO e vazio. Não apaga nem recria tabelas existentes.
+-- Para atualizar um banco com dados, use 03_remover_verificacao_email.sql.
 --
 -- Para melhor vizualização do modelo físico, abra o arquivo Modelo_lógico_banco_de_dados.png, que é a representação gráfica.
 -- =====================================================================
 
-DROP DATABASE IF EXISTS pediagenda;
-
-CREATE DATABASE pediagenda
+CREATE DATABASE IF NOT EXISTS pediagenda
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_0900_ai_ci;
 
@@ -34,6 +31,7 @@ CREATE TABLE usuario (
     tentativas_invalidas TINYINT UNSIGNED NOT NULL DEFAULT 0,
     bloqueado_ate        DATETIME         NULL,
     criado_em            DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    termos_aceitos_em     DATETIME         NULL,
     CONSTRAINT pk_usuario       PRIMARY KEY (id_usuario),
     CONSTRAINT uq_usuario_cpf   UNIQUE (cpf),
     CONSTRAINT uq_usuario_email UNIQUE (email)
@@ -47,9 +45,6 @@ CREATE TABLE responsavel (
     id_responsavel INT UNSIGNED NOT NULL AUTO_INCREMENT,
     telefone       VARCHAR(20)  NOT NULL,
     id_usuario     INT UNSIGNED NOT NULL,
-    codigo_ativacao_hash      VARBINARY(32) NULL,
-    codigo_ativacao_expira_em  DATETIME NULL,
-    codigo_ativacao_usado_em   DATETIME NULL,
     CONSTRAINT pk_responsavel         PRIMARY KEY (id_responsavel),
     CONSTRAINT uq_responsavel_usuario UNIQUE (id_usuario),
     CONSTRAINT fk_responsavel_usuario FOREIGN KEY (id_usuario)

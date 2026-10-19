@@ -35,7 +35,7 @@ public class ConsultaService(IConsultaRepositorio consultas, IPacienteRepositori
 {
     private readonly IConsultaRepositorio _consultas = consultas;
     private readonly IPacienteRepositorio _pacientes = pacientes;
-    private readonly TimeProvider _relogio = relogio ?? TimeProvider.System;
+    private readonly TimeProvider _relogio = relogio ?? RelogioClinica.Instancia;
 
     private DateTime Agora => _relogio.GetLocalNow().DateTime;
 

@@ -33,6 +33,13 @@ public class AgendaRepositorioMySql(string stringDeConexao) : IAgendaRepositorio
         using var con = Abrir();
         using var tx = con.BeginTransaction();
 
+        using (var agenda = new MySqlCommand(
+            "SELECT id_agenda FROM agenda_medica WHERE id_agenda = @id FOR UPDATE", con, tx))
+        {
+            agenda.Parameters.AddWithValue("@id", idAgenda);
+            agenda.ExecuteScalar();
+        }
+
         var existentes = new List<(TimeOnly Inicio, TimeOnly Fim)>();
         using (var cmd = new MySqlCommand(
             "SELECT hora_inicio, hora_fim FROM horario WHERE id_agenda = @agenda AND data_horario = @data FOR UPDATE",

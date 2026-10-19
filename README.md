@@ -1,154 +1,52 @@
-# PediAgenda: Sistema de Agendamento e Atendimento Pediátrico
+# PediAgenda
 
-> Sistema digital voltado para o agendamento e gerenciamento de consultas pediátricas, alinhado ao Objetivo de Desenvolvimento Sustentável ODS-3 (Saúde e Bem-estar) da ONU.
+Sistema de agendamento e atendimento pediátrico desenvolvido por Talita Barbara Cardanha Lopes, Sara Helena de Oliveira Nunes Ribeiro e Lara Vitoria Araujo Moreira.
 
-## 👥 Equipe e Papéis
-* **Talita Barbara Cardanha Lopes** - Product Owner
-* **Sara Helena de Oliveira Nunes Ribeiro** - Scrum Master
-* **Lara Vitoria Araujo Moreira** - Dev Team
+## Projetos
 
-## 📋 Sobre o Projeto
-O **PediAgenda** foi desenvolvido para modernizar e otimizar o fluxo de atendimentos em clínicas pediátricas. O sistema mitiga problemas comuns como filas e atrasos organizando a rotina através de perfis distintos:
-* **Pacientes/Responsáveis:** Cadastro, login, busca de pediatras por especialidade e agendamento prático (particular ou convênio).
-* **Profissionais (Médicos e Recepção):** Gerenciamento completo da agenda, prontuário eletrônico básico e geração de relatórios.
+| Pasta | Função |
+| --- | --- |
+| `PediAgenda/` | Aplicativo .NET MAUI; usa .NET 10 e os workloads da plataforma |
+| `api/` | API HTTP em .NET 9 com autenticação JWT |
+| `nucleo/` | Regras de negócio e repositórios MySQL, compartilhados pela API |
+| `banco/` | Schema MySQL 8, carga fictícia e migração de bancos existentes |
+| `login/` | Demonstração em console do login |
+| `testes/` | Testes HTTP com API e MySQL locais descartáveis |
 
-*Nota de Privacidade: O sistema foi estruturado seguindo os princípios da LGPD (Art. 14 da Lei nº 13.709/2018) para o tratamento seguro de dados de menores de idade.*
+## Executar a API
 
-## 🛠️ Tecnologias e Ferramentas
-* **Ambiente de Desenvolvimento:** .NET
-* **Banco de Dados:** Relacional (SQL Server/PostgreSQL)
-* **Metodologia Ágil:** Scrum (Organizado em 4 Sprints)
+É necessário o SDK .NET 9 e um MySQL 8 acessível. O backend usa MySqlConnector diretamente; não usa Entity Framework nem `dotnet ef`.
 
-## 🗓️ Planejamento das Sprints
-A evolução do projeto foi dividida em blocos de entrega de valor:
-* **Sprint 1:** Infraestrutura Inicial, Módulo de Cadastro e Login *(Responsáveis: Joab, Sara, Talita)*.
-* **Sprint 2:** Infraestrutura de Agendas e Módulo de Agendamento *(Responsáveis: Gustavo, Sara, Talita)*.
-* **Sprint 3:** Gerenciamento de Agenda Médica e Mecanismo de Notificações *(Responsáveis: Sara, Lara, Gustavo)*.
-* **Sprint 4:** Relatórios de Atendimento, Estabilização e Homologação *(Responsáveis: Sara, Lara, Equipe)*.
+- Banco novo e vazio: execute `banco/01_Schema.sql`; a carga `02_popula_tabelas.sql` é opcional e exclusiva de testes.
+- Banco existente: execute `banco/03_remover_verificacao_email.sql` antes de iniciar esta versão da API. A migração preserva usuários, credenciais, contas inativas e atendimentos.
 
-## Como Executar o Projeto
+No PowerShell, na raiz do repositório, configure a sessão atual:
 
-### Pré-requisitos
-Antes de começar, você vai precisar ter instalado em sua máquina:
-* SDK do [.NET](https://microsoft.com) (Versão utilizada no curso)
-* Um SGBD compatível (Ex: SQL Server Management Studio ou PostgreSQL)
-* Git
-
-### Passo a Passo
-
-```bash
-# 1. Clonar o repositório do grupo
-git clone https://github.com
-
-# 2. Entrar na pasta raiz do projeto
-cd pediagenda
-
-# 3. Restaurar as dependências do .NET
-dotnet restore
-
-# 4. Atualizar o banco de dados (caso use Entity Framework Migrations)
-dotnet ef database update
-
-# 5. Rodar a aplicação
-dotnet run
+```powershell
+$env:PEDIAGENDA_CONEXAO = "Server=localhost;Port=3306;Database=pediagenda;User ID=SEU_USUARIO;Password=SUA_SENHA;"
+$b = New-Object byte[] 48
+[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b)
+$env:PEDIAGENDA_JWT_CHAVE = [Convert]::ToBase64String($b)
+dotnet run --project api/PediAgenda.Api.csproj --urls http://localhost:5000
 ```
 
-# Banco de Dados - PediAgenda
+`GET http://localhost:5000/api/saude` deve retornar `{"status":"ok"}`. Essa rota verifica a aplicação; os testes de integração verificam também o banco.
 
-Scripts do banco de dados `pediagenda` (MySQL 8.0) hospedado em nuvem utilizando o **Aiven**.
+Para guardar as variáveis entre sessões, use `setx` e reabra o terminal e o Visual Studio. No Render, configure as mesmas variáveis no serviço; use o host, porta, credenciais e opções SSL fornecidos pelo Aiven, com `Database=pediagenda`.
 
-## 📁 Estrutura dos Arquivos
+## Cadastro e sessão
 
-| Arquivo | Descrição |
-| :--- | :--- |
-| `01_Schema.sql` | Criação do schema, 12 tabelas, chaves estrangeiras, índices e restrições do sistema. |
-| `02_popula_tabelas.sql` | Popula as tabelas com dados iniciais e de teste (opcional). |
+A recepção pré-cadastra nome, CPF, e-mail e telefone em `POST /api/responsaveis`. O responsável conclui seu acesso em `POST /api/cadastro/responsavel`, informando o CPF e e-mail cadastrados pela clínica, sua senha e o aceite dos termos. O cadastro não envia e-mail nem exige código de ativação. A API retorna 201; o próximo passo é fazer login.
 
----
+O JWT de **login** continua obrigatório nas rotas protegidas. Uma conta que já definiu senha não pode sobrescrevê-la pelo cadastro, inclusive quando está inativa. Recuperação de senha e reativação de contas pela clínica não são implementadas por esta rota.
 
-## ☁️ Como Configurar e Executar (Aiven + MySQL Workbench)
+Horários de consulta usam `America/Sao_Paulo`, inclusive no Render; vencimento de JWT, bloqueios de login e novos prontuários usam UTC.
 
-Como o banco está hospedado na nuvem pelo Aiven, usuários comuns geralmente não possuem permissão para executar comandos de criação de banco (`CREATE DATABASE`). Siga o passo a passo abaixo para realizar o deploy corretamente:
+## Referências
 
-### Passo 1: Criar o banco de dados no Aiven
-1. Acesse o painel do **Aiven** e selecione o seu serviço MySQL.
-2. Vá até a aba **Databases**.
-3. Clique em **Create database**, digite exatamente `pediagenda` e confirme.
+- [Rotas e exemplos da API](api/README.md)
+- [Scripts do banco e migração](banco/README.md)
+- [Como executar os testes](testes/README.md)
+- [Resultado da revisão e validação](api/VALIDACAO.md)
 
-### Passo 2: Conectar no MySQL Workbench
-1. Abra o **MySQL Workbench** e crie uma nova conexão (`New Connection`).
-2. Preencha os campos com o **Host**, **Port**, **Username** e **Password** fornecidos na aba *Overview / Quick Connect* do painel do Aiven.
-3. *Dica:* Na aba **SSL**, certifique-se de configurar o arquivo de certificado CA se o Aiven exigir conexão segura.
-
-### Passo 3: Executar o Schema (`01_Schema.sql`)
-1. Abra o arquivo `01_Schema.sql` no MySQL Workbench.
-2. **Atenção:** Como o banco já foi criado manualmente no painel do Aiven, comente ou remova as linhas de criação do banco (`DROP DATABASE` e `CREATE DATABASE`).
-3. Garanta que o comando `USE pediagenda;` está ativo no início do script.
-4. Clique no ícone do raio (**⚡**) para executar o script. 
-5. Atualize o painel de Schemas no Workbench para confirmar que as **12 tabelas** foram criadas com sucesso.
-
-### Passo 4: Popular o Banco (Opcional)
-1. Abra o arquivo `02_popula_tabelas.sql`.
-2. Certifique-se de que a conexão está apontando para o schema `pediagenda`.
-3. Clique no raio (**⚡**) para rodar os dados de teste da equipe.
-
-
-# PediAgenda â€” API
-
-API que o app chama para autenticar, cadastrar e, daqui em diante, agendar.
-.NET 9, banco MySQL `pediagenda`.
-
-## Rodar
-
-A senha do banco e a chave do token vÃªm de variÃ¡veis de ambiente, nunca do
-cÃ³digo:
-
-    setx PEDIAGENDA_CONEXAO "Server=localhost;Port=3306;Database=pediagenda;User ID=SEU_USUARIO;Password=SUA_SENHA;"
-
-A chave do token Ã© aleatÃ³ria, cada um gera a sua (PowerShell):
-
-    $b = New-Object byte[] 48; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); setx PEDIAGENDA_JWT_CHAVE ([Convert]::ToBase64String($b))
-
-Feche e reabra o terminal, e:
-
-    dotnet run --project api/PediAgenda.Api.csproj --urls http://localhost:5000
-
-`GET /api/saude` responde `{"status":"ok"}` se subiu.
-
-
-## Rotas expostas no código (20)
-
-| Método | Rota | Perfil |
-| --- | --- | --- |
-| GET | `/api/saude` | Público |
-| POST | `/api/auth/login` | Público |
-| GET | `/api/auth/eu` | Logado |
-| POST | `/api/cadastro/responsavel` | Público — conclui pré-cadastro |
-| GET, POST | `/api/pacientes` | Responsável |
-| GET | `/api/horarios` | Logado |
-| POST, GET | `/api/consultas` | Responsável |
-| PATCH | `/api/consultas/{id}/cancelar` | Responsável |
-| POST | `/api/horarios` | Médico / recepção |
-| GET | `/api/agenda` | Médico / recepção |
-| PATCH | `/api/horarios/{id}/bloquear` | Médico / recepção |
-| PATCH | `/api/horarios/{id}/desbloquear` | Médico / recepção |
-| PATCH | `/api/consultas/{id}/confirmar` | Médico / recepção |
-| PATCH | `/api/consultas/{id}/realizar` | Médico |
-| POST, GET | `/api/relatorios` | Médico / recepção |
-| GET | `/api/relatorios/{id}` | Médico / recepção |
-| GET | `/api/relatorios/{id}/exportar` | Médico / recepção; CSV |
-
-
-### Cadastro sem verificação de e-mail (API)
-
-`POST /api/cadastro/responsavel` continua exigindo CPF e código de ativação
-fornecido pela clínica, e-mail válido, senha e aceite dos termos. Ao concluir,
-a conta é ativada imediatamente, o código da clínica é consumido e a API
-retorna **HTTP 201**, sem enviar link por e-mail. O login já fica disponível.
-O e-mail continua sendo o identificador de login, **não** foi removido.
-Não existe mais `GET /api/cadastro/confirmar-email`.
-
-Para bases já existentes, consulte `banco/03_remover_verificacao_email.sql`.
-**Nunca execute `01_Schema.sql` no Aiven com dados reais:** ele começa com
-`DROP DATABASE`. O script `02_popula_tabelas.sql` é legado, contém outras
-incompatibilidades com o modelo físico e NÃO deve ser executado em produção.
+As telas têm seus próprios fluxos de integração. Executar a API local não altera automaticamente o endereço usado pelo aplicativo.

@@ -74,11 +74,30 @@ public class PacienteRepositorioMySql(string stringDeConexao) : IPacienteReposit
             """;
 
         using var con = Abrir();
-        using var cmd = new MySqlCommand(sql, con);
+        using var tx = con.BeginTransaction();
+        using (var familia = new MySqlCommand(
+            "SELECT id_responsavel FROM responsavel WHERE id_responsavel = @id FOR UPDATE", con, tx))
+        {
+            familia.Parameters.AddWithValue("@id", idResponsavel);
+            familia.ExecuteScalar();
+        }
+        using (var duplicado = new MySqlCommand("""
+            SELECT id_paciente FROM paciente
+            WHERE id_responsavel = @id AND nome = @nome AND data_nascimento = @nascimento FOR UPDATE
+            """, con, tx))
+        {
+            duplicado.Parameters.AddWithValue("@id", idResponsavel);
+            duplicado.Parameters.AddWithValue("@nome", nome);
+            duplicado.Parameters.AddWithValue("@nascimento", dataNascimento);
+            if (duplicado.ExecuteScalar() is not (null or DBNull)) throw new PacienteDuplicadoException();
+        }
+        using var cmd = new MySqlCommand(sql, con, tx);
         cmd.Parameters.AddWithValue("@nome", nome);
         cmd.Parameters.AddWithValue("@nascimento", dataNascimento);
         cmd.Parameters.AddWithValue("@responsavel", idResponsavel);
         cmd.ExecuteNonQuery();
-        return (int)cmd.LastInsertedId;
+        var id = (int)cmd.LastInsertedId;
+        tx.Commit();
+        return id;
     }
 }

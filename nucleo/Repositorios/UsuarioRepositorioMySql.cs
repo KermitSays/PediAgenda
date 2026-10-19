@@ -217,120 +217,62 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
         };
     }
 
-    public bool CodigoAtivacaoResponsavelValido(
-        int usuarioId,
-        string codigo,
-        DateTime agora)
-    {
-        const string sql = """
-            SELECT
-                codigo_ativacao_hash,
-                codigo_ativacao_expira_em,
-                codigo_ativacao_usado_em
-
-            FROM responsavel
-
-            WHERE id_usuario = @id
-
-            LIMIT 1
-            """;
-
-        using var con = Abrir();
-        using var cmd =
-            new MySqlCommand(sql, con);
-
-        cmd.Parameters.AddWithValue(
-            "@id",
-            usuarioId);
-
-        using var r =
-            cmd.ExecuteReader();
-
-        if (!r.Read())
-            return false;
-
-        if (r.IsDBNull(
-            r.GetOrdinal(
-                "codigo_ativacao_hash")))
-        {
-            return false;
-        }
-
-        if (r.IsDBNull(
-            r.GetOrdinal(
-                "codigo_ativacao_expira_em")))
-        {
-            return false;
-        }
-
-        if (!r.IsDBNull(
-            r.GetOrdinal(
-                "codigo_ativacao_usado_em")))
-        {
-            return false;
-        }
-
-        var expiraEm =
-            r.GetDateTime(
-                "codigo_ativacao_expira_em");
-
-        if (expiraEm <= agora)
-            return false;
-
-        var hashEsperado =
-            (byte[])r[
-                "codigo_ativacao_hash"];
-
-        return CodigoAtivacao.Conferir(
-            codigo,
-            hashEsperado);
-    }
-
-    public void CompletarCadastroResponsavel(
-        int usuarioId, string email, string senha, DateTime ativadoEm)
+    public bool CompletarCadastroResponsavel(int usuarioId, string email, string senha)
     {
         if (!PoliticaSenha.Valida(senha, out var erro))
             throw new ArgumentException(erro, nameof(senha));
 
         var (hash, salt, iteracoes) = HashSenha.Gerar(senha);
-
-        // Um único UPDATE altera o cadastro e consome o código da clínica.
-        // A condição sobre usado_em garante que duas requisições concorrentes
-        // não consigam utilizar o mesmo código.
+        // Só conclui um pré-cadastro sem senha e com o e-mail da clínica.
+        // Duas chamadas concorrentes não podem substituir a senha uma da outra.
         const string sql = """
             UPDATE usuario u
             INNER JOIN responsavel r ON r.id_usuario = u.id_usuario
-            SET u.email = @email,
-                u.senha_hash = @hash,
-                u.senha_salt = @salt,
-                u.senha_iteracoes = @iteracoes,
-                u.ativo = 1,
-                u.tentativas_invalidas = 0,
-                u.bloqueado_ate = NULL,
-                r.codigo_ativacao_usado_em = @ativadoEm
-            WHERE u.id_usuario = @id
-              AND (u.ativo = 0 OR u.senha_hash IS NULL OR u.senha_salt IS NULL)
-              AND r.codigo_ativacao_hash IS NOT NULL
-              AND r.codigo_ativacao_usado_em IS NULL
-              AND r.codigo_ativacao_expira_em > @ativadoEm
+            SET u.senha_hash = @hash, u.senha_salt = @salt,
+                u.senha_iteracoes = @iteracoes, u.ativo = 1,
+                u.tentativas_invalidas = 0, u.bloqueado_ate = NULL,
+                u.termos_aceitos_em = UTC_TIMESTAMP()
+            WHERE u.id_usuario = @id AND u.email = @email
+              AND u.senha_hash IS NULL AND u.senha_salt IS NULL
             """;
+        using var con = Abrir();
+        using var cmd = new MySqlCommand(sql, con);
+        cmd.Parameters.AddWithValue("@id", usuarioId);
+        cmd.Parameters.AddWithValue("@email", email);
+        cmd.Parameters.AddWithValue("@hash", hash);
+        cmd.Parameters.AddWithValue("@salt", salt);
+        cmd.Parameters.AddWithValue("@iteracoes", iteracoes);
+        return cmd.ExecuteNonQuery() == 1;
+    }
 
+    public int PreCadastrarResponsavel(string nome, string cpf, string email, string telefone)
+    {
         try
         {
             using var con = Abrir();
-            using var cmd = new MySqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@email", email);
-            cmd.Parameters.AddWithValue("@hash", hash);
-            cmd.Parameters.AddWithValue("@salt", salt);
-            cmd.Parameters.AddWithValue("@iteracoes", iteracoes);
-            cmd.Parameters.AddWithValue("@ativadoEm", ativadoEm);
-            cmd.Parameters.AddWithValue("@id", usuarioId);
-            if (cmd.ExecuteNonQuery() == 0)
-                throw new CodigoAtivacaoIndisponivelException();
+            using var tx = con.BeginTransaction();
+            using var usuario = new MySqlCommand("""
+                INSERT INTO usuario (nome, cpf, email, ativo)
+                VALUES (@nome, @cpf, @email, FALSE)
+                """, con, tx);
+            usuario.Parameters.AddWithValue("@nome", nome);
+            usuario.Parameters.AddWithValue("@cpf", cpf);
+            usuario.Parameters.AddWithValue("@email", email);
+            usuario.ExecuteNonQuery();
+            var id = (int)usuario.LastInsertedId;
+            using var responsavel = new MySqlCommand("""
+                INSERT INTO responsavel (telefone, id_usuario) VALUES (@telefone, @id)
+                """, con, tx);
+            responsavel.Parameters.AddWithValue("@telefone", telefone);
+            responsavel.Parameters.AddWithValue("@id", id);
+            responsavel.ExecuteNonQuery();
+            tx.Commit();
+            return id;
         }
         catch (MySqlException e) when (e.ErrorCode == MySqlErrorCode.DuplicateKeyEntry)
         {
-            throw new CadastroDuplicadoException("e-mail");
+            throw new CadastroDuplicadoException(
+                e.Message.Contains("cpf", StringComparison.OrdinalIgnoreCase) ? "CPF" : "e-mail");
         }
     }
 
@@ -365,6 +307,34 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
             usuario.Id);
 
         cmd.ExecuteNonQuery();
+    }
+
+    public (bool Bloqueado, int Restantes) RegistrarFalhaSenha(
+        int usuarioId, DateTime agora, int limite, TimeSpan duracao)
+    {
+        using var con = Abrir();
+        using var tx = con.BeginTransaction();
+        int tentativas;
+        using (var leitura = new MySqlCommand(
+            "SELECT tentativas_invalidas, bloqueado_ate FROM usuario WHERE id_usuario = @id FOR UPDATE", con, tx))
+        {
+            leitura.Parameters.AddWithValue("@id", usuarioId);
+            using var r = leitura.ExecuteReader();
+            if (!r.Read()) return (false, 0);
+            if (!r.IsDBNull(1) && r.GetDateTime(1) > agora) return (true, 0);
+            tentativas = r.GetInt32(0) + 1;
+        }
+        var bloquear = tentativas >= limite;
+        using var escrita = new MySqlCommand("""
+            UPDATE usuario SET tentativas_invalidas = @tentativas, bloqueado_ate = @ate
+            WHERE id_usuario = @id
+            """, con, tx);
+        escrita.Parameters.AddWithValue("@id", usuarioId);
+        escrita.Parameters.AddWithValue("@tentativas", bloquear ? 0 : tentativas);
+        escrita.Parameters.AddWithValue("@ate", bloquear ? (object)agora.Add(duracao) : DBNull.Value);
+        escrita.ExecuteNonQuery();
+        tx.Commit();
+        return (bloquear, bloquear ? 0 : limite - tentativas);
     }
 
     public void RegistrarTentativa(
@@ -402,7 +372,7 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
 
         cmd.Parameters.AddWithValue(
             "@email",
-            emailInformado);
+            emailInformado[..Math.Min(emailInformado.Length, 160)]);
 
         cmd.Parameters.AddWithValue(
             "@sucesso",

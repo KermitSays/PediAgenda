@@ -19,3 +19,5 @@ public interface IPacienteRepositorio
 
     int Inserir(int idResponsavel, string nome, DateOnly dataNascimento);
 }
+
+public sealed class PacienteDuplicadoException() : Exception("Paciente já cadastrado.");

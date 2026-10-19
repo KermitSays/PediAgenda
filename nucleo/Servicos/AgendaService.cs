@@ -42,7 +42,7 @@ public class AgendaService(IAgendaRepositorio repositorio, TimeProvider? relogio
     public const int DuracaoPadrao = 30;
 
     private readonly IAgendaRepositorio _repo = repositorio;
-    private readonly TimeProvider _relogio = relogio ?? TimeProvider.System;
+    private readonly TimeProvider _relogio = relogio ?? RelogioClinica.Instancia;
 
     private DateTime Agora => _relogio.GetLocalNow().DateTime;
 
@@ -106,6 +106,8 @@ public class AgendaService(IAgendaRepositorio repositorio, TimeProvider? relogio
     {
         var campos = new Dictionary<string, string>();
         var data = Entrada.LerData(dataInformada, "data", campos);
+        if (!ator.EhMedico && idMedicoInformado is <= 0)
+            campos["medico"] = "Informe um médico válido.";
         if (campos.Count > 0)
             return ResultadoClinica<IReadOnlyList<ItemAgenda>>.Invalido(campos);
 

@@ -122,14 +122,13 @@ public partial class CadastroService(
                 "Não foi encontrado um responsável cadastrado pela clínica com esse CPF.");
         }
 
-        // Responsáveis com cadastro completo e ativo não podem se cadastrar de novo.
-        // Cadastros antigos que aguardavam e-mail podem ser refeitos com o código
-        // da clínica, desde que ele ainda não tenha sido utilizado.
-        if (responsavel.Ativo && responsavel.PossuiCredenciais)
+        // Cadastro não é recuperação de senha: não altera credenciais existentes,
+        // inclusive quando a clínica desativou o acesso.
+        if (responsavel.SenhaHash is { Length: > 0 } || responsavel.SenhaSalt is { Length: > 0 })
         {
             return ResultadoCadastro.Falha(
                 MotivoRecusa.CadastroJaIniciado,
-                "O acesso deste responsável já está ativo.");
+                "Este responsável já definiu suas credenciais. Procure a recepção se precisar recuperar o acesso.");
         }
 
         // O e-mail precisa ter sido registrado pela clínica
@@ -156,28 +155,15 @@ public partial class CadastroService(
                 "Já existe outra conta utilizando esse e-mail.");
         }
 
-        var agora =
-            DateTime.UtcNow;
-
-        // CPF sozinho não é suficiente.
-        // Também precisa apresentar o código entregue
-        // pela clínica no momento do pré-cadastro.
-        if (!_repo.CodigoAtivacaoResponsavelValido(
-            responsavel.Id,
-            codigoAtivacao,
-            agora))
-        {
-            return ResultadoCadastro.Falha(
-                MotivoRecusa.CodigoAtivacaoInvalido,
-                "Código de ativação inválido, expirado ou já utilizado.");
-        }
-
         try
         {
-            // Completa o usuário já existente e consome o código de ativação
-            // na mesma instrução SQL (atômica), sem gerar token de e-mail.
-            _repo.CompletarCadastroResponsavel(
-                responsavel.Id, email, dados.Senha!, agora);
+            // A condição também é conferida pelo repositório de forma atômica.
+            if (!_repo.CompletarCadastroResponsavel(responsavel.Id, email, dados.Senha!))
+            {
+                return ResultadoCadastro.Falha(
+                    MotivoRecusa.CadastroJaIniciado,
+                    "O cadastro já foi concluído ou alterado. Procure a recepção.");
+            }
         }
         catch (CadastroDuplicadoException)
         {
@@ -185,16 +171,39 @@ public partial class CadastroService(
                 MotivoRecusa.EmailJaCadastrado,
                 "Já existe uma conta utilizando esse e-mail.");
         }
-        catch (CodigoAtivacaoIndisponivelException)
-        {
-            return ResultadoCadastro.Falha(
-                MotivoRecusa.CodigoAtivacaoInvalido,
-                "Código de ativação inválido, expirado ou já utilizado.");
-        }
-
         responsavel.Email = email;
         responsavel.Ativo = true;
         return ResultadoCadastro.Ok(responsavel);
+    }
+
+    public ResultadoCadastro PreCadastrar(string? nomeInformado, string? cpfInformado,
+                                           string? emailInformado, string? telefoneInformado)
+    {
+        var nome = (nomeInformado ?? "").Trim();
+        var cpf = SoDigitos(cpfInformado ?? "");
+        var email = (emailInformado ?? "").Trim();
+        var telefone = SoDigitos(telefoneInformado ?? "");
+        var campos = new Dictionary<string, string>();
+        if (nome.Length is < 1 or > 120) campos["nome"] = "Informe um nome de até 120 caracteres.";
+        if (cpf.Length != 11) campos["cpf"] = "O CPF deve ter 11 dígitos.";
+        if (email.Length > TamanhoMaximoEmail || !EmailValido().IsMatch(email))
+            campos["email"] = "Informe um e-mail válido de até 160 caracteres.";
+        if (telefone.Length is < 10 or > 15) campos["telefone"] = "Informe um telefone com DDD.";
+        if (campos.Count > 0) return ResultadoCadastro.Invalido(campos);
+        try
+        {
+            var id = _repo.PreCadastrarResponsavel(nome, cpf, email, telefone);
+            return ResultadoCadastro.Ok(new Usuario
+            {
+                Id = id, Nome = nome, Cpf = cpf, Email = email,
+                Perfil = Perfil.Responsavel, Ativo = false
+            });
+        }
+        catch (CadastroDuplicadoException e)
+        {
+            return ResultadoCadastro.Falha(MotivoRecusa.CadastroJaIniciado,
+                $"Já existe cadastro com esse {e.Campo}.");
+        }
     }
 
     private static string SoDigitos(

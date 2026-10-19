@@ -5,7 +5,7 @@ namespace PediAgenda.Nucleo.Modelos;
 ///
 /// Médico e recepcionista possuem contas criadas pela clínica.
 /// O responsável pode existir inicialmente apenas como pré-cadastro,
-/// ainda sem e-mail, senha ou acesso liberado ao aplicativo.
+/// com e-mail registrado pela clínica, mas sem senha ou acesso ao aplicativo.
 /// </summary>
 public class Usuario
 {
@@ -30,8 +30,8 @@ public class Usuario
 
     public int SenhaIteracoes { get; set; } = 100_000;
 
-    // Contas pre-cadastradas pela clínica começam inativas; o responsável
-    // é ativado após validar o código da clínica e definir sua senha.
+    // Contas pré-cadastradas começam inativas. O responsável confere CPF e
+    // e-mail e define a senha para concluir seu acesso.
     public bool Ativo { get; set; }
 
     // RNF02 — bloquear acesso após 5 tentativas inválidas.

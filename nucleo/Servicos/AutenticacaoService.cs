@@ -58,7 +58,7 @@ public class AutenticacaoService(
         repositorio;
 
     private readonly TimeProvider _relogio =
-        relogio ?? TimeProvider.System;
+        relogio ?? RelogioClinica.Instancia;
 
     // Mensagem genérica para não revelar se determinado
     // e-mail existe ou não no banco.
@@ -70,10 +70,13 @@ public class AutenticacaoService(
         string? senha)
     {
         var agora =
-            _relogio.GetLocalNow().DateTime;
+            _relogio.GetUtcNow().UtcDateTime;
 
         email =
             (email ?? "").Trim();
+
+        if (email.Length is 0 or > 160)
+            return ResultadoLogin.Falha(MensagemGenerica, MotivoFalha.CredenciaisInvalidas);
 
         // A mesma política de senha usada no cadastro
         // também é utilizada no login.
@@ -168,53 +171,16 @@ public class AutenticacaoService(
             usuario.SenhaSalt!,
             usuario.SenhaIteracoes))
         {
-            usuario.TentativasInvalidas++;
-
-            var motivo =
-                "senha incorreta";
-
-            if (usuario.TentativasInvalidas
-                >= MaximoTentativas)
-            {
-                usuario.BloqueadoAte =
-                    agora.Add(DuracaoBloqueio);
-
-                usuario.TentativasInvalidas = 0;
-
-                motivo =
-                    "bloqueio por tentativas";
-
-                _repo.Atualizar(usuario);
-
-                _repo.RegistrarTentativa(
-                    email,
-                    usuario.Id,
-                    false,
-                    motivo);
-
-                return ResultadoLogin.Falha(
-                    $"Conta bloqueada por " +
-                    $"{DuracaoBloqueio.TotalMinutes:0} minutos " +
-                    $"após {MaximoTentativas} tentativas inválidas.",
-                    MotivoFalha.ContaBloqueada);
-            }
-
-            _repo.Atualizar(usuario);
-
-            _repo.RegistrarTentativa(
-                email,
-                usuario.Id,
-                false,
-                motivo);
-
-            var restantes =
-                MaximoTentativas
-                - usuario.TentativasInvalidas;
-
-            return ResultadoLogin.Falha(
-                $"{MensagemGenerica} " +
-                $"Tentativas restantes: {restantes}.",
-                MotivoFalha.CredenciaisInvalidas);
+            var (bloqueado, restantes) = _repo.RegistrarFalhaSenha(
+                usuario.Id, agora, MaximoTentativas, DuracaoBloqueio);
+            _repo.RegistrarTentativa(email, usuario.Id, false,
+                bloqueado ? "bloqueio por tentativas" : "senha incorreta");
+            return bloqueado
+                ? ResultadoLogin.Falha(
+                    $"Conta bloqueada por {DuracaoBloqueio.TotalMinutes:0} minutos após {MaximoTentativas} tentativas inválidas.",
+                    MotivoFalha.ContaBloqueada)
+                : ResultadoLogin.Falha($"{MensagemGenerica} Tentativas restantes: {restantes}.",
+                    MotivoFalha.CredenciaisInvalidas);
         }
 
         // Login realizado com sucesso.

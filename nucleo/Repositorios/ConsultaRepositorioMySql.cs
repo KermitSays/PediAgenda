@@ -24,12 +24,12 @@ public class ConsultaRepositorioMySql(string stringDeConexao) : IConsultaReposit
         // 1. O paciente é desta família? Se não for, a resposta é a mesma de
         //    "não existe" — não se confirma a existência de filho de outra família.
         using (var cmd = new MySqlCommand(
-            "SELECT COUNT(*) FROM paciente WHERE id_paciente = @paciente AND id_responsavel = @responsavel",
+            "SELECT id_paciente FROM paciente WHERE id_paciente = @paciente AND id_responsavel = @responsavel FOR UPDATE",
             con, tx))
         {
             cmd.Parameters.AddWithValue("@paciente", idPaciente);
             cmd.Parameters.AddWithValue("@responsavel", idResponsavel);
-            if (Convert.ToInt32(cmd.ExecuteScalar()) == 0)
+            if (cmd.ExecuteScalar() is null or DBNull)
                 return (ResultadoReserva.PacienteNaoEncontrado, 0);
         }
 
@@ -39,7 +39,14 @@ public class ConsultaRepositorioMySql(string stringDeConexao) : IConsultaReposit
         DateOnly data;
         TimeOnly inicio, fim;
         using (var cmd = new MySqlCommand(
-            "SELECT data_horario, hora_inicio, hora_fim, disponivel FROM horario WHERE id_horario = @horario FOR UPDATE",
+            """
+            SELECT h.data_horario, h.hora_inicio, h.hora_fim, h.disponivel, u.ativo
+            FROM horario h
+            JOIN agenda_medica a ON a.id_agenda = h.id_agenda
+            JOIN medico m ON m.id_medico = a.id_medico
+            JOIN usuario u ON u.id_usuario = m.id_usuario
+            WHERE h.id_horario = @horario FOR UPDATE
+            """,
             con, tx))
         {
             cmd.Parameters.AddWithValue("@horario", idHorario);
@@ -53,7 +60,7 @@ public class ConsultaRepositorioMySql(string stringDeConexao) : IConsultaReposit
 
             if (data.ToDateTime(inicio) <= agora)
                 return (ResultadoReserva.HorarioPassado, 0);
-            if (!r.GetBoolean("disponivel"))
+            if (!r.GetBoolean("disponivel") || !r.GetBoolean("ativo"))
                 return (ResultadoReserva.HorarioBloqueado, 0);
         }
 
