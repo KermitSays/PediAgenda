@@ -15,6 +15,9 @@ public interface IPacienteRepositorio
 
     IReadOnlyList<Paciente> ListarPorResponsavel(int idResponsavel);
 
+    IReadOnlyList<PacienteRecepcaoResumo> ListarParaRecepcao();
+
+
     bool Existe(int idResponsavel, string nome, DateOnly dataNascimento);
 
     int Inserir(int idResponsavel, string nome, DateOnly dataNascimento);

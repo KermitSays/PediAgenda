@@ -266,6 +266,24 @@ pacientes.MapPost("", (PacienteRequisicao req, ClaimsPrincipal usuario, Paciente
     };
 });
 
+
+// ==========================================
+// RECEPÇÃO — LISTAGEM DE PACIENTES
+// ==========================================
+
+app.MapGet(
+    "/api/recepcao/pacientes",
+    (PacienteService servico) =>
+    {
+        var pacientes = servico.ListarParaRecepcao();
+
+        return Results.Ok(pacientes);
+    })
+    .RequireAuthorization(
+        politica =>
+            politica.RequireRole("RECEPCIONISTA"));
+
+
 // RF05 e RNF03 — horários livres de um dia, agrupados por médico. Qualquer
 // perfil logado consulta: o responsável para agendar, a recepção para atender
 // quem liga.
