@@ -19,8 +19,8 @@ public partial class LoginResponsavel : ContentPage
         new()
         {
             BaseAddress =
-                new Uri(
-                    "https://pediagenda-api.onrender.com/"),
+    new Uri(
+        "https://pediagenda-api.onrender.com/"),
 
             Timeout =
                 TimeSpan.FromSeconds(90)

@@ -17,20 +17,14 @@ public partial class LoginFuncionario : ContentPage
 
 
     private static readonly HttpClient http =
-        new()
-        {
-            BaseAddress =
-                        new Uri(
-                    #if DEBUG && ANDROID
-                            "http://10.0.2.2:5000/"
-                    #else
-                            "https://pediagenda-api.onrender.com/"
-                    #endif
-                        ),
+    new()
+    {
+        BaseAddress =
+            new Uri("https://pediagenda-api.onrender.com/"),
 
-            Timeout =
-                TimeSpan.FromSeconds(90)
-        };
+        Timeout =
+            TimeSpan.FromSeconds(90)
+    };
 
 
     public LoginFuncionario()
