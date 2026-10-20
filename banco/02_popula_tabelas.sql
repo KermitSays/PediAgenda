@@ -11,7 +11,7 @@ USE pediagenda;
 -- Senha de TODAS as contas completas desta carga fictícia: senhaDemo123
 START TRANSACTION;
 
--- 1. Usuários: IDs originais preservados, colunas explícitas.
+-- 1. Usuários.
 INSERT INTO usuario
   (id_usuario, nome, cpf, email, senha_hash, senha_salt,
    senha_iteracoes, ativo, tentativas_invalidas, bloqueado_ate)
@@ -71,7 +71,7 @@ VALUES
 INSERT INTO recepcionista (id_recepcionista, id_usuario)
 VALUES (1, 5), (2, 18), (3, 19);
 
--- 5. Pacientes (os nove registros de origem foram preservados).
+-- 5. Pacientes.
 INSERT INTO paciente (id_paciente, nome, data_nascimento, id_responsavel)
 VALUES
   (1, 'Lucas de Teste', '2025-03-10', 1),
@@ -151,7 +151,7 @@ WHERE h.id_agenda = 4 AND h.data_horario = @dia1 AND h.hora_inicio = '10:30:00';
 INSERT INTO prontuario (id_prontuario, observacoes, id_consulta)
 VALUES (1, 'Registro fictício de atendimento para teste da API.', 3);
 
--- 10. Notificações de SISTEMA, sem disparar e-mails reais.
+-- 10. Notificações do sistema.
 INSERT INTO notificacao (id_notificacao, canal, mensagem, data_envio, id_consulta)
 VALUES
   (1, 'SISTEMA', 'Consulta agendada para teste.', NULL, 1),
