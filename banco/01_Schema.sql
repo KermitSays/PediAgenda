@@ -5,10 +5,27 @@
 -- SGBD: MySQL 8.0
 --
 -- Use em um banco NOVO e vazio. Não apaga nem recria tabelas existentes.
--- Para atualizar um banco com dados, use 03_remover_verificacao_email.sql.
 --
 -- Para melhor vizualização do modelo físico, abra o arquivo Modelo_lógico_banco_de_dados.png, que é a representação gráfica.
 -- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- LIMPEZA OPCIONAL
+-- Para excluir as tabelas e todos os dados, descomente as linhas abaixo.
+-- ---------------------------------------------------------------------
+
+-- DROP TABLE IF EXISTS tentativa_login;
+-- DROP TABLE IF EXISTS relatorio_atendimento;
+-- DROP TABLE IF EXISTS notificacao;
+-- DROP TABLE IF EXISTS prontuario;
+-- DROP TABLE IF EXISTS consulta;
+-- DROP TABLE IF EXISTS horario;
+-- DROP TABLE IF EXISTS agenda_medica;
+-- DROP TABLE IF EXISTS paciente;
+-- DROP TABLE IF EXISTS recepcionista;
+-- DROP TABLE IF EXISTS medico;
+-- DROP TABLE IF EXISTS responsavel;
+-- DROP TABLE IF EXISTS usuario;
 
 CREATE DATABASE IF NOT EXISTS pediagenda
     CHARACTER SET utf8mb4
@@ -17,7 +34,7 @@ CREATE DATABASE IF NOT EXISTS pediagenda
 USE pediagenda;
 
 -- ---------------------------------------------------------------------
--- USUARIO: classe base da generalizacao (sem verificação de e-mail)
+-- USUARIO: classe base dos usuários
 -- ---------------------------------------------------------------------
 CREATE TABLE usuario (
     id_usuario           INT UNSIGNED     NOT NULL AUTO_INCREMENT,
