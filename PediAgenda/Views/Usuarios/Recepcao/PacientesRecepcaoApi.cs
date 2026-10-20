@@ -6,16 +6,7 @@ namespace PediAgenda.Views.Usuarios.Recepcao;
 
 public static class PacientesRecepcaoApi
 {
-#if DEBUG
-#if ANDROID
-    private const string EnderecoApi = "http://10.0.2.2:5000/";
-#else
-    private const string EnderecoApi = "http://localhost:5000/";
-#endif
-#else
-    private const string EnderecoApi =
-        "https://pediagenda-api.onrender.com/";
-#endif
+    private const string EnderecoApi = "https://pediagenda-api.onrender.com/";
 
     private static readonly HttpClient http = new()
     {
