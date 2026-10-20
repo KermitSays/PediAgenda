@@ -51,6 +51,52 @@ public class PacienteRepositorioMySql(string stringDeConexao) : IPacienteReposit
         return pacientes;
     }
 
+
+    public IReadOnlyList<PacienteRecepcaoResumo> ListarParaRecepcao()
+    {
+        const string sql = """
+        SELECT
+            p.id_paciente,
+            p.nome,
+            p.data_nascimento,
+            u.nome AS nome_responsavel,
+            r.telefone AS telefone_responsavel,
+            u.email AS email_responsavel
+        FROM paciente p
+        INNER JOIN responsavel r
+            ON r.id_responsavel = p.id_responsavel
+        INNER JOIN usuario u
+            ON u.id_usuario = r.id_usuario
+        ORDER BY p.nome, p.id_paciente
+        """;
+
+        using var con = Abrir();
+        using var cmd = new MySqlCommand(sql, con);
+        using var reader = cmd.ExecuteReader();
+
+        var pacientes = new List<PacienteRecepcaoResumo>();
+
+        while (reader.Read())
+        {
+            string? email = reader.IsDBNull(
+                reader.GetOrdinal("email_responsavel"))
+                ? null
+                : reader.GetString("email_responsavel");
+
+            pacientes.Add(new PacienteRecepcaoResumo(
+                reader.GetInt32("id_paciente"),
+                reader.GetString("nome"),
+                reader.GetDateOnly("data_nascimento"),
+                reader.GetString("nome_responsavel"),
+                reader.GetString("telefone_responsavel"),
+                email
+            ));
+        }
+
+        return pacientes;
+    }
+
+
     public bool Existe(int idResponsavel, string nome, DateOnly dataNascimento)
     {
         const string sql = """
