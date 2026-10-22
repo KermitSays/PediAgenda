@@ -2,6 +2,7 @@
 namespace PediAgenda.Views.Usuarios.Recepcao;
 
 [QueryProperty(nameof(PacienteId), "PacienteId")]
+[QueryProperty(nameof(PacienteDaApi), "PacienteDaApi")]
 public partial class DetalhesPacienteRecepcao : ContentPage
 {
     private int _pacienteId;
@@ -28,6 +29,23 @@ public partial class DetalhesPacienteRecepcao : ContentPage
         }
     }
 
+    private PacienteRecepcaoItem? _pacienteDaApi;
+
+    public PacienteRecepcaoItem? PacienteDaApi
+    {
+        get => _pacienteDaApi;
+
+        set
+        {
+            _pacienteDaApi = value;
+
+            if (value is not null)
+            {
+                _pacienteId = value.Id;
+            }
+        }
+    }
+
     public DetalhesPacienteRecepcao()
     {
         InitializeComponent();
@@ -49,8 +67,9 @@ public partial class DetalhesPacienteRecepcao : ContentPage
 
     private void CarregarPaciente()
     {
-        _paciente = PacientesRecepcaoDados.Pacientes
-            .FirstOrDefault(p => p.Id == _pacienteId);
+        _paciente = PacienteDaApi
+    ?? PacientesRecepcaoDados.Pacientes
+        .FirstOrDefault(p => p.Id == _pacienteId);
 
         if (_paciente == null)
         {
@@ -96,6 +115,18 @@ public partial class DetalhesPacienteRecepcao : ContentPage
         object sender,
         EventArgs e)
     {
+
+        if (_pacienteDaApi is not null)
+        {
+            await DisplayAlertAsync(
+                "Agendamento em integração",
+                "O agendamento de pacientes cadastrados no banco de dados ainda está sendo integrado.",
+                "OK");
+
+            return;
+        }
+
+
         if (_paciente == null)
         {
             await DisplayAlertAsync(
