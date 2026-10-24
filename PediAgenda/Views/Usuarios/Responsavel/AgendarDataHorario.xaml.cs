@@ -1,3 +1,6 @@
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
 [QueryProperty(nameof(PacienteId), "PacienteId")]
@@ -8,6 +11,33 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 [QueryProperty(nameof(Especialidade), "Especialidade")]
 public partial class AgendarDataHorario : ContentPage
 {
+    private class HorariosApiResposta
+    {
+        public string Data { get; set; } = string.Empty;
+
+        public List<MedicoHorariosApi> Medicos { get; set; } = new();
+    }
+
+    private class MedicoHorariosApi
+    {
+        public int IdMedico { get; set; }
+
+        public string NomeMedico { get; set; } = string.Empty;
+
+        public string Especialidade { get; set; } = string.Empty;
+
+        public List<HorarioApi> Horarios { get; set; } = new();
+    }
+
+    private class HorarioApi
+    {
+        public int Id { get; set; }
+
+        public string Inicio { get; set; } = string.Empty;
+
+        public string Fim { get; set; } = string.Empty;
+    }
+
     private int pacienteId;
 
     private int medicoId;
@@ -229,7 +259,7 @@ public partial class AgendarDataHorario : ContentPage
 
     // CARREGA OS HORÁRIOS DISPONÍVEIS
 
-    private void CarregarHorarios()
+    private async void CarregarHorarios()
     {
         if (HorariosContainer == null ||
             DataPicker == null ||
@@ -238,52 +268,129 @@ public partial class AgendarDataHorario : ContentPage
             return;
         }
 
-
         HorariosContainer.Children.Clear();
-
-
-        horarioSelecionado =
-            null;
-
+        horarioSelecionado = null;
 
         DateTime dataSelecionada =
-            DataPicker.Date
-            ?? DateTime.Today;
+            DataPicker.Date ?? DateTime.Today;
 
+        ErroHorarioLabel.Text = "Consultando horários disponíveis...";
+        ErroHorarioLabel.IsVisible = true;
 
-        List<HorarioAgendamentoItem>
-            horariosDisponiveis =
-                HorarioAgendamentoDados
-                    .ObterHorariosDisponiveis(
-                        MedicoId,
-                        dataSelecionada);
+        try
+        {
+            string? token =
+                await SecureStorage.Default.GetAsync("pediagenda_token");
 
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                ErroHorarioLabel.Text =
+                    "Sessão expirada. Faça login novamente.";
+                return;
+            }
 
-        if (horariosDisponiveis.Count == 0)
+            using HttpClient cliente = new HttpClient
+            {
+                BaseAddress = new Uri(
+                    DeviceInfo.Platform == DevicePlatform.Android
+                        ? "http://10.0.2.2:5000/"
+                        : "http://localhost:5000/"),
+
+                Timeout = TimeSpan.FromSeconds(20)
+            };
+
+            cliente.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            string data = dataSelecionada.ToString("yyyy-MM-dd");
+
+            string url =
+                $"api/horarios?data={data}&medico={MedicoId}";
+
+            using HttpResponseMessage resposta =
+                await cliente.GetAsync(url);
+
+            if (!resposta.IsSuccessStatusCode)
+            {
+                ErroHorarioLabel.Text =
+                    resposta.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                        ? "Sessão expirada. Faça login novamente."
+                        : "Não foi possível consultar os horários.";
+                return;
+            }
+
+            HorariosApiResposta? resultado =
+                await resposta.Content.ReadFromJsonAsync<HorariosApiResposta>();
+
+            string json = await resposta.Content.ReadAsStringAsync();
+
+            System.Diagnostics.Debug.WriteLine(
+                $"RESPOSTA HORARIOS API: {json}");
+
+            if (resultado == null)
+            {
+                ErroHorarioLabel.Text =
+                    "Não foi possível obter os horários.";
+                return;
+            }
+
+            List<HorarioAgendamentoItem> horariosDisponiveis = new();   
+
+            foreach (MedicoHorariosApi medicoApi in resultado.Medicos)
+            {
+                foreach (HorarioApi horarioApi in medicoApi.Horarios)
+                {
+                    if (!TimeSpan.TryParse(horarioApi.Inicio, out TimeSpan inicio) ||
+                        !TimeSpan.TryParse(horarioApi.Fim, out TimeSpan fim))
+                    {
+                        continue;
+                    }
+
+                    horariosDisponiveis.Add(
+                        new HorarioAgendamentoItem
+                        {
+                            IdHorario = horarioApi.Id,
+                            IdMedico = medicoApi.IdMedico,
+                            Data = dataSelecionada,
+                            HoraInicio = inicio,
+                            HoraFim = fim,
+                            Disponivel = true
+                        });
+                }
+            }
+
+            // Evita mostrar uma resposta antiga se a data
+            // ou o médico forem alterados durante a consulta.
+            if ((DataPicker.Date ?? DateTime.Today).Date != dataSelecionada.Date ||
+                MedicoId <= 0)
+            {
+                return;
+            }
+
+            HorariosContainer.Children.Clear();
+
+            if (horariosDisponiveis.Count == 0)
+            {
+                ErroHorarioLabel.Text =
+                    "Não existem horários disponíveis para esta data.";
+                ErroHorarioLabel.IsVisible = true;
+                return;
+            }
+
+            ErroHorarioLabel.IsVisible = false;
+
+            foreach (HorarioAgendamentoItem horario in
+                     horariosDisponiveis.OrderBy(h => h.HoraInicio))
+            {
+                HorariosContainer.Children.Add(
+                    CriarCardHorario(horario));
+            }
+        }
+        catch (Exception)
         {
             ErroHorarioLabel.Text =
-                "Não existem horários disponíveis para esta data.";
-
-
-            ErroHorarioLabel.IsVisible =
-                true;
-
-
-            return;
-        }
-
-
-        ErroHorarioLabel.IsVisible =
-            false;
-
-
-        foreach (
-            HorarioAgendamentoItem horario
-            in horariosDisponiveis)
-        {
-            HorariosContainer.Children.Add(
-                CriarCardHorario(
-                    horario));
+                "Erro ao consultar os horários. Verifique a conexão com a API.";
+            ErroHorarioLabel.IsVisible = true;
         }
     }
 
@@ -332,8 +439,7 @@ public partial class AgendarDataHorario : ContentPage
         Label horarioLabel =
             new Label
             {
-                Text =
-                    horario.HoraTexto,
+                Text = horario.HoraTexto,
 
                 FontSize =
                     16,

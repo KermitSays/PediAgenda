@@ -52,8 +52,8 @@ public class ConsultaService(IConsultaRepositorio consultas, IPacienteRepositori
             campos["idPaciente"] = "Escolha o paciente.";
         if (idHorario is null or <= 0)
             campos["idHorario"] = "Escolha o horário.";
-        if (!TipoAtendimento.Validos.Contains(tipo))
-            campos["tipoAtendimento"] = "Escolha CONVENIO ou PARTICULAR.";
+        if (!string.IsNullOrEmpty(tipo) && !TipoAtendimento.Validos.Contains(tipo))
+            campos["tipoAtendimento"] = "Tipo de atendimento inválido.";
 
         if (campos.Count > 0)
             return new ResultadoConsulta(false, "Verifique os campos destacados.",

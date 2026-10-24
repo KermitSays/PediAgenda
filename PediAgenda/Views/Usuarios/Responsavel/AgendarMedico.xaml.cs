@@ -1,4 +1,7 @@
+
 using System.ComponentModel;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 
 namespace PediAgenda.Views.Usuarios.Responsavel;
@@ -9,29 +12,27 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 public partial class AgendarMedico : ContentPage
 {
     private int pacienteId;
-
     private string? paciente;
-
     private string? especialidade;
-
     private Medico? medicoSelecionado;
 
+    private static readonly HttpClient http = new()
+    {
+        BaseAddress = new Uri("http://10.0.2.2:5000/"),
+        Timeout = TimeSpan.FromSeconds(90)
+    };
 
     public int PacienteId
     {
         get => pacienteId;
-
         set => pacienteId = value;
     }
-
 
     public string Paciente
     {
         get => paciente ?? string.Empty;
-
         set => paciente = value;
     }
-
 
     public string Especialidade
     {
@@ -41,134 +42,123 @@ public partial class AgendarMedico : ContentPage
         {
             especialidade = value;
 
-
             if (EspecialidadeLabel != null)
             {
                 EspecialidadeLabel.Text =
                     $"Especialidade: {value}";
             }
-
-
-            CarregarMedicos(value);
         }
     }
-
 
     public AgendarMedico()
     {
         InitializeComponent();
     }
 
-
-    // CARREGA OS MÉDICOS
-
-    private void CarregarMedicos(
-        string especialidade)
+    protected override async void OnAppearing()
     {
-        List<Medico> medicos =
-            especialidade switch
-            {
-                "Pediatria" =>
-                    new List<Medico>
-                    {
-                        new Medico
-                        {
-                            IdMedico = 1,
-                            Nome = "Dra. Ana Oliveira",
-                            Crm = "CRM-SP 12345 (exemplo)",
-                            Foto = "user.png"
-                        },
+        base.OnAppearing();
 
-                        new Medico
-                        {
-                            IdMedico = 2,
-                            Nome = "Dr. Carlos Mendes",
-                            Crm = "CRM-SP 23456 (exemplo)",
-                            Foto = "user.png"
-                        },
-
-                        new Medico
-                        {
-                            IdMedico = 3,
-                            Nome = "Dra. Juliana Santos",
-                            Crm = "CRM-SP 34567 (exemplo)",
-                            Foto = "user.png"
-                        }
-                    },
-
-
-                "Neuropediatria" =>
-                    new List<Medico>
-                    {
-                        new Medico
-                        {
-                            IdMedico = 4,
-                            Nome = "Dra. Mariana Costa",
-                            Crm = "CRM-SP 45678 (exemplo)",
-                            Foto = "user.png"
-                        },
-
-                        new Medico
-                        {
-                            IdMedico = 5,
-                            Nome = "Dr. Rafael Almeida",
-                            Crm = "CRM-SP 56789 (exemplo)",
-                            Foto = "user.png"
-                        }
-                    },
-
-
-                "Cardiologia" =>
-                    new List<Medico>
-                    {
-                        new Medico
-                        {
-                            IdMedico = 6,
-                            Nome = "Dr. Felipe Martins",
-                            Crm = "CRM-SP 67890 (exemplo)",
-                            Foto = "user.png"
-                        },
-
-                        new Medico
-                        {
-                            IdMedico = 7,
-                            Nome = "Dra. Camila Rodrigues",
-                            Crm = "CRM-SP 78901 (exemplo)",
-                            Foto = "user.png"
-                        }
-                    },
-
-
-                "Endocrinologia" =>
-                    new List<Medico>
-                    {
-                        new Medico
-                        {
-                            IdMedico = 8,
-                            Nome = "Dra. Beatriz Lima",
-                            Crm = "CRM-SP 89012 (exemplo)",
-                            Foto = "user.png"
-                        },
-
-                        new Medico
-                        {
-                            IdMedico = 9,
-                            Nome = "Dr. Lucas Ferreira",
-                            Crm = "CRM-SP 90123 (exemplo)",
-                            Foto = "user.png"
-                        }
-                    },
-
-
-                _ =>
-                    new List<Medico>()
-            };
-
-
-        MedicosCollectionView.ItemsSource =
-            medicos;
+        await CarregarMedicosAsync();
     }
 
+    // CARREGA OS MÉDICOS REAIS DA API
+
+    private async Task CarregarMedicosAsync()
+    {
+        try
+        {
+            medicoSelecionado = null;
+            ErroLabel.IsVisible = false;
+
+            MedicosCollectionView.ItemsSource = null;
+
+            string? token = await SecureStorage.Default
+                .GetAsync("pediagenda_token");
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                MostrarErro(
+                    "Faça login para consultar os médicos.");
+                return;
+            }
+
+            string rota = "api/medicos";
+
+            if (!string.IsNullOrWhiteSpace(Especialidade))
+            {
+                rota += "?especialidade=" +
+                    Uri.EscapeDataString(Especialidade);
+            }
+
+            using var requisicao = new HttpRequestMessage(
+                HttpMethod.Get,
+                rota);
+
+            requisicao.Headers.Authorization =
+                new AuthenticationHeaderValue(
+                    "Bearer",
+                    token);
+
+            using var resposta =
+                await http.SendAsync(requisicao);
+
+            if (resposta.StatusCode ==
+                System.Net.HttpStatusCode.Unauthorized)
+            {
+                MostrarErro(
+                    "Sua sessão expirou. Faça login novamente.");
+                return;
+            }
+
+            if (!resposta.IsSuccessStatusCode)
+            {
+                MostrarErro(
+                    "Não foi possível consultar os médicos.");
+                return;
+            }
+
+            var dados = await resposta.Content
+                .ReadFromJsonAsync<List<MedicoApiDto>>();
+
+            var medicos = new List<Medico>();
+
+            if (dados != null)
+            {
+                foreach (var item in dados)
+                {
+                    medicos.Add(new Medico
+                    {
+                        IdMedico = item.IdMedico,
+                        Nome = item.Nome,
+                        Crm = item.Especialidade,
+                        Foto = "user.png"
+                    });
+                }
+            }
+
+            MedicosCollectionView.ItemsSource = medicos;
+
+            if (medicos.Count == 0)
+            {
+                MostrarErro(
+                    "Nenhum médico encontrado para esta especialidade.");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(ex);
+
+            MostrarErro(
+                "Erro de conexão. Verifique se a API está funcionando.");
+        }
+    }
+
+    private void MostrarErro(string mensagem)
+    {
+        ErroLabel.Text = mensagem;
+        ErroLabel.IsVisible = true;
+    }
 
     // SELECIONA O MÉDICO
 
@@ -179,38 +169,23 @@ public partial class AgendarMedico : ContentPage
         if (sender is not Border border)
             return;
 
-
-        if (border.BindingContext
-            is not Medico medico)
-        {
+        if (border.BindingContext is not Medico medico)
             return;
-        }
-
 
         if (MedicosCollectionView.ItemsSource
             is not List<Medico> medicos)
-        {
             return;
-        }
-
 
         foreach (Medico item in medicos)
         {
-            item.Selecionado =
-                item == medico;
+            item.Selecionado = item == medico;
         }
 
-
-        medicoSelecionado =
-            medico;
-
-
-        ErroLabel.IsVisible =
-            false;
+        medicoSelecionado = medico;
+        ErroLabel.IsVisible = false;
     }
 
-
-    // CONTINUAR
+    // CONTINUAR PARA DATA E HORÁRIO
 
     private async void ContinuarButton_Clicked(
         object sender,
@@ -218,52 +193,25 @@ public partial class AgendarMedico : ContentPage
     {
         if (medicoSelecionado == null)
         {
-            ErroLabel.Text =
-                "Selecione um médico para continuar.";
-
-            ErroLabel.IsVisible =
-                true;
-
+            MostrarErro(
+                "Selecione um médico para continuar.");
             return;
         }
-
 
         await Shell.Current.GoToAsync(
             nameof(AgendarDataHorario),
             new Dictionary<string, object>
             {
-                {
-                    "PacienteId",
-                    PacienteId
-                },
-
-                {
-                    "Paciente",
-                    Paciente
-                },
-
-                {
-                    "MedicoId",
-                    medicoSelecionado.IdMedico
-                },
-
-                {
-                    "Medico",
-                    medicoSelecionado.Nome
-                },
-
-                {
-                    "FotoMedico",
-                    medicoSelecionado.Foto
-                },
-
-                {
-                    "Especialidade",
-                    Especialidade
-                }
+                { "PacienteId", PacienteId },
+                { "Paciente", Paciente },
+                { "MedicoId", medicoSelecionado.IdMedico },
+                { "Medico", medicoSelecionado.Nome },
+                { "FotoMedico", medicoSelecionado.Foto },
+                { "Especialidade", Especialidade }
             });
     }
 
+    // VOLTAR
 
     private async void VoltarButton_Clicked(
         object sender,
@@ -271,8 +219,18 @@ public partial class AgendarMedico : ContentPage
     {
         await Shell.Current.GoToAsync("..");
     }
-}
 
+    // FORMATO DOS DADOS RETORNADOS PELA API
+
+    private class MedicoApiDto
+    {
+        public int IdMedico { get; set; }
+
+        public string Nome { get; set; } = string.Empty;
+
+        public string Especialidade { get; set; } = string.Empty;
+    }
+}
 
 // MODELO DO MÉDICO
 
@@ -280,21 +238,13 @@ public class Medico : INotifyPropertyChanged
 {
     private bool selecionado;
 
-
     public int IdMedico { get; set; }
 
+    public string Nome { get; set; } = string.Empty;
 
-    public string Nome { get; set; } =
-        string.Empty;
+    public string Crm { get; set; } = string.Empty;
 
-
-    public string Crm { get; set; } =
-        string.Empty;
-
-
-    public string Foto { get; set; } =
-        string.Empty;
-
+    public string Foto { get; set; } = string.Empty;
 
     public bool Selecionado
     {
@@ -305,46 +255,30 @@ public class Medico : INotifyPropertyChanged
             if (selecionado == value)
                 return;
 
-
-            selecionado =
-                value;
-
+            selecionado = value;
 
             OnPropertyChanged();
-
-            OnPropertyChanged(
-                nameof(CorFundo));
-
-            OnPropertyChanged(
-                nameof(CorBorda));
-
-            OnPropertyChanged(
-                nameof(EspessuraBorda));
+            OnPropertyChanged(nameof(CorFundo));
+            OnPropertyChanged(nameof(CorBorda));
+            OnPropertyChanged(nameof(EspessuraBorda));
         }
     }
-
 
     public Color CorFundo =>
         Selecionado
             ? Color.FromArgb("#EAF5FA")
             : Color.FromArgb("#FFFFFF");
 
-
     public Color CorBorda =>
         Selecionado
             ? Color.FromArgb("#105A7E")
             : Color.FromArgb("#ABCCDC");
 
-
     public double EspessuraBorda =>
-        Selecionado
-            ? 2.5
-            : 1;
-
+        Selecionado ? 2.5 : 1;
 
     public event PropertyChangedEventHandler?
         PropertyChanged;
-
 
     protected void OnPropertyChanged(
         [CallerMemberName]
@@ -352,7 +286,6 @@ public class Medico : INotifyPropertyChanged
     {
         PropertyChanged?.Invoke(
             this,
-            new PropertyChangedEventArgs(
-                propertyName));
+            new PropertyChangedEventArgs(propertyName));
     }
 }
