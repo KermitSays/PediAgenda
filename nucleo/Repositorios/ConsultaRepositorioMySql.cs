@@ -104,7 +104,10 @@ public class ConsultaRepositorioMySql(string stringDeConexao) : IConsultaReposit
             VALUES (@tipo, @paciente, @horario)
             """, con, tx))
         {
-            cmd.Parameters.AddWithValue("@tipo", tipoAtendimento);
+            cmd.Parameters.AddWithValue("@tipo",
+                string.IsNullOrWhiteSpace(tipoAtendimento)
+                ? DBNull.Value
+                : tipoAtendimento);
             cmd.Parameters.AddWithValue("@paciente", idPaciente);
             cmd.Parameters.AddWithValue("@horario", idHorario);
             cmd.ExecuteNonQuery();
@@ -197,7 +200,9 @@ public class ConsultaRepositorioMySql(string stringDeConexao) : IConsultaReposit
     private static ConsultaDetalhe Ler(MySqlDataReader r) => new(
         r.GetInt32("id_consulta"),
         r.GetString("status"),
-        r.GetString("tipo_atendimento"),
+        r.IsDBNull(r.GetOrdinal("tipo_atendimento"))
+             ? string.Empty
+             : r.GetString("tipo_atendimento"),
         r.GetDateOnly("data_horario"),
         TimeOnly.FromTimeSpan(r.GetTimeSpan("hora_inicio")),
         TimeOnly.FromTimeSpan(r.GetTimeSpan("hora_fim")),
