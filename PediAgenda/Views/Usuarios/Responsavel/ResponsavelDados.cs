@@ -84,6 +84,61 @@ public class PacienteResponsavelItem :
         }
     }
 
+    // Filtro selecionado no histórico de consultas
+    private string filtroSelecionado = "Todas";
+
+    public string FiltroSelecionado
+    {
+        get => filtroSelecionado;
+        set
+        {
+            if (filtroSelecionado == value)
+                return;
+
+            filtroSelecionado = value;
+
+            PropertyChanged?.Invoke(
+                this, new PropertyChangedEventArgs(nameof(FiltroSelecionado)));
+
+            PropertyChanged?.Invoke(
+                this, new PropertyChangedEventArgs(nameof(TodasConsultasOrdenadas)));
+        }
+    }
+
+    // Consultas exibidas conforme o filtro selecionado
+    public IEnumerable<ConsultaResponsavelItem> TodasConsultasOrdenadas
+    {
+        get
+        {
+            IEnumerable<ConsultaResponsavelItem> consultasFiltradas = Consultas;
+
+            switch (FiltroSelecionado)
+            {
+                case "Agendadas":
+                    consultasFiltradas = Consultas.Where(c =>
+                        StatusConsulta.EhPorConfirmar(c.Status) ||
+                        StatusConsulta.EhConfirmada(c.Status));
+                    break;
+
+                case "Realizadas":
+                    consultasFiltradas = Consultas.Where(c =>
+                        StatusConsulta.EhRealizada(c.Status));
+                    break;
+
+                case "Canceladas":
+                    consultasFiltradas = Consultas.Where(c =>
+                        StatusConsulta.EhCancelada(c.Status));
+                    break;
+            }
+
+            return consultasFiltradas
+                .OrderByDescending(c => c.Data)
+                .ThenByDescending(c => c.Horario);
+        }
+    }
+
+    public bool SemConsultas =>
+        !Consultas.Any();
 
     // =============================================
     // CONSULTAS ATIVAS
