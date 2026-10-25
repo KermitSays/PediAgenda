@@ -42,6 +42,8 @@ builder.Services.AddScoped<PacienteService>();
 builder.Services.AddSingleton<IHorarioRepositorio>(
     _ => new HorarioRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<HorarioService>();
+builder.Services.AddSingleton<MedicoRepositorioMySql>(
+    _ => new MedicoRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddSingleton<IConsultaRepositorio>(
     _ => new ConsultaRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<ConsultaService>();
@@ -305,6 +307,16 @@ app.MapGet("/api/horarios", (string? data, string? especialidade, int? medico, H
 
     return Results.Ok(new HorariosDoDia(resultado.Data.ToString("yyyy-MM-dd"), medicos));
 }).RequireAuthorization();
+
+// RF05 - Consulta os médicos ativos por especialidade.
+app.MapGet("/api/medicos",
+    (string? especialidade, MedicoRepositorioMySql repositorio) =>
+    {
+        var medicos = repositorio.Listar(especialidade);
+
+        return Results.Ok(medicos);
+    })
+.RequireAuthorization();
 
 // RF05 e RF07 — consultas do responsável: agendar, listar, cancelar.
 var consultas = app.MapGroup("/api/consultas")

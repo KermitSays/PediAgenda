@@ -19,8 +19,25 @@
                     Stroke="{StaticResource InputBlue}" StrokeThickness="1"
                     Padding="18" StrokeShape="RoundRectangle 18">
                 <VerticalStackLayout Spacing="14">
-                    <Label Text="Dados da consulta" FontSize="20"
-                           FontAttributes="Bold" TextColor="{StaticResource TextDark}" />
+
+                    <Label Text="Dados da consulta"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextDark}"
+                           HorizontalTextAlignment="Center"
+                           HorizontalOptions="Fill" />
+
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="Responsável"
+                               FontSize="13"
+                               TextColor="{StaticResource InputPlaceholder}" />
+
+                        <Label x:Name="ResponsavelLabel"
+                                 FontSize="17"
+                                 FontAttributes="Bold"
+                                 TextColor="{StaticResource TextDark}" />
+                    </VerticalStackLayout>
+
                     <VerticalStackLayout Spacing="3">
                         <Label Text="Paciente" FontSize="13" TextColor="{StaticResource InputPlaceholder}" />
                         <Label x:Name="PacienteLabel" FontSize="17" FontAttributes="Bold"

@@ -1,4 +1,7 @@
+using PediAgenda.Dados;
 using System.Globalization;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
@@ -13,6 +16,11 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 [QueryProperty(nameof(FotoMedico), "FotoMedico")]
 public partial class AgendarConfirmacao : ContentPage
 {
+    private static readonly HttpClient http = new()
+    {
+         BaseAddress = new Uri("http://10.0.2.2:5000/"),
+         Timeout = TimeSpan.FromSeconds(90)
+    };
     private int pacienteId;
 
     private int medicoId;
@@ -153,178 +161,95 @@ public partial class AgendarConfirmacao : ContentPage
     public AgendarConfirmacao()
     {
         InitializeComponent();
+
+        ResponsavelLabel.Text = SessaoUsuario.Nome;
     }
 
 
     // CONFIRMAR AGENDAMENTO
 
-    private async void ConfirmarButton_Clicked(
-        object sender,
-        EventArgs e)
+    private async void ConfirmarButton_Clicked(object sender, EventArgs e)
     {
         if (agendamentoSalvo)
             return;
 
-
-        PacienteResponsavelItem? pacienteEncontrado =
-            ResponsavelDados.Pacientes
-                .FirstOrDefault(p =>
-                    p.Id == PacienteId);
-
-
-        if (pacienteEncontrado == null)
+        if (PacienteId <= 0 || HorarioId <= 0)
         {
             await DisplayAlertAsync(
-                "Erro",
-                "Não foi possível localizar o paciente.",
+                "Erro nos dados",
+                $"PacienteId: {PacienteId}\nHorarioId: {HorarioId}",
                 "OK");
-
             return;
         }
 
-
-        if (!DateTime.TryParseExact(
-            Data,
-            "dd/MM/yyyy",
-            CultureInfo.InvariantCulture,
-            DateTimeStyles.None,
-            out DateTime dataConsulta))
+        try
         {
-            await DisplayAlertAsync(
-                "Erro",
-                "A data da consulta é inválida.",
-                "OK");
+            agendamentoSalvo = true;
 
-            return;
-        }
+            string? token = await SecureStorage.Default
+                .GetAsync("pediagenda_token");
 
-
-        if (!TimeSpan.TryParse(
-            Horario,
-            out TimeSpan horarioConsulta))
-        {
-            await DisplayAlertAsync(
-                "Erro",
-                "O horário da consulta é inválido.",
-                "OK");
-
-            return;
-        }
-
-
-        // Confere novamente antes de salvar.
-        // Isso simula a validação que futuramente
-        // será responsabilidade da API.
-
-        bool horarioReservado =
-            HorarioAgendamentoDados
-                .ReservarHorario(
-                    HorarioId);
-
-
-        if (!horarioReservado)
-        {
-            await DisplayAlertAsync(
-                "Horário indisponível",
-                "Este horário não está mais disponível. " +
-                "Selecione outro horário.",
-                "OK");
-
-
-            await Shell.Current.GoToAsync(
-                "..");
-
-
-            return;
-        }
-
-
-        int novoId =
-            ResponsavelDados.Pacientes
-                .SelectMany(p =>
-                    p.Consultas)
-                .Select(c =>
-                    c.Id)
-                .DefaultIfEmpty(0)
-                .Max()
-            + 1;
-
-
-        // Pagamento e convenio serao definidos na recepcao.
-
-        ConsultaResponsavelItem novaConsulta =
-            new ConsultaResponsavelItem
+            if (string.IsNullOrWhiteSpace(token))
             {
-                Id =
-                    novoId,
+                await DisplayAlertAsync(
+                    "Acesso não autorizado",
+                    "Faça login novamente para agendar a consulta.",
+                    "OK");
+                return;
+            }
 
-                IdMedico =
-                    MedicoId,
-
-                IdHorario =
-                    HorarioId,
-
-                Medico =
-                    Medico,
-
-                Especialidade =
-                    Especialidade,
-
-                Data =
-                    dataConsulta,
-
-                Horario =
-                    horarioConsulta,
-
-                Status =
-                    "Por confirmar"
+            var dados = new
+            {
+                idPaciente = PacienteId,
+                idHorario = HorarioId,
+                tipoAtendimento = (string?)null
             };
 
+            using var requisicao = new HttpRequestMessage(
+                HttpMethod.Post,
+                "api/consultas");
 
-        pacienteEncontrado.Consultas.Add(
-            novaConsulta);
+            requisicao.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
 
+            requisicao.Content = JsonContent.Create(dados);
 
-        // Notificacoes retiradas do escopo reduzido.
+            using var resposta = await http.SendAsync(requisicao);
 
-        agendamentoSalvo =
-            true;
-
-
-        await Shell.Current.GoToAsync(
-            nameof(AgendamentoConcluido),
-            new Dictionary<string, object>
+            if (!resposta.IsSuccessStatusCode)
             {
-                {
-                    "Paciente",
-                    Paciente
-                },
+                await DisplayAlertAsync(
+                    "Não foi possível agendar",
+                    "Verifique se o horário continua disponível e tente novamente.",
+                    "OK");
 
-                {
-                    "Medico",
-                    Medico
-                },
+                return;
+            }
 
+            await Shell.Current.GoToAsync(
+                nameof(AgendamentoConcluido),
+                new Dictionary<string, object>
                 {
-                    "FotoMedico",
-                    FotoMedico
-                },
-
-                {
-                    "Especialidade",
-                    Especialidade
-                },
-
-                {
-                    "Data",
-                    Data
-                },
-
-                {
-                    "Horario",
-                    Horario
-                }
-            });
+                { "Responsavel", SessaoUsuario.Nome },
+                { "Paciente", Paciente },
+                { "Medico", Medico },
+                { "FotoMedico", FotoMedico },
+                { "Especialidade", Especialidade },
+                { "Data", Data },
+                { "Horario", Horario }
+                });
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync(
+                "Erro de conexão",
+                $"Não foi possível concluir o agendamento: {ex.Message}",
+                "OK");
+        }
+        finally
+        {
+            agendamentoSalvo = false;
+        }
     }
 
 

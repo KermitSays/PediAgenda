@@ -25,6 +25,15 @@
                            HorizontalTextAlignment="Center"
                            TextColor="{StaticResource TextDark}" />
                     <VerticalStackLayout Spacing="3">
+                        <Label Text="Responsável"
+                           FontSize="13"
+                           TextColor="{StaticResource InputPlaceholder}" />
+                        <Label Text="{Binding Responsavel}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextDark}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="3">
                         <Label Text="Paciente" FontSize="13" TextColor="{StaticResource InputPlaceholder}" />
                         <Label Text="{Binding Paciente}" FontSize="18" FontAttributes="Bold"
                                TextColor="{StaticResource TextDark}" />
