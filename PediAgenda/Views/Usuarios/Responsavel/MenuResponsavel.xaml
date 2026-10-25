@@ -154,174 +154,84 @@
                 Spacing="10">
 
                 <Label
-                    Text="Próxima consulta"
+                    Text="Próximas consultas"
                     FontSize="21"
                     FontAttributes="Bold"
                     TextColor="{StaticResource TextDark}" />
 
 
                 <!-- QUANDO EXISTE CONSULTA -->
+                <!-- LISTA DE PRÓXIMAS CONSULTAS -->
 
-                <Border
-                    x:Name="ProximaConsultaCard"
-                    BackgroundColor="{StaticResource White}"
-                    StrokeThickness="0"
-                    Padding="20"
-                    StrokeShape="RoundRectangle 20">
+                <VerticalStackLayout
+    x:Name="ProximasConsultasContainer"
+    Spacing="10"
+    IsVisible="False">
 
-                    <VerticalStackLayout
-                        Spacing="15">
-
-
-                        <!-- MÉDICO -->
-
-                        <Grid
-                            ColumnDefinitions="Auto,*"
-                            ColumnSpacing="14">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
 
                             <Border
-                                Grid.Column="0"
-                                StrokeThickness="0"
-                                StrokeShape="RoundRectangle 28">
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource InputBlue}"
+                StrokeThickness="1"
+                Padding="15"
+                StrokeShape="RoundRectangle 15">
 
-                                <Image
-                                    Source="user.png"
-                                    WidthRequest="55"
-                                    HeightRequest="55"
-                                    Aspect="AspectFit"
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                        Tapped="ProximaConsulta_Tapped" />
+                                </Border.GestureRecognizers>
+
+                                <Grid
+                    ColumnDefinitions="*,Auto"
+                    RowDefinitions="Auto,Auto,Auto"
+                    ColumnSpacing="10"
+                    RowSpacing="4">
+
+                                    <!-- MÉDICO -->
+                                    <Label
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Text="{Binding Consulta.Medico}"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextDark}" />
+
+                                    <!-- DATA E HORÁRIO -->
+                                    <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Text="{Binding Consulta.DataHorario}"
+                        FontSize="14"
+                        TextColor="{StaticResource PrimaryBlue}" />
+
+                                    <!-- PACIENTE -->
+                                    <Label
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Text="{Binding Paciente.Nome}"
+                        FontSize="13"
+                        TextColor="{StaticResource InputPlaceholder}" />
+
+                                    <!-- INDICADOR -->
+                                    <Label
+                        Grid.Row="0"
+                        Grid.RowSpan="3"
+                        Grid.Column="1"
+                        Text="›"
+                        FontSize="28"
+                        VerticalTextAlignment="Center"
+                        TextColor="{StaticResource PrimaryBlue}" />
+
+                                </Grid>
 
                             </Border>
 
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
 
-                            <VerticalStackLayout
-                                Grid.Column="1"
-                                VerticalOptions="Center"
-                                Spacing="2">
-
-                                <Label
-                                    x:Name="ProximoMedicoLabel"
-                                    FontSize="18"
-                                    FontAttributes="Bold"
-                                    TextColor="{StaticResource TextDark}" />
-
-                                <Label
-                                    x:Name="ProximaEspecialidadeLabel"
-                                    FontSize="15"
-                                    TextColor="{StaticResource PrimaryBlue}" />
-
-                            </VerticalStackLayout>
-
-                        </Grid>
-
-
-                        <!-- PACIENTE -->
-
-                        <VerticalStackLayout
-                            Spacing="2">
-
-                            <Label
-                                Text="paciente"
-                                FontSize="13"
-                                TextColor="{StaticResource InputPlaceholder}" />
-
-                            <Label
-                                x:Name="ProximoPacienteLabel"
-                                FontSize="16"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource TextDark}" />
-
-                        </VerticalStackLayout>
-
-
-                        <!-- INFORMAÇÕES -->
-
-                        <Grid
-                            ColumnDefinitions="*,*"
-                            RowDefinitions="Auto,Auto"
-                            ColumnSpacing="15"
-                            RowSpacing="12">
-
-
-                            <!-- DATA -->
-
-                            <VerticalStackLayout
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                Spacing="2">
-
-                                <Label
-                                    Text="data"
-                                    FontSize="13"
-                                    TextColor="{StaticResource InputPlaceholder}" />
-
-                                <Label
-                                    x:Name="ProximaDataLabel"
-                                    FontSize="16"
-                                    FontAttributes="Bold"
-                                    TextColor="{StaticResource TextDark}" />
-
-                            </VerticalStackLayout>
-
-
-                            <!-- HORÁRIO -->
-
-                            <VerticalStackLayout
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Spacing="2">
-
-                                <Label
-                                    Text="horário"
-                                    FontSize="13"
-                                    TextColor="{StaticResource InputPlaceholder}" />
-
-                                <Label
-                                    x:Name="ProximoHorarioLabel"
-                                    FontSize="16"
-                                    FontAttributes="Bold"
-                                    TextColor="{StaticResource TextDark}" />
-
-                            </VerticalStackLayout>
-
-
-
-                            <!-- STATUS -->
-
-                            <VerticalStackLayout
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Spacing="2">
-
-                                <Label
-                                    Text="status"
-                                    FontSize="13"
-                                    TextColor="{StaticResource InputPlaceholder}" />
-
-                                <Border
-                                    BackgroundColor="{StaticResource ResponsibleButton}"
-                                    StrokeThickness="0"
-                                    Padding="10,5"
-                                    StrokeShape="RoundRectangle 12"
-                                    HorizontalOptions="Start">
-
-                                    <Label
-                                        x:Name="ProximoStatusLabel"
-                                        FontSize="14"
-                                        FontAttributes="Bold"
-                                        TextColor="{StaticResource ResponsibleText}" />
-
-                                </Border>
-
-                            </VerticalStackLayout>
-
-                        </Grid>
-
-                    </VerticalStackLayout>
-
-                </Border>
-
+                </VerticalStackLayout>
 
                 <!-- QUANDO NÃO EXISTE CONSULTA -->
 
