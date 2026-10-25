@@ -66,18 +66,6 @@
                     BackgroundColor="{StaticResource White}"
                     SelectedIndexChanged="EspecialidadePicker_SelectedIndexChanged">
 
-                    <Picker.Items>
-
-                        <x:String>Pediatria</x:String>
-
-                        <x:String>Neuropediatria</x:String>
-
-                        <x:String>Cardiologia</x:String>
-
-                        <x:String>Endocrinologia</x:String>
-
-                    </Picker.Items>
-
                 </Picker>
 
             </VerticalStackLayout>

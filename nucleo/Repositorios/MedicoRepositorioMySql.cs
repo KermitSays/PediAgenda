@@ -50,6 +50,38 @@ public class MedicoRepositorioMySql(string stringDeConexao)
 
         return medicos;
     }
+    // CONSULTA AS ESPECIALIDADES DOS MÉDICOS ATIVOS
+    public List<string> ListarEspecialidades()
+    {
+        const string sql = """
+        SELECT DISTINCT TRIM(m.especialidade) AS especialidade
+        FROM medico m
+        INNER JOIN usuario u
+            ON m.id_usuario = u.id_usuario
+        WHERE u.ativo = TRUE
+          AND m.especialidade IS NOT NULL
+          AND TRIM(m.especialidade) <> ''
+        ORDER BY especialidade
+        """;
+
+        using var con = new MySqlConnection(_conexao);
+        con.Open();
+
+        using var cmd = new MySqlCommand(sql, con);
+
+        var especialidades = new List<string>();
+
+        using var leitor = cmd.ExecuteReader();
+
+        while (leitor.Read())
+        {
+            especialidades.Add(
+                leitor.GetString("especialidade"));
+        }
+
+        return especialidades;
+    }
+
 }
 
 public record MedicoListaDto(
