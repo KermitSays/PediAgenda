@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
 [QueryProperty(nameof(ConsultaId), "ConsultaId")]
@@ -8,6 +10,14 @@ namespace PediAgenda.Views.Usuarios.Responsavel;
 [QueryProperty(nameof(Horario), "Horario")]
 public partial class CancelarConsulta : ContentPage
 {
+
+    // Conexão com a API do PediAgenda
+    private static readonly HttpClient http = new()
+    {
+        BaseAddress = new Uri("http://10.0.2.2:5000/"),
+        Timeout = TimeSpan.FromSeconds(90)
+    };
+
     private int consultaId;
 
     private string? medico;
@@ -212,19 +222,72 @@ public partial class CancelarConsulta : ContentPage
         }
 
 
-        // CANCELA A CONSULTA
+        // CANCELA A CONSULTA UTILIZANDO A API
 
-        consulta.Status =
-            "Cancelada";
-
-
-        // LIBERA O HORÁRIO NOVAMENTE
-
-        if (consulta.IdHorario > 0)
+        try
         {
-            HorarioAgendamentoDados
-                .LiberarHorario(
-                    consulta.IdHorario);
+            // Recupera o token do responsável logado
+            string? token = await SecureStorage.Default
+                .GetAsync("pediagenda_token");
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                await DisplayAlertAsync(
+                    "Sessão expirada",
+                    "Faça login novamente para cancelar a consulta.",
+                    "OK");
+
+                return;
+            }
+
+            // Envia o cancelamento para a API
+            using var requisicao = new HttpRequestMessage(
+                HttpMethod.Patch,
+                $"api/consultas/{ConsultaId}/cancelar");
+
+            requisicao.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            using var resposta = await http.SendAsync(requisicao);
+
+            // Verifica se a API confirmou o cancelamento
+            if (!resposta.IsSuccessStatusCode)
+            {
+                string mensagem = resposta.StatusCode switch
+                {
+                    System.Net.HttpStatusCode.Unauthorized =>
+                        "Sua sessão expirou. Faça login novamente.",
+
+                    System.Net.HttpStatusCode.Conflict =>
+                        "Esta consulta não pode ser cancelada. Verifique o prazo permitido.",
+
+                    System.Net.HttpStatusCode.NotFound =>
+                        "A consulta não foi encontrada.",
+
+                    _ => "Não foi possível cancelar a consulta. Tente novamente."
+                };
+
+                await DisplayAlertAsync(
+                    "Cancelamento não realizado",
+                    mensagem,
+                    "OK");
+
+                return;
+            }
+
+            // A API confirmou o cancelamento
+            consulta.Status = "Cancelada";
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(ex);
+
+            await DisplayAlertAsync(
+                "Erro de conexão",
+                "Não foi possível conectar à API para cancelar a consulta.",
+                "OK");
+
+            return;
         }
 
 
