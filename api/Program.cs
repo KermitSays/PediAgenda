@@ -318,6 +318,17 @@ app.MapGet("/api/medicos",
     })
 .RequireAuthorization();
 
+
+// RF05 - Consulta as especialidades dos médicos ativos.
+app.MapGet("/api/especialidades",
+    (MedicoRepositorioMySql repositorio) =>
+    {
+        var especialidades = repositorio.ListarEspecialidades();
+
+        return Results.Ok(especialidades);
+    })
+.RequireAuthorization();
+
 // RF05 e RF07 — consultas do responsável: agendar, listar, cancelar.
 var consultas = app.MapGroup("/api/consultas")
                    .RequireAuthorization(politica => politica.RequireRole("RESPONSAVEL"));

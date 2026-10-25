@@ -28,6 +28,8 @@
                 FontSize="15"
                 TextColor="{StaticResource InputPlaceholder}" />
 
+            <Label x:Name="EstadoAgendaLabel" FontSize="12" TextColor="Black" />
+            <Button Text="Atualizar" Clicked="AtualizarButton_Clicked" />
         </VerticalStackLayout>
     <controls:BotaoLogoff Grid.Column="1" />
 </Grid>

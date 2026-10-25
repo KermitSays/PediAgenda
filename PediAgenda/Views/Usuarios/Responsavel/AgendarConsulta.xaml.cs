@@ -33,6 +33,7 @@ public partial class AgendarConsulta : ContentPage
         base.OnAppearing();
 
         await CarregarPacientesAsync();
+        await CarregarEspecialidadesAsync();
     }
 
     private async Task CarregarPacientesAsync()
@@ -125,6 +126,68 @@ public partial class AgendarConsulta : ContentPage
         finally
         {
             carregandoPacientes = false;
+        }
+    }
+
+    // CARREGA AS ESPECIALIDADES DIRETAMENTE DA API
+
+    private async Task CarregarEspecialidadesAsync()
+    {
+        especialidadeSelecionada = null;
+        EspecialidadePicker.SelectedIndex = -1;
+        EspecialidadePicker.Items.Clear();
+
+        try
+        {
+            string? token = await SecureStorage.Default
+                .GetAsync("pediagenda_token");
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                MostrarErro(
+                    "Faça login para consultar as especialidades.");
+                return;
+            }
+
+            using var requisicao = new HttpRequestMessage(
+                HttpMethod.Get,
+                "api/especialidades");
+
+            requisicao.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            using var resposta = await http.SendAsync(requisicao);
+
+            if (!resposta.IsSuccessStatusCode)
+            {
+                MostrarErro(
+                    "Não foi possível carregar as especialidades.");
+                return;
+            }
+
+            var especialidades = await resposta.Content
+                .ReadFromJsonAsync<List<string>>();
+
+            if (especialidades == null || especialidades.Count == 0)
+            {
+                MostrarErro(
+                    "Nenhuma especialidade disponível.");
+                return;
+            }
+
+            foreach (var especialidade in especialidades)
+            {
+                EspecialidadePicker.Items.Add(especialidade);
+            }
+
+            ErroLabel.IsVisible = false;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(ex);
+
+            MostrarErro(
+                "Erro de conexão ao consultar as especialidades.");
         }
     }
 
