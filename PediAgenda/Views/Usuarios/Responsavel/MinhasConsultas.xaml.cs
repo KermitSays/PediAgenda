@@ -194,6 +194,10 @@ public partial class MinhasConsultas : ContentPage
             if (paciente == null)
                 continue;
 
+            // Verifica se a consulta já existe na lista do paciente
+            if (paciente.Consultas.Any(c => c.Id == consulta.Id))
+                continue;
+
             if (!DateTime.TryParse(consulta.Data, out DateTime data) ||
                 !TimeSpan.TryParse(consulta.Inicio, out TimeSpan horario))
                 continue;

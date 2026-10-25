@@ -1,15 +1,16 @@
 using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using PediAgenda.Dados;
 
 namespace PediAgenda.Views.Usuarios.Responsavel;
 
 public partial class PacientesResponsavel : ContentPage
 {
-    public ObservableCollection<PacienteResponsavelItem>
-        PacientesLista
-    { get; set; }
+    public ObservableCollection<PacienteResponsavelItem> PacientesLista
+    {
+        get;
+        set;
+    }
 
     private static readonly HttpClient http = new()
     {
@@ -33,6 +34,8 @@ public partial class PacientesResponsavel : ContentPage
         await CarregarPacientesAsync();
     }
 
+    // CARREGA OS DEPENDENTES DO RESPONSÁVEL LOGADO
+
     private async Task CarregarPacientesAsync()
     {
         try
@@ -44,7 +47,7 @@ public partial class PacientesResponsavel : ContentPage
             {
                 await DisplayAlert(
                     "Acesso não autorizado",
-                    "Faça login para consultar seus pacientes.",
+                    "Faça login para consultar seus dependentes.",
                     "OK");
 
                 return;
@@ -63,7 +66,7 @@ public partial class PacientesResponsavel : ContentPage
             {
                 await DisplayAlert(
                     "Erro",
-                    "Não foi possível consultar os pacientes.",
+                    "Não foi possível consultar os dependentes.",
                     "OK");
 
                 return;
@@ -95,6 +98,7 @@ public partial class PacientesResponsavel : ContentPage
                 }
             }
 
+            // Atualiza a lista de dependentes
             PacientesCollectionView.ItemsSource = null;
             PacientesCollectionView.ItemsSource = PacientesLista;
         }
@@ -104,22 +108,12 @@ public partial class PacientesResponsavel : ContentPage
 
             await DisplayAlert(
                 "Erro de conexão",
-                "Não foi possível carregar os pacientes. Verifique se a API está funcionando.",
+                "Não foi possível carregar os dependentes. Verifique se a API está funcionando.",
                 "OK");
         }
     }
 
-    private void PacienteCard_Tapped(
-        object sender,
-        TappedEventArgs e)
-    {
-        if (sender is BindableObject elemento &&
-            elemento.BindingContext is PacienteResponsavelItem paciente)
-        {
-            paciente.IsHistoricoExpanded =
-                !paciente.IsHistoricoExpanded;
-        }
-    }
+    // BOTÃO VOLTAR
 
     private async void VoltarButton_Clicked(
         object sender,
@@ -127,6 +121,8 @@ public partial class PacientesResponsavel : ContentPage
     {
         await Shell.Current.GoToAsync("..");
     }
+
+    // DADOS DOS PACIENTES RECEBIDOS DA API
 
     private class PacienteApiDto
     {

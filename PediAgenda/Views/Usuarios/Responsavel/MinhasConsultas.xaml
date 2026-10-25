@@ -259,7 +259,7 @@
 
                                                 <Label
                                                   Grid.Column="2"
-                                                  Text="{Binding Status}"
+                                                  Text="{Binding StatusExibicao}"
                                                   FontSize="11"
                                                   LineBreakMode="WordWrap"
                                                   VerticalTextAlignment="Center"

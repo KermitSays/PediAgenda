@@ -331,6 +331,13 @@ public class ConsultaResponsavelItem
                     value);
     }
 
+    // Status apresentado na tela do Responsável.
+    // Não altera o status utilizado nas regras do sistema.
+    public string StatusExibicao =>
+        StatusConsulta.EhPorConfirmar(Status)
+            ? "Agendada"
+            : Status;
+
 
     public string DataFormatada =>
         Data.ToString(
