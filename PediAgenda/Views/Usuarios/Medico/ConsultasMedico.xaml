@@ -72,6 +72,8 @@
                 Text="Toque em uma consulta para registrar o atendimento."
                 FontSize="13"
                 TextColor="{StaticResource InputPlaceholder}" />
+            <Label x:Name="EstadoAgendaLabel" FontSize="12" TextColor="Black" />
+            <Button Text="Atualizar" Clicked="AtualizarButton_Clicked" />
 
         </VerticalStackLayout>
 

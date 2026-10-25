@@ -1,5 +1,6 @@
 
 using System.Collections.ObjectModel;
+using PediAgenda.Dados;
 using PediAgenda.Views.Usuarios.Responsavel;
 
 namespace PediAgenda.Views.Usuarios.Medico;
@@ -11,8 +12,7 @@ public partial class ConsultasMedico : ContentPage
 
     private bool ajustandoData;
 
-    // Médico local temporário.
-    // Substituir pelo ID real durante a integração da API.
+    // Usado apenas pelo atalho de teste visual. A API identifica o médico pelo token.
     private const int IdMedicoAgendaLocal = 1;
 
     public ConsultasMedico()
@@ -20,7 +20,7 @@ public partial class ConsultasMedico : ContentPage
         InitializeComponent();
 
         DateTime primeiraDataDisponivel =
-            ProximoDiaUtil(DateTime.Today);
+            MedicoApi.ModoTeste ? ProximoDiaUtil(DateTime.Today) : DateTime.Today;
 
         DataConsultaPicker.MinimumDate =
             primeiraDataDisponivel;
@@ -34,15 +34,15 @@ public partial class ConsultasMedico : ContentPage
         AgendaCollectionView.ItemsSource = Agenda;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
 
         DateTime dataSelecionada =
             DataConsultaPicker.Date ??
-            ProximoDiaUtil(DateTime.Today);
+            (MedicoApi.ModoTeste ? ProximoDiaUtil(DateTime.Today) : DateTime.Today);
 
-        CarregarAgenda(dataSelecionada);
+        await CarregarAgendaAsync(dataSelecionada);
     }
 
     // ============================================
@@ -82,7 +82,7 @@ public partial class ConsultasMedico : ContentPage
         DateTime dataSelecionada =
             e.NewDate ?? DateTime.Today;
 
-        if (!EhDiaUtil(dataSelecionada))
+        if (MedicoApi.ModoTeste && !EhDiaUtil(dataSelecionada))
         {
             await DisplayAlertAsync(
                 "Data indisponível",
@@ -96,19 +96,86 @@ public partial class ConsultasMedico : ContentPage
 
             ajustandoData = false;
 
-            CarregarAgenda(
+            await CarregarAgendaAsync(
                 DataConsultaPicker.Date ??
                 ProximoDiaUtil(DateTime.Today));
 
             return;
         }
 
-        CarregarAgenda(dataSelecionada);
+        await CarregarAgendaAsync(dataSelecionada);
     }
 
     // ============================================
     // CARREGAR AGENDA
     // ============================================
+
+    private CancellationTokenSource? carregamento;
+
+    protected override void OnDisappearing()
+    {
+        carregamento?.Cancel();
+        base.OnDisappearing();
+    }
+
+    private async void AtualizarButton_Clicked(object sender, EventArgs e)
+        => await CarregarAgendaAsync(DataConsultaPicker.Date ?? DateTime.Today);
+
+    private async Task CarregarAgendaAsync(DateTime data)
+    {
+        carregamento?.Cancel();
+        using var atual = new CancellationTokenSource();
+        carregamento = atual;
+        int usuario = SessaoUsuario.IdUsuario;
+        Agenda.Clear();
+        AgendaCollectionView.IsVisible = false;
+        EstadoAgendaLabel.Text = MedicoApi.ModoTeste
+            ? "Teste visual — dados de exemplo" : "Carregando agenda…";
+        try
+        {
+            if (MedicoApi.ModoTeste)
+            {
+                CarregarAgenda(data);
+                AgendaCollectionView.IsVisible = true;
+                return;
+            }
+            var horarios = await MedicoApi.ObterAgendaAsync(data, atual.Token);
+            if (atual.IsCancellationRequested || usuario != SessaoUsuario.IdUsuario) return;
+            foreach (var horario in horarios)
+            {
+                string status = horario.Consulta != null
+                    ? StatusConsulta.Normalizar(horario.Consulta.Status)
+                    : horario.Situacao switch
+                    {
+                        "LIVRE" => "Horário disponível",
+                        "BLOQUEADO" => "Horário bloqueado",
+                        _ => "Horário ocupado"
+                    };
+                Agenda.Add(new ConsultaAgenda
+                {
+                    AtendimentoApi = new AtendimentoMedicoApi(data.Date, horario),
+                    Horario = horario.Inicio,
+                    Paciente = horario.Consulta?.Paciente.Nome ?? "-----------",
+                    Status = status,
+                    StatusCor = ObterCorStatus(status)
+                });
+            }
+            EstadoAgendaLabel.Text = "Agenda do médico conectado";
+            AgendaCollectionView.IsVisible = true;
+        }
+        catch (OperationCanceledException) when (atual.IsCancellationRequested) { }
+        catch (Exception) when (atual.IsCancellationRequested) { }
+        catch (Exception ex)
+        {
+            EstadoAgendaLabel.Text = "Não foi possível carregar a agenda. Toque em Atualizar.";
+            await DisplayAlertAsync("Agenda", ex is InvalidOperationException
+                ? ex.Message : "Não foi possível carregar a agenda. Tente novamente.", "OK");
+        }
+        finally
+        {
+            if (ReferenceEquals(carregamento, atual)) carregamento = null;
+        }
+    }
 
     private void CarregarAgenda(DateTime data)
     {
@@ -239,6 +306,20 @@ public partial class ConsultasMedico : ContentPage
         }
 
         AgendaCollectionView.SelectedItem = null;
+
+        if (item.AtendimentoApi is { } atendimento)
+        {
+            if (atendimento.Horario.Consulta == null) return;
+            if (StatusConsulta.EhCancelada(item.Status) || StatusConsulta.EhRealizada(item.Status))
+            {
+                await DisplayAlertAsync("Atendimento indisponível",
+                    "Esta consulta está cancelada ou já foi realizada.", "OK");
+                return;
+            }
+            await Shell.Current.GoToAsync(nameof(RegistrarAtendimento),
+                new Dictionary<string, object> { ["AtendimentoApi"] = atendimento });
+            return;
+        }
 
         // Não abre horários disponíveis, ocupados
         // ou bloqueados.
@@ -427,6 +508,12 @@ public partial class ConsultasMedico : ContentPage
         object sender,
         EventArgs e)
     {
+        if (!MedicoApi.ModoTeste)
+        {
+            await DisplayAlertAsync("Integração em andamento",
+                "O bloqueio por período ainda não está conectado à API. Esta ação permanece disponível no teste visual.", "OK");
+            return;
+        }
         await Shell.Current.GoToAsync(
             nameof(BloquearHorario));
     }
@@ -439,6 +526,12 @@ public partial class ConsultasMedico : ContentPage
         object sender,
         EventArgs e)
     {
+        if (!MedicoApi.ModoTeste)
+        {
+            await DisplayAlertAsync("Integração em andamento",
+                "O bloqueio por período ainda não está conectado à API. Esta ação permanece disponível no teste visual.", "OK");
+            return;
+        }
         await Shell.Current.GoToAsync(
             nameof(LiberarHorarios));
     }
@@ -461,6 +554,8 @@ public partial class ConsultasMedico : ContentPage
 
 public class ConsultaAgenda
 {
+    public AtendimentoMedicoApi? AtendimentoApi { get; set; }
+
     public Guid? IdConsulta { get; set; }
 
     public int? IdPaciente { get; set; }
@@ -477,3 +572,4 @@ public class ConsultaAgenda
     public Color StatusCor { get; set; } =
         Colors.Black;
 }
+

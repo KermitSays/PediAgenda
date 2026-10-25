@@ -23,7 +23,7 @@ public partial class MenuMedico : ContentPage
     }
 
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
 
@@ -34,7 +34,7 @@ public partial class MenuMedico : ContentPage
         AtualizarData();
 
 
-        CarregarConsultasHoje();
+        await AtualizarConsultasAsync();
     }
 
 
@@ -72,6 +72,66 @@ public partial class MenuMedico : ContentPage
     // =============================================
     // CONSULTAS DE HOJE
     // =============================================
+
+    private CancellationTokenSource? carregamento;
+
+    protected override void OnDisappearing()
+    {
+        carregamento?.Cancel();
+        base.OnDisappearing();
+    }
+
+    private async void AtualizarButton_Clicked(object sender, EventArgs e)
+        => await AtualizarConsultasAsync();
+
+    private async Task AtualizarConsultasAsync()
+    {
+        carregamento?.Cancel();
+        using var atual = new CancellationTokenSource();
+        carregamento = atual;
+        int usuario = SessaoUsuario.IdUsuario;
+        ConsultasLista.Clear();
+        ConsultasCollectionView.IsVisible = false;
+        SemConsultasContainer.IsVisible = false;
+        EstadoAgendaLabel.Text = MedicoApi.ModoTeste
+            ? "Teste visual — dados de exemplo" : "Carregando consultas…";
+        try
+        {
+            if (MedicoApi.ModoTeste)
+            {
+                CarregarConsultasHoje();
+                return;
+            }
+            var horarios = await MedicoApi.ObterAgendaAsync(DateTime.Today, atual.Token);
+            if (atual.IsCancellationRequested || usuario != SessaoUsuario.IdUsuario) return;
+            foreach (var horario in horarios)
+            {
+                var consulta = horario.Consulta;
+                if (consulta == null || StatusConsulta.EhCancelada(consulta.Status)) continue;
+                ConsultasLista.Add(new ConsultaHoje
+                {
+                    Horario = horario.Inicio,
+                    Paciente = consulta.Paciente.Nome,
+                    Status = StatusConsulta.Normalizar(consulta.Status)
+                });
+            }
+            EstadoAgendaLabel.Text = "Consultas do médico conectado";
+            ConsultasCollectionView.IsVisible = ConsultasLista.Count > 0;
+            SemConsultasContainer.IsVisible = ConsultasLista.Count == 0;
+        }
+        catch (OperationCanceledException) when (atual.IsCancellationRequested) { }
+        catch (Exception) when (atual.IsCancellationRequested) { }
+        catch (Exception ex)
+        {
+            EstadoAgendaLabel.Text = "Não foi possível carregar as consultas. Toque em Atualizar.";
+            await DisplayAlertAsync("Consultas", ex is InvalidOperationException
+                ? ex.Message : "Não foi possível carregar a agenda. Tente novamente.", "OK");
+        }
+        finally
+        {
+            if (ReferenceEquals(carregamento, atual)) carregamento = null;
+        }
+    }
 
     private void CarregarConsultasHoje()
     {
@@ -128,6 +188,12 @@ public partial class MenuMedico : ContentPage
         object sender,
         TappedEventArgs e)
     {
+        if (!MedicoApi.ModoTeste)
+        {
+            await DisplayAlertAsync("Integração em andamento",
+                "Esta tela ainda usa dados de exemplo. Ela permanece disponível pelo acesso de teste visual.", "OK");
+            return;
+        }
         await Shell.Current.GoToAsync(
             nameof(PacientesMedico));
     }
@@ -154,6 +220,12 @@ public partial class MenuMedico : ContentPage
         object sender,
         TappedEventArgs e)
     {
+        if (!MedicoApi.ModoTeste)
+        {
+            await DisplayAlertAsync("Integração em andamento",
+                "Esta tela ainda usa dados de exemplo. Ela permanece disponível pelo acesso de teste visual.", "OK");
+            return;
+        }
         await Shell.Current.GoToAsync(
             nameof(RelatoriosMedico));
     }
