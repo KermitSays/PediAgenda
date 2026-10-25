@@ -1,9 +1,23 @@
 
+using PediAgenda.Dados;
+
 namespace PediAgenda.Views.Usuarios.Medico;
 
-[QueryProperty(nameof(IdConsulta), "IdConsulta")]
-public partial class RegistrarAtendimento : ContentPage
+public partial class RegistrarAtendimento : ContentPage, IQueryAttributable
 {
+    private AtendimentoMedicoApi? atendimentoApi;
+    private bool salvando;
+    private int usuarioApi;
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        atendimentoApi = query.TryGetValue("AtendimentoApi", out var valor)
+            ? valor as AtendimentoMedicoApi : null;
+        usuarioApi = SessaoUsuario.IdUsuario;
+        if (MedicoApi.ModoTeste && query.TryGetValue("IdConsulta", out var id))
+            IdConsulta = id?.ToString() ?? string.Empty;
+    }
+
     private Guid idConsulta;
 
     private ConsultaMedico? consultaAtual;
@@ -58,6 +72,12 @@ public partial class RegistrarAtendimento : ContentPage
     {
         base.OnAppearing();
 
+        if (!MedicoApi.ModoTeste)
+        {
+            await CarregarAtendimentoApiAsync();
+            return;
+        }
+
         CarregarConsulta();
 
         // Proteção adicional:
@@ -83,6 +103,7 @@ public partial class RegistrarAtendimento : ContentPage
     private void CarregarConsulta()
     {
         FinalizarAtendimentoButton.IsEnabled = false;
+        if (!MedicoApi.ModoTeste) return;
 
         consultaAtual = null;
         pacienteAtual = null;
@@ -188,6 +209,12 @@ public partial class RegistrarAtendimento : ContentPage
         object sender,
         EventArgs e)
     {
+        if (!MedicoApi.ModoTeste)
+        {
+            await FinalizarAtendimentoApiAsync();
+            return;
+        }
+
         if (consultaAtual == null ||
             pacienteAtual == null)
         {
@@ -356,6 +383,105 @@ public partial class RegistrarAtendimento : ContentPage
     // VOLTAR
     // ============================================
 
+    private async Task CarregarAtendimentoApiAsync()
+    {
+        FinalizarAtendimentoButton.IsEnabled = false;
+        try
+        {
+            if (atendimentoApi?.Horario.Consulta == null || usuarioApi != SessaoUsuario.IdUsuario)
+                throw new InvalidOperationException("Abra uma consulta pela agenda do médico conectado.");
+
+            var horarios = await MedicoApi.ObterAgendaAsync(atendimentoApi.Data);
+            if (usuarioApi != SessaoUsuario.IdUsuario) return;
+            var horario = horarios.FirstOrDefault(h => h.Consulta?.Id == atendimentoApi.Horario.Consulta.Id)
+                ?? throw new InvalidOperationException("A consulta não está mais disponível na agenda. Volte e atualize a lista.");
+            atendimentoApi = atendimentoApi with { Horario = horario };
+            var consulta = horario.Consulta!;
+            PacienteLabel.Text = consulta.Paciente.Nome;
+            ResponsavelLabel.Text = consulta.Responsavel.Nome;
+            DataLabel.Text = atendimentoApi.Data.ToString("dd/MM/yyyy");
+            HorarioLabel.Text = horario.Inicio;
+            TipoConsultaLabel.Text = consulta.TipoAtendimento;
+            string? impedimento = ImpedimentoAtendimentoApi();
+            if (impedimento != null)
+                await DisplayAlertAsync("Atendimento indisponível", impedimento, "OK");
+            else
+                FinalizarAtendimentoButton.IsEnabled = !salvando;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Atendimento", ex is InvalidOperationException
+                ? ex.Message : "Não foi possível carregar a consulta. Volte à agenda e tente novamente.", "OK");
+        }
+    }
+
+    private string? ImpedimentoAtendimentoApi()
+    {
+        var consulta = atendimentoApi?.Horario.Consulta;
+        if (consulta == null || usuarioApi != SessaoUsuario.IdUsuario)
+            return "Abra a consulta novamente pela agenda.";
+        if (StatusConsulta.EhRealizada(consulta.Status))
+            return "Esta consulta já possui um atendimento registrado.";
+        if (StatusConsulta.EhCancelada(consulta.Status))
+            return "Esta consulta foi cancelada.";
+        // Preserva a validação já existente na tela; a API também valida o registro.
+        if (!StatusConsulta.EhConfirmada(consulta.Status))
+            return "A consulta precisa estar confirmada para registrar o atendimento nesta tela.";
+        if (atendimentoApi!.Data.Date > DateTime.Today)
+            return "O atendimento ainda não está disponível para esta data.";
+        return null;
+    }
+
+    private async Task FinalizarAtendimentoApiAsync()
+    {
+        if (salvando) return;
+        string? impedimento = ImpedimentoAtendimentoApi();
+        if (impedimento != null)
+        {
+            await DisplayAlertAsync("Atendimento indisponível", impedimento, "OK");
+            return;
+        }
+        string observacoes = ObservacoesEditor.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(observacoes))
+        {
+            await DisplayAlertAsync("Observações obrigatórias",
+                "Digite as observações do atendimento antes de finalizar.", "OK");
+            return;
+        }
+        salvando = true;
+        FinalizarAtendimentoButton.IsEnabled = false;
+        bool registrado = false;
+        try
+        {
+            bool confirmar = await DisplayAlertAsync("Finalizar atendimento",
+                $"Deseja finalizar o atendimento de {atendimentoApi!.Horario.Consulta!.Paciente.Nome}?\n\nA consulta será marcada como realizada e o prontuário será salvo.",
+                "FINALIZAR", "VOLTAR");
+            if (!confirmar) return;
+            if (usuarioApi != SessaoUsuario.IdUsuario)
+                throw new InvalidOperationException("Sua sessão mudou. Abra a consulta novamente pela agenda.");
+            await MedicoApi.RegistrarAtendimentoAsync(atendimentoApi.Horario.Consulta.Id, observacoes);
+            registrado = true;
+            ObservacoesEditor.IsEnabled = false;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Não foi possível confirmar o registro",
+                (ex is InvalidOperationException ? ex.Message : "Verifique a conexão e atualize a agenda.")
+                + "\n\nSuas observações foram mantidas. Em caso de falha de conexão, confira a agenda antes de repetir o envio.", "OK");
+        }
+        finally
+        {
+            salvando = false;
+            FinalizarAtendimentoButton.IsEnabled = !registrado && ImpedimentoAtendimentoApi() == null;
+        }
+        if (registrado)
+        {
+            await DisplayAlertAsync("Atendimento registrado",
+                "A consulta foi marcada como realizada e o prontuário foi salvo no banco.", "OK");
+            await Shell.Current.GoToAsync("..");
+        }
+    }
+
     private async void VoltarButton_Clicked(
         object sender,
         EventArgs e)
@@ -363,3 +489,4 @@ public partial class RegistrarAtendimento : ContentPage
         await Shell.Current.GoToAsync("..");
     }
 }
+
