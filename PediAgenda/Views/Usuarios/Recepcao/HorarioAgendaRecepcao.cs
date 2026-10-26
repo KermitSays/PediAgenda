@@ -10,6 +10,12 @@ namespace PediAgenda.Views.Usuarios.Recepcao;
 
 public class HorarioAgendaRecepcao
 {
+    public int IdMedico
+    {
+        get;
+        set;
+    }
+
     public int Id
     {
         get;

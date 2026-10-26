@@ -6,7 +6,7 @@ namespace PediAgenda.Views.Usuarios.Recepcao;
 
 public static class PacientesRecepcaoApi
 {
-    private const string EnderecoApi = "https://pediagenda-api.onrender.com/";
+    private const string EnderecoApi = "http://10.0.2.2:5000/";
 
     private static readonly HttpClient http = new()
     {

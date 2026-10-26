@@ -137,15 +137,26 @@ public partial class DetalhesPacienteRecepcao : ContentPage
             return;
         }
 
+
+        if (_pacienteDaApi is not null)
+        {
+            await Shell.Current.GoToAsync(
+                nameof(AgendarConsultaRecepcao),
+                new Dictionary<string, object>
+                {
+            { "PacienteDaApi", _pacienteDaApi }
+                });
+
+            return;
+        }
+
         await Shell.Current.GoToAsync(
             nameof(AgendarConsultaRecepcao),
             new Dictionary<string, object>
             {
-                {
-                    "PacienteId",
-                    _paciente.Id.ToString()
-                }
+        { "PacienteId", _paciente!.Id.ToString() }
             });
+
     }
 
     // ============================================

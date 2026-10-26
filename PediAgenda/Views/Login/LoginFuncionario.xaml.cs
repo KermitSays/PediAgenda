@@ -20,7 +20,7 @@ public partial class LoginFuncionario : ContentPage
     new()
     {
         BaseAddress =
-            new Uri("https://pediagenda-api.onrender.com/"),
+            new Uri("http://10.0.2.2:5000/"),
 
         Timeout =
             TimeSpan.FromSeconds(90)

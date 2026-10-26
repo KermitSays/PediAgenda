@@ -23,6 +23,31 @@ public partial class PacientesRecepcao : ContentPage
     }
 
 
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        try
+        {
+            _todosPacientes.Clear();
+            PacientesFiltrados.Clear();
+
+            await CarregarPacientesDaApiAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(ex);
+
+            await DisplayAlertAsync(
+                "Erro ao carregar pacientes",
+                "Não foi possível consultar os pacientes pela API. Verifique a conexão e o login da Recepção.",
+                "OK");
+        }
+    }
+
+
+
     private static PacienteRecepcaoItem ConverterPacienteDaApi(
         PacienteRecepcaoRespostaApi origem)
     {

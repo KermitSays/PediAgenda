@@ -4,12 +4,17 @@ using PediAgenda.Views.Usuarios.Responsavel;
 
 namespace PediAgenda.Views.Usuarios.Recepcao;
 
+
 [QueryProperty(nameof(PacienteId), "PacienteId")]
 [QueryProperty(nameof(HorarioId), "HorarioId")]
+[QueryProperty(nameof(PacienteDaApi), "PacienteDaApi")]
 public partial class AgendarConsultaRecepcao : ContentPage
 {
     private int _pacienteId;
     private PacienteRecepcaoItem? _paciente;
+
+    public PacienteRecepcaoItem? PacienteDaApi { get; set; }
+
     private HorarioAgendaRecepcao? _horarioSelecionado;
 
     private bool ajustandoData;
@@ -114,11 +119,12 @@ public partial class AgendarConsultaRecepcao : ContentPage
 
     private void CarregarPaciente()
     {
-        if (_pacienteId <= 0)
+        if (_pacienteId <= 0 && PacienteDaApi is null)
             return;
 
-        _paciente = PacientesRecepcaoDados.Pacientes
-            .FirstOrDefault(p => p.Id == _pacienteId);
+        _paciente = PacienteDaApi
+    ?? PacientesRecepcaoDados.Pacientes
+        .FirstOrDefault(p => p.Id == _pacienteId);
 
         if (_paciente == null)
         {

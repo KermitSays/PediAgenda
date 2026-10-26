@@ -40,6 +40,7 @@ public partial class MedicosRecepcao : ContentPage
     private string medicoSelecionado =
         string.Empty;
 
+    private int? idMedicoSelecionado;
 
     // =============================================
     // CONSTRUTOR
@@ -58,15 +59,9 @@ public partial class MedicosRecepcao : ContentPage
         // MÉDICO INICIAL
         // =========================================
 
-        medicoSelecionado =
-            AgendaMedicaRecepcaoDados
-                .MedicosCompartilhados
-                .FirstOrDefault()
-            ?? string.Empty;
+        medicoSelecionado = "Todos os médicos";
 
-
-        MedicoSelecionadoLabel.Text =
-            medicoSelecionado;
+        MedicoSelecionadoLabel.Text = medicoSelecionado;
 
 
         // =========================================
@@ -74,8 +69,8 @@ public partial class MedicosRecepcao : ContentPage
         // =========================================
 
         DateTime primeiraDataDisponivel =
-            ProximoDiaUtil(
-                DateTime.Today);
+    ProximoDiaUtil(
+        DateTime.Today);
 
 
         DataPicker.MinimumDate =
@@ -153,37 +148,26 @@ public partial class MedicosRecepcao : ContentPage
     // SELECIONAR MÉDICO
     // =============================================
 
+
     private async void SelecionarMedicoButton_Clicked(
         object sender,
         EventArgs e)
     {
-        SelecionarMedicoRecepcao
-            paginaSelecao =
-                new();
+        var paginaSelecao = new SelecionarMedicoRecepcao();
 
-
-        SelecionarMedicoRecepcao
-            .MedicoSelecaoItem?
-            medico =
-                await paginaSelecao
-                    .AbrirAsync(
-                        this);
-
+        var medico = await paginaSelecao.AbrirAsync(this);
 
         if (medico == null)
             return;
 
+        idMedicoSelecionado = medico.IdMedico;
+        medicoSelecionado = medico.Nome;
 
-        medicoSelecionado =
-            medico.Nome;
-
-
-        MedicoSelecionadoLabel.Text =
-            medicoSelecionado;
-
+        MedicoSelecionadoLabel.Text = medicoSelecionado;
 
         CarregarAgenda();
     }
+
 
 
     // =============================================
@@ -234,74 +218,113 @@ public partial class MedicosRecepcao : ContentPage
         CarregarAgenda();
     }
 
+    // Busca os horários reais da agenda do médico na API, filtrando por data e ID do médico, se fornecido.
+    private async Task<List<HorarioAgendaRecepcao>> BuscarHorariosReaisAsync(
+        DateTime data,
+        int? idMedico = null)
+    {
+        var agenda = await AgendaRecepcaoApi.ConsultarAsync(
+            data, idMedico);
+
+        var horarios = new List<HorarioAgendaRecepcao>();
+
+        foreach (var medico in agenda.Medicos)
+        {
+            foreach (var horario in medico.Horarios)
+            {
+                if (!TimeSpan.TryParse(
+                    horario.Inicio, out TimeSpan horaInicio))
+                {
+                    continue;
+                }
+
+                string status = horario.Situacao switch
+                {
+                    "LIVRE" => "Disponível",
+                    "OCUPADO" => "Agendado",
+                    "BLOQUEADO" => "Bloqueado",
+                    _ => "Indisponível"
+                };
+
+                horarios.Add(new HorarioAgendaRecepcao
+                {
+                    Id = horario.Id,
+                    IdMedico = medico.Id,
+                    Medico = medico.Nome,
+                    Data = data.Date,
+                    Horario = horaInicio,
+                    Status = status,
+                    StatusConsulta = horario.Consulta?.Status ?? "",
+                    Paciente = horario.Consulta?.Paciente?.Nome ?? ""
+                });
+            }
+        }
+
+        return horarios
+    .OrderBy(h => h.Medico)
+    .ThenBy(h => h.Horario)
+    .ToList();
+    }
+
+
 
     // =============================================
     // CARREGA A AGENDA
     // =============================================
 
-    private void CarregarAgenda()
+
+    private int versaoCarregamento = 0;
+
+    private async void CarregarAgenda()
     {
+        int versaoAtual = ++versaoCarregamento;
+
         HorariosFiltrados.Clear();
+        QuantidadeHorariosLabel.Text = "Carregando...";
 
+        MedicoSelecionadoLabel.Text =
+        idMedicoSelecionado.HasValue
+            ? medicoSelecionado
+            : "Todos os médicos";
 
-        string medico =
-            medicoSelecionado;
+        DateTime data = DataPicker.Date ?? DateTime.Today;
 
-
-        if (
-            string.IsNullOrWhiteSpace(
-                medico))
+        if (!EhDiaUtil(data))
         {
-            QuantidadeHorariosLabel.Text =
-                "0 horário(s)";
-
-
+            QuantidadeHorariosLabel.Text = "0 horário(s)";
             return;
         }
 
-
-        DateTime data =
-            DataPicker.Date
-            ?? ProximoDiaUtil(
-                DateTime.Today);
-
-
-        if (
-            !EhDiaUtil(
-                data))
+        try
         {
+            var horarios = await BuscarHorariosReaisAsync(
+                data, idMedicoSelecionado);
+
+            if (versaoAtual != versaoCarregamento)
+                return;
+
+            foreach (var horario in horarios)
+            {
+                HorariosFiltrados.Add(horario);
+            }
+
             QuantidadeHorariosLabel.Text =
-                "0 horário(s)";
-
-
-            return;
+                $"{HorariosFiltrados.Count} horário(s)";
         }
-
-
-        // =========================================
-        // FONTE COMPARTILHADA
-        // =========================================
-
-        List<HorarioAgendaRecepcao>
-            horarios =
-                AgendaMedicaRecepcaoDados
-                    .ObterHorariosCompartilhados(
-                        medico,
-                        data);
-
-
-        foreach (
-            HorarioAgendaRecepcao horario
-            in horarios)
+        catch (Exception ex)
         {
-            HorariosFiltrados.Add(
-                horario);
+            if (versaoAtual != versaoCarregamento)
+                return;
+
+            QuantidadeHorariosLabel.Text = "Erro ao carregar";
+
+            await DisplayAlertAsync(
+                "Erro na agenda",
+                $"Não foi possível consultar a agenda: {ex.Message}",
+                "OK");
         }
-
-
-        QuantidadeHorariosLabel.Text =
-            $"{HorariosFiltrados.Count} horário(s)";
     }
+
 
 
     // =============================================
@@ -768,89 +791,52 @@ public partial class MedicosRecepcao : ContentPage
 
 
     // =============================================
-    // BLOQUEAR HORÁRIO
+    // BLOQUEAR HORÁRIO — TELA ORIGINAL
     // =============================================
 
     private async void BloquearHorarioButton_Clicked(
         object sender,
         EventArgs e)
     {
-        string medico =
-            medicoSelecionado;
-
-
-        int idMedico =
-            AgendaMedicaRecepcaoDados
-                .ObterIdMedico(
-                    medico);
-
-
-        if (idMedico <= 0)
+        if (idMedicoSelecionado is not int idMedico || idMedico <= 0)
         {
             await DisplayAlertAsync(
                 "Selecione um médico",
-                "Selecione o médico cuja agenda deseja bloquear.",
+                "Selecione um médico antes de gerenciar a agenda.",
                 "OK");
-
-
             return;
         }
 
-
         await Shell.Current.GoToAsync(
-            nameof(
-                BloquearHorario),
-
+            nameof(BloquearHorario),
             new Dictionary<string, object>
             {
-                {
-                    "IdMedico",
-                    idMedico.ToString()
-                }
+                ["IdMedico"] = idMedico.ToString()
             });
     }
 
-
     // =============================================
-    // LIBERAR HORÁRIOS
+    // LIBERAR HORÁRIOS — TELA ORIGINAL
     // =============================================
 
     private async void LiberarHorariosButton_Clicked(
         object sender,
         EventArgs e)
     {
-        string medico =
-            medicoSelecionado;
-
-
-        int idMedico =
-            AgendaMedicaRecepcaoDados
-                .ObterIdMedico(
-                    medico);
-
-
-        if (idMedico <= 0)
+        if (idMedicoSelecionado is not int idMedico || idMedico <= 0)
         {
             await DisplayAlertAsync(
                 "Selecione um médico",
-                "Selecione o médico cuja agenda deseja gerenciar.",
+                "Selecione um médico antes de gerenciar a agenda.",
                 "OK");
-
-
             return;
         }
 
-
         await Shell.Current.GoToAsync(
-            nameof(
-                LiberarHorarios),
-
+            nameof(LiberarHorarios),
             new Dictionary<string, object>
             {
-                {
-                    "IdMedico",
-                    idMedico.ToString()
-                }
+                ["IdMedico"] = idMedico.ToString()
             });
     }
 

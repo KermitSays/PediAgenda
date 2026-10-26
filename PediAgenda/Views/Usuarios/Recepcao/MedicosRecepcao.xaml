@@ -63,7 +63,7 @@
                                 TextColor="{StaticResource TextDark}" />
 
                             <Label
-                                Text="Toque para selecionar outro médico"
+                                Text="Toque para selecionar um médico"
                                 FontSize="11"
                                 TextColor="{StaticResource InputPlaceholder}" />
 
@@ -85,6 +85,7 @@
                             BackgroundColor="Transparent"
                             Opacity="0.01"
                             Clicked="SelecionarMedicoButton_Clicked" />
+
 
                     </Grid>
 
@@ -152,7 +153,7 @@
             Grid.Row="1"
             x:Name="AgendaCollectionView"
             ItemsSource="{Binding HorariosFiltrados}"
-            SelectionMode="Single"
+            SelectionMode="None"
             SelectionChanged="AgendaCollectionView_SelectionChanged">
 
             <CollectionView.ItemsLayout>
@@ -199,6 +200,14 @@
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="{StaticResource TextDark}" />
+
+
+                                <Label
+                                    Text="{Binding Medico}"
+                                    FontSize="12"
+                                    TextColor="{StaticResource InputPlaceholder}"
+                                    LineBreakMode="TailTruncation" />
+
 
                                 <Label
                                     Text="{Binding Descricao}"
@@ -278,7 +287,8 @@
                 BackgroundColor="{StaticResource PrimaryBlue}"
                 TextColor="White"
                 FontAttributes="Bold"
-                Clicked="BloquearHorarioButton_Clicked" />
+                Clicked="BloquearHorarioButton_Clicked"
+                IsEnabled="True"/>
 
             <Button
                 Text="LIBERAR HORÁRIOS"
@@ -289,7 +299,8 @@
                 BorderColor="{StaticResource PrimaryBlue}"
                 BorderWidth="1"
                 FontAttributes="Bold"
-                Clicked="LiberarHorariosButton_Clicked" />
+                Clicked="LiberarHorariosButton_Clicked"
+                IsEnabled="True"/>
 
             <Button
                 Text="Voltar"

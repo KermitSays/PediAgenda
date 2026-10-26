@@ -451,6 +451,8 @@ clinica.MapGet("/relatorios/{id:int}/exportar", (int id, ClaimsPrincipal usuario
         : FalhaClinica(r);
 });
 
+
+app.MapearBloqueioPeriodo();
 app.Run();
 return 0;
 
