@@ -17,15 +17,14 @@ public partial class LoginFuncionario : ContentPage
 
 
     private static readonly HttpClient http =
-        new()
-        {
-            BaseAddress =
-                new Uri(
-                    "http://10.0.2.2:5000/"),
+    new()
+    {
+        BaseAddress =
+            new Uri("http://10.0.2.2:5000/"),
 
-            Timeout =
-                TimeSpan.FromSeconds(90)
-        };
+        Timeout =
+            TimeSpan.FromSeconds(90)
+    };
 
 
     public LoginFuncionario()

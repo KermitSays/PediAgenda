@@ -19,8 +19,8 @@ public partial class LoginResponsavel : ContentPage
         new()
         {
             BaseAddress =
-                new Uri(
-                    "http://10.0.2.2:5000/"),
+    new Uri(
+        "http://10.0.2.2:5000/"),
 
             Timeout =
                 TimeSpan.FromSeconds(90)

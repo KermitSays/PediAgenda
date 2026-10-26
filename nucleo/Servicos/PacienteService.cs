@@ -42,6 +42,13 @@ public class PacienteService(IPacienteRepositorio repositorio, TimeProvider? rel
         return idResponsavel is null ? null : _repo.ListarPorResponsavel(idResponsavel.Value);
     }
 
+
+    public IReadOnlyList<PacienteRecepcaoResumo> ListarParaRecepcao()
+    {
+        return _repo.ListarParaRecepcao();
+    }
+
+
     public ResultadoPaciente Cadastrar(int idUsuario, string? nomeInformado, string? dataInformada)
     {
         var idResponsavel = _repo.IdResponsavelDoUsuario(idUsuario);

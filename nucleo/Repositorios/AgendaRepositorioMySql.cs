@@ -121,7 +121,8 @@ public class AgendaRepositorioMySql(string stringDeConexao) : IAgendaRepositorio
                 r.GetString("especialidade"),
                 livre ? null : r.GetInt32("id_consulta"),
                 livre ? null : r.GetString("status"),
-                livre ? null : r.GetString("tipo_atendimento"),
+                livre ? null : (r.IsDBNull(r.GetOrdinal("tipo_atendimento"))
+                      ? string.Empty : r.GetString("tipo_atendimento")),
                 livre ? null : r.GetInt32("id_paciente"),
                 livre ? null : r.GetString("nome_paciente"),
                 livre ? null : r.GetDateOnly("data_nascimento"),

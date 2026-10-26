@@ -1,10 +1,20 @@
 using System.Collections.ObjectModel;
 using PediAgenda.Dados;
+using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace PediAgenda.Views.Usuarios.Recepcao;
 
 public partial class MenuRecepcao : ContentPage
 {
+
+    private static readonly HttpClient httpAgenda = new()
+    {
+        BaseAddress = new Uri("http://10.0.2.2:5000/"),
+        Timeout = TimeSpan.FromSeconds(90)
+    };
+
+
     public ObservableCollection<ConsultaRecepcaoResumo>
         ConsultasHoje
     {
@@ -27,22 +37,39 @@ public partial class MenuRecepcao : ContentPage
     // AO ABRIR / VOLTAR PARA O MENU
     // =============================================
 
-    protected override void OnAppearing()
+
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-
         AtualizarSaudacao();
-
-
         AtualizarData();
 
-
-        AtualizarConsultasHoje();
-
-
+        ConsultasHoje.Clear();
         AtualizarQuantidadeConsultas();
+
+        try
+        {
+            var consultas = await BuscarConsultasReaisAsync();
+
+            foreach (var consulta in consultas)
+            {
+                ConsultasHoje.Add(consulta);
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync(
+                "Erro ao carregar consultas",
+                $"Não foi possível consultar a agenda: {ex.Message}",
+                "OK");
+        }
+        finally
+        {
+            AtualizarQuantidadeConsultas();
+        }
     }
+
 
 
     // =============================================
@@ -81,153 +108,47 @@ public partial class MenuRecepcao : ContentPage
     // CONSULTAS DE HOJE
     // =============================================
     //
-    // O Menu usa a MESMA fonte compartilhada da
-    // tela Médicos.
-    //
-    // Assim, se um horário estiver disponível na
-    // agenda, ele não poderá continuar aparecendo
-    // como consulta no Menu.
+    // Consulta a agenda real através da API.
+    // Exibe somente os horários que possuem
+    // consultas não canceladas no banco de dados.
 
-    private void AtualizarConsultasHoje()
+
+    private async Task<List<ConsultaRecepcaoResumo>> BuscarConsultasReaisAsync()
     {
-        ConsultasHoje.Clear();
+        var agenda = await AgendaRecepcaoApi.ConsultarAsync(
+            DateTime.Today);
 
+        var consultas = new List<ConsultaRecepcaoResumo>();
 
-        DateTime hoje =
-            DateTime.Today;
-
-
-        List<(
-            TimeSpan Horario,
-            ConsultaRecepcaoResumo Resumo)>
-            consultas =
-                new();
-
-
-        // =========================================
-        // PERCORRE TODOS OS MÉDICOS
-        // =========================================
-
-        foreach (
-            string medico
-            in AgendaMedicaRecepcaoDados
-                .MedicosCompartilhados)
+        foreach (var medico in agenda.Medicos)
         {
-            List<HorarioAgendaRecepcao>
-                horarios =
-                    AgendaMedicaRecepcaoDados
-                        .ObterHorariosCompartilhados(
-                            medico,
-                            hoje);
-
-
-            foreach (
-                HorarioAgendaRecepcao horario
-                in horarios)
+            foreach (var horario in medico.Horarios)
             {
-                // =================================
-                // SOMENTE HORÁRIOS AGENDADOS
-                // =================================
-                //
-                // Disponível:
-                // não existe consulta ativa.
-                //
-                // Bloqueado:
-                // não é uma consulta.
-                //
-                // Agendado:
-                // existe uma consulta ativa.
+                var consulta = horario.Consulta;
 
-                if (
-                    horario.Status !=
-                    "Agendado")
+                if (consulta == null ||
+                    StatusConsulta.EhCancelada(consulta.Status))
                 {
                     continue;
                 }
 
-
-                // =================================
-                // PROTEÇÃO EXTRA
-                // =================================
-
-                if (
-                    StatusConsulta.EhCancelada(
-                        horario.StatusConsulta))
+                consultas.Add(new ConsultaRecepcaoResumo
                 {
-                    continue;
-                }
-
-
-                consultas.Add(
-                    (
-                        horario.Horario,
-
-                        new ConsultaRecepcaoResumo
-                        {
-                            Horario =
-                                horario
-                                    .HorarioFormatado,
-
-                            Paciente =
-                                string.IsNullOrWhiteSpace(
-                                    horario.Paciente)
-
-                                    ? "Paciente"
-
-                                    : horario.Paciente,
-
-                            Medico =
-                                medico,
-
-                            Status =
-                                string.IsNullOrWhiteSpace(
-                                    horario.StatusConsulta)
-
-                                    ? "Por confirmar"
-
-                                    : StatusConsulta
-                                        .Normalizar(
-                                            horario.StatusConsulta)
-                        }
-                    ));
+                    Horario = horario.Inicio,
+                    Paciente = consulta.Paciente.Nome,
+                    Medico = medico.Nome,
+                    Status = consulta.Status
+                });
             }
         }
 
-
-        // =============================================
-        // ORDENA E REMOVE DUPLICAÇÕES
-        // =============================================
-
-        var consultasOrdenadas =
-            consultas
-
-                .GroupBy(item =>
-                    new
-                    {
-                        item.Horario,
-
-                        item.Resumo.Paciente,
-
-                        item.Resumo.Medico
-                    })
-
-                .Select(grupo =>
-                    grupo.First())
-
-                .OrderBy(item =>
-                    item.Horario)
-
-                .ToList();
-
-
-        foreach (
-            var item
-            in consultasOrdenadas)
-        {
-            ConsultasHoje.Add(
-                item.Resumo);
-        }
+        return consultas
+            .OrderBy(c => c.Horario)
+            .ThenBy(c => c.Medico)
+            .ToList();
     }
+
+
 
 
     // =============================================
@@ -260,19 +181,37 @@ public partial class MenuRecepcao : ContentPage
     // ATUALIZAÇÃO MANUAL
     // =============================================
 
-    private void ConsultasRefreshView_Refreshing(
+
+    private async void ConsultasRefreshView_Refreshing(
         object sender,
         EventArgs e)
     {
-        AtualizarConsultasHoje();
+        try
+        {
+            var consultas = await BuscarConsultasReaisAsync();
 
+            ConsultasHoje.Clear();
 
-        AtualizarQuantidadeConsultas();
+            foreach (var consulta in consultas)
+            {
+                ConsultasHoje.Add(consulta);
+            }
 
-
-        ConsultasRefreshView.IsRefreshing =
-            false;
+            AtualizarQuantidadeConsultas();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync(
+                "Erro ao atualizar consultas",
+                $"Não foi possível atualizar a agenda: {ex.Message}",
+                "OK");
+        }
+        finally
+        {
+            ConsultasRefreshView.IsRefreshing = false;
+        }
     }
+
 
 
     // =============================================

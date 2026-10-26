@@ -14,7 +14,8 @@ public partial class CadastroCampo : ContentPage
     private static readonly HttpClient http = new()
     {
         BaseAddress = new Uri(
-            "http://10.0.2.2:5000/"),
+    "https://pediagenda-api.onrender.com/"),
+
         Timeout = TimeSpan.FromSeconds(90)
     };
 
