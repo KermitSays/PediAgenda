@@ -125,14 +125,7 @@
                 Style="{StaticResource PrimaryButton}"
                 Clicked="EntrarButton_Clicked" />
 
-            <!-- Entrar Direto -->
-            <Button
-                x:Name="EntrarDiretoButton"
-                Text="Entrar Direto"
-                Style="{StaticResource PrimaryButton}"
-                Clicked="EntrarDiretoButton_Clicked" 
-                Margin="0,8,0,8"/>
-
+            
             <!-- Cadastro -->
             <HorizontalStackLayout
                     HorizontalOptions="Center"

@@ -379,31 +379,6 @@ public partial class LoginResponsavel : ContentPage
         }
     }
 
-
-    // =============================================
-    // ACESSO RÁPIDO
-    // =============================================
-
-    private async void EntrarDiretoButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        SecureStorage.Default.Remove(
-            "pediagenda_token");
-
-
-        SessaoUsuario.Iniciar(
-            0,
-            "Responsável Teste",
-            string.Empty,
-            "RESPONSAVEL");
-
-
-        await Shell.Current.GoToAsync(
-            nameof(
-                MenuResponsavel));
-    }
-
     // =============================================
     // BOTÃO DE CADASTRO
     // =============================================
