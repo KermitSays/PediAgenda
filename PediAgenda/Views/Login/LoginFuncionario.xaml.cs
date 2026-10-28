@@ -418,31 +418,6 @@ public partial class LoginFuncionario : ContentPage
 
 
     // =============================================
-    // ACESSO RÁPIDO - MÉDICO
-    // =============================================
-
-    private async void EntrarMedicoButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        SecureStorage.Default.Remove(
-            "pediagenda_token");
-
-
-        SessaoUsuario.Iniciar(
-            0,
-            "Médico Teste",
-            string.Empty,
-            "MEDICO");
-
-
-        await Shell.Current.GoToAsync(
-            nameof(
-                MenuMedico));
-    }
-
-
-    // =============================================
     // ACESSO RÁPIDO - RECEPÇÃO
     // =============================================
 
