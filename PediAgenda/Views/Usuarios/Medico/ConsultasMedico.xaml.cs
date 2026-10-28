@@ -508,14 +508,16 @@ public partial class ConsultasMedico : ContentPage
         object sender,
         EventArgs e)
     {
-        if (!MedicoApi.ModoTeste)
+        if (MedicoApi.ModoTeste)
         {
-            await DisplayAlertAsync("Integração em andamento",
-                "O bloqueio por período ainda não está conectado à API. Esta ação permanece disponível no teste visual.", "OK");
+            await DisplayAlertAsync(
+                "Acesso de teste",
+                "Para bloquear horários reais, entre com e-mail e senha de médico.",
+                "OK");
             return;
         }
-        await Shell.Current.GoToAsync(
-            nameof(BloquearHorario));
+
+        await Shell.Current.GoToAsync(nameof(BloquearHorario));
     }
 
     // ============================================
@@ -526,14 +528,16 @@ public partial class ConsultasMedico : ContentPage
         object sender,
         EventArgs e)
     {
-        if (!MedicoApi.ModoTeste)
+        if (MedicoApi.ModoTeste)
         {
-            await DisplayAlertAsync("Integração em andamento",
-                "O bloqueio por período ainda não está conectado à API. Esta ação permanece disponível no teste visual.", "OK");
+            await DisplayAlertAsync(
+                "Acesso de teste",
+                "Para liberar horários reais, entre com e-mail e senha de médico.",
+                "OK");
             return;
         }
-        await Shell.Current.GoToAsync(
-            nameof(LiberarHorarios));
+
+        await Shell.Current.GoToAsync(nameof(LiberarHorarios));
     }
 
     // ============================================
