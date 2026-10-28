@@ -558,6 +558,7 @@ public partial class ConsultasMedico : ContentPage
 
 public class ConsultaAgenda
 {
+
     public AtendimentoMedicoApi? AtendimentoApi { get; set; }
 
     public Guid? IdConsulta { get; set; }
