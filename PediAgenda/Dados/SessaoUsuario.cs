@@ -2,6 +2,7 @@
 
 public static class SessaoUsuario
 {
+    public static long Versao { get; private set; }
     public static int IdUsuario
     {
         get;
@@ -62,6 +63,7 @@ public static class SessaoUsuario
         string email,
         string perfil)
     {
+        Versao++;
         IdUsuario =
             idUsuario;
 
@@ -84,6 +86,7 @@ public static class SessaoUsuario
 
     public static void Limpar()
     {
+        Versao++;
         IdUsuario =
             0;
 

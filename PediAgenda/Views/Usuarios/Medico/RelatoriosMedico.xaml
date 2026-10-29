@@ -89,6 +89,8 @@
                 </VerticalStackLayout>
             </Border>
 
+            <Label x:Name="EstadoLabel" TextColor="{StaticResource TextDark}" />
+
             <!-- RESUMO -->
             <Label
                 Text="Resumo"
@@ -132,6 +134,8 @@
                 TextColor="{StaticResource TextDark}" />
 
             <CollectionView
+                x:Name="ResultadosCollectionView"
+                IsVisible="False"
                 ItemsSource="{Binding Resultados}"
                 SelectionMode="None">
 
@@ -196,6 +200,8 @@
 
             <!-- EXPORTAR EXCEL -->
             <Button
+                x:Name="GerarExcelButton"
+                IsEnabled="False"
                 Text="GERAR EXCEL"
                 HeightRequest="52"
                 CornerRadius="16"
@@ -214,3 +220,4 @@
     </ScrollView>
 
 </ContentPage>
+

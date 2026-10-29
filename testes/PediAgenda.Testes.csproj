@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.20" />
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <ProjectReference Include="../api/PediAgenda.Api.csproj" />
+    <Compile Include="../PediAgenda/Views/Usuarios/Medico/RelatorioMedicoDocumento.cs" Link="Cliente/RelatorioMedicoDocumento.cs" />
+    <Compile Include="../PediAgenda/Dados/SessaoUsuario.cs" Link="Cliente/SessaoUsuario.cs" />
+    <None Include="../banco/01_Schema.sql" Link="01_Schema.sql" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -32,6 +32,9 @@
             </VerticalStackLayout>
 
 
+            <Label x:Name="EstadoLabel" TextColor="{StaticResource TextDark}" />
+            <Button x:Name="AtualizarButton" Text="Atualizar consulta" Clicked="AtualizarButton_Clicked" />
+
             <!-- DADOS DA CONSULTA -->
 
             <Border

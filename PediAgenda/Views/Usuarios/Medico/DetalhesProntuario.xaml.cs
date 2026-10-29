@@ -26,21 +26,21 @@ public partial class DetalhesProntuario : ContentPage, IQueryAttributable
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object sender, EventArgs e) => await CarregarAsync();
+    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarAsync();
 
     private async Task CarregarAsync()
     {
         carregamento?.Cancel();
         using var atual = new CancellationTokenSource();
         carregamento = atual;
-        int usuario = SessaoUsuario.IdUsuario;
+        long sessao = SessaoUsuario.Versao;
         TipoConsultaLabel.Text = DataConsultaLabel.Text = ObservacoesLabel.Text = "";
         EstadoLabel.Text = "Carregando registro…";
         try
         {
             if (idConsulta <= 0) throw new InvalidOperationException("Selecione um registro no histórico.");
             var registro = await MedicoApi.ObterProntuarioAsync(idConsulta, atual.Token);
-            if (atual.IsCancellationRequested || usuario != SessaoUsuario.IdUsuario) return;
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
             TipoConsultaLabel.Text = registro.IdConsulta.ToString();
             DataConsultaLabel.Text = registro.DataRegistro.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
             ObservacoesLabel.Text = registro.Observacoes;
@@ -48,7 +48,7 @@ public partial class DetalhesProntuario : ContentPage, IQueryAttributable
         }
         catch (Exception ex)
         {
-            if (atual.IsCancellationRequested || usuario != SessaoUsuario.IdUsuario) return;
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
             EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar.";
             await DisplayAlertAsync("Prontuário", ex is InvalidOperationException
                 ? ex.Message : "Falha ao carregar o registro. Tente novamente.", "OK");
@@ -59,6 +59,7 @@ public partial class DetalhesProntuario : ContentPage, IQueryAttributable
         }
     }
 
-    private async void VoltarButton_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync("..");
+    private async void VoltarButton_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync("..");
 }
+
 
