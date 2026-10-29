@@ -29,7 +29,7 @@ public sealed class BotaoLogoff : ImageButton
         // Evita simular um logout que ainda nao limpa a sessao.
         if (Shell.Current is not null)
         {
-            await Shell.Current.DisplayAlert(
+            await Shell.Current.DisplayAlertAsync(
                 "Sair da conta",
                 "O encerramento de sessao sera ativado quando a autenticacao estiver integrada.",
                 "Entendi");

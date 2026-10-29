@@ -45,7 +45,7 @@ public partial class MinhasConsultas : ContentPage
 
             if (string.IsNullOrWhiteSpace(token))
             {
-                await DisplayAlert(
+                await DisplayAlertAsync(
                     "Acesso não autorizado",
                     "Faça login para consultar seus pacientes.",
                     "OK");
@@ -63,7 +63,7 @@ public partial class MinhasConsultas : ContentPage
 
             if (!resposta.IsSuccessStatusCode)
             {
-                await DisplayAlert(
+                await DisplayAlertAsync(
                     "Erro",
                     "Não foi possível consultar os pacientes.",
                     "OK");
@@ -106,7 +106,7 @@ public partial class MinhasConsultas : ContentPage
         {
             System.Diagnostics.Debug.WriteLine(ex);
 
-            await DisplayAlert(
+            await DisplayAlertAsync(
                 "Erro de conexão",
                 "Não foi possível carregar os pacientes. Verifique se a API está funcionando.",
                 "OK");
@@ -172,7 +172,7 @@ public partial class MinhasConsultas : ContentPage
 
         if (!resposta.IsSuccessStatusCode)
         {
-            await DisplayAlert(
+            await DisplayAlertAsync(
                 "Erro",
                 "Não foi possível carregar as consultas.",
                 "OK");
@@ -287,7 +287,7 @@ public partial class MinhasConsultas : ContentPage
         if (PediAgenda.Dados.StatusConsulta.EhRealizada(consulta.Status) ||
             PediAgenda.Dados.StatusConsulta.EhCancelada(consulta.Status))
         {
-            await DisplayAlert(
+            await DisplayAlertAsync(
                 "Detalhes da consulta",
                 $"Paciente: {paciente.Nome}\n\n" +
                 $"Médico: {consulta.Medico}\n" +

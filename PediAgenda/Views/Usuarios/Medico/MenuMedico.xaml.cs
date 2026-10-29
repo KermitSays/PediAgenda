@@ -188,12 +188,6 @@ public partial class MenuMedico : ContentPage
         object sender,
         TappedEventArgs e)
     {
-        if (!MedicoApi.ModoTeste)
-        {
-            await DisplayAlertAsync("Integração em andamento",
-                "Esta tela ainda usa dados de exemplo. Ela permanece disponível pelo acesso de teste visual.", "OK");
-            return;
-        }
         await Shell.Current.GoToAsync(
             nameof(PacientesMedico));
     }
@@ -265,3 +259,4 @@ public class ConsultaHoje
         set;
     } = string.Empty;
 }
+
