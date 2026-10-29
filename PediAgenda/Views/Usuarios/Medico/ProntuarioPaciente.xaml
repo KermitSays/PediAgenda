@@ -21,6 +21,9 @@
                 TextColor="{StaticResource TextDark}" />
 
 
+            <Label x:Name="EstadoLabel" TextColor="Black" />
+            <Button Text="Atualizar" Clicked="AtualizarButton_Clicked" />
+
             <!-- DADOS DO PACIENTE -->
             <Border
                 BackgroundColor="{StaticResource White}"
@@ -107,7 +110,7 @@
             <!-- MENSAGEM QUANDO NÃO EXISTE HISTÓRICO -->
             <Label
                 x:Name="SemHistoricoLabel"
-                Text="Nenhuma consulta registrada."
+                Text="Nenhum prontuário registrado para este paciente."
                 FontSize="15"
                 TextColor="{StaticResource InputPlaceholder}"
                 HorizontalTextAlignment="Center"
@@ -157,13 +160,13 @@
                                     Spacing="4">
 
                                     <Label
-                                        Text="{Binding TipoConsulta}"
+                                        Text="{Binding ConsultaTexto}"
                                         FontSize="16"
                                         FontAttributes="Bold"
                                         TextColor="{StaticResource TextDark}" />
 
                                     <Label
-                                        Text="{Binding DataTexto}"
+                                        Text="{Binding RegistroTexto}"
                                         FontSize="14"
                                         TextColor="{StaticResource InputPlaceholder}" />
 

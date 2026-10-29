@@ -78,6 +78,30 @@ internal static class MedicoApi
         return agenda.Medicos.SelectMany(m => m.Horarios).OrderBy(h => h.Inicio).ToList();
     }
 
+    public static async Task<List<PacienteMedicoResposta>> ObterPacientesAsync(CancellationToken ct = default)
+    {
+        using var pedido = new HttpRequestMessage(HttpMethod.Get, "api/medico/pacientes");
+        using var resposta = await EnviarAsync(pedido, ct);
+        return await resposta.Content.ReadFromJsonAsync<List<PacienteMedicoResposta>>(ct)
+            ?? throw new InvalidOperationException("A API retornou uma lista inválida.");
+    }
+
+    public static async Task<List<ProntuarioMedicoResposta>> ObterHistoricoAsync(int idPaciente, CancellationToken ct = default)
+    {
+        using var pedido = new HttpRequestMessage(HttpMethod.Get, $"api/pacientes/{idPaciente}/prontuarios");
+        using var resposta = await EnviarAsync(pedido, ct);
+        return await resposta.Content.ReadFromJsonAsync<List<ProntuarioMedicoResposta>>(ct)
+            ?? throw new InvalidOperationException("A API retornou um histórico inválido.");
+    }
+
+    public static async Task<ProntuarioMedicoResposta> ObterProntuarioAsync(int idConsulta, CancellationToken ct = default)
+    {
+        using var pedido = new HttpRequestMessage(HttpMethod.Get, $"api/consultas/{idConsulta}/prontuario");
+        using var resposta = await EnviarAsync(pedido, ct);
+        return await resposta.Content.ReadFromJsonAsync<ProntuarioMedicoResposta>(ct)
+            ?? throw new InvalidOperationException("A API retornou um prontuário inválido.");
+    }
+
     public static async Task RegistrarAtendimentoAsync(int idConsulta, string observacoes)
     {
         using var pedido = new HttpRequestMessage(HttpMethod.Post,
@@ -101,3 +125,11 @@ public sealed record ConsultaMedicoApi(int Id, string Status, string TipoAtendim
 public sealed record PacienteAgendaApi(int Id, string Nome, int Idade);
 public sealed record ResponsavelAgendaApi(string Nome, string Telefone);
 public sealed record AtendimentoMedicoApi(DateTime Data, HorarioMedicoApi Horario);
+
+public sealed record PacienteMedicoResposta(int Id, string Nome, DateOnly DataNascimento, string Responsavel);
+public sealed record ProntuarioMedicoResposta(int Id, int IdConsulta, int IdPaciente, string Observacoes, DateTime DataRegistro)
+{
+    public string ConsultaTexto => $"Consulta nº {IdConsulta}";
+    public string RegistroTexto => $"Registrado em {DataRegistro.ToLocalTime():dd/MM/yyyy HH:mm}";
+}
+
