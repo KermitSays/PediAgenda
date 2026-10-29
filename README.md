@@ -18,7 +18,6 @@ Sistema de agendamento e atendimento pediátrico desenvolvido por Talita Barbara
 É necessário o SDK .NET 9 e um MySQL 8 acessível. O backend usa MySqlConnector diretamente; não usa Entity Framework nem `dotnet ef`.
 
 - Banco novo e vazio: execute `banco/01_Schema.sql`; a carga `02_popula_tabelas.sql` é opcional e exclusiva de testes.
-- Banco existente: execute `banco/03_remover_verificacao_email.sql` antes de iniciar esta versão da API. A migração preserva usuários, credenciais, contas inativas e atendimentos.
 
 No PowerShell, na raiz do repositório, configure a sessão atual:
 
@@ -42,11 +41,5 @@ O JWT de **login** continua obrigatório nas rotas protegidas. Uma conta que já
 
 Horários de consulta usam `America/Sao_Paulo`, inclusive no Render; vencimento de JWT, bloqueios de login e novos prontuários usam UTC.
 
-## Referências
-
-- [Rotas e exemplos da API](api/README.md)
-- [Scripts do banco e migração](banco/README.md)
-- [Como executar os testes](testes/README.md)
-- [Resultado da revisão e validação](api/VALIDACAO.md)
 
 As telas têm seus próprios fluxos de integração. Executar a API local não altera automaticamente o endereço usado pelo aplicativo.
