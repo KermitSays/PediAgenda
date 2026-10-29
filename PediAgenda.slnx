@@ -4,7 +4,9 @@
   </Folder>
   <Project Path="api/PediAgenda.Api.csproj" />
   <Project Path="nucleo/PediAgenda.Nucleo.csproj" />
+  <Project Path="testes/PediAgenda.Testes.csproj" />
   <Project Path="PediAgenda/PediAgenda.csproj">
     <Deploy Solution="Debug|*" />
   </Project>
 </Solution>
+

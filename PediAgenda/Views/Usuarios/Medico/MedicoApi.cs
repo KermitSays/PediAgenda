@@ -20,12 +20,15 @@ internal static class MedicoApi
         && SessaoUsuario.Nome == "Médico Teste";
 
     private static async Task<HttpResponseMessage> EnviarAsync(HttpRequestMessage pedido,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, bool permitirNaoEncontrado = false)
     {
         if (ModoTeste || SessaoUsuario.IdUsuario <= 0 || SessaoUsuario.Perfil != "MEDICO")
             throw new InvalidOperationException("Entre com uma conta de médico para acessar os dados da clínica.");
 
+        long sessao = SessaoUsuario.Versao;
         string? token = await SecureStorage.Default.GetAsync("pediagenda_token");
+        if (sessao != SessaoUsuario.Versao)
+            throw new InvalidOperationException("Sua sessão mudou. Entre novamente.");
         if (string.IsNullOrWhiteSpace(token))
             throw new InvalidOperationException("Sua sessão expirou. Entre novamente com e-mail e senha.");
 
@@ -41,10 +44,10 @@ internal static class MedicoApi
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            throw new InvalidOperationException("A API demorou para responder. Atualize a agenda antes de tentar novamente.");
+            throw new InvalidOperationException("A API demorou para responder. Tente carregar os dados novamente.");
         }
 
-        if (resposta.IsSuccessStatusCode)
+        if (resposta.IsSuccessStatusCode || (permitirNaoEncontrado && resposta.StatusCode == HttpStatusCode.NotFound))
             return resposta;
 
         using (resposta)
@@ -54,7 +57,7 @@ internal static class MedicoApi
             if (resposta.StatusCode == HttpStatusCode.Forbidden)
                 throw new InvalidOperationException("Sua conta não tem permissão para esta operação.");
 
-            string mensagem = "Não foi possível concluir a operação. Atualize a agenda e tente novamente.";
+            string mensagem = "Não foi possível concluir a operação. Tente novamente.";
             try
             {
                 var erro = await resposta.Content.ReadFromJsonAsync<ErroApi>(cancellationToken);
@@ -78,6 +81,39 @@ internal static class MedicoApi
         return agenda.Medicos.SelectMany(m => m.Horarios).OrderBy(h => h.Inicio).ToList();
     }
 
+    public static async Task<List<PacienteMedicoResposta>> ObterPacientesAsync(CancellationToken ct = default)
+    {
+        using var pedido = new HttpRequestMessage(HttpMethod.Get, "api/medico/pacientes");
+        using var resposta = await EnviarAsync(pedido, ct);
+        return await resposta.Content.ReadFromJsonAsync<List<PacienteMedicoResposta>>(ct)
+            ?? throw new InvalidOperationException("A API retornou uma lista inválida.");
+    }
+
+    public static async Task<List<ProntuarioMedicoResposta>> ObterHistoricoAsync(int idPaciente, CancellationToken ct = default)
+    {
+        using var pedido = new HttpRequestMessage(HttpMethod.Get, $"api/pacientes/{idPaciente}/prontuarios");
+        using var resposta = await EnviarAsync(pedido, ct);
+        return await resposta.Content.ReadFromJsonAsync<List<ProntuarioMedicoResposta>>(ct)
+            ?? throw new InvalidOperationException("A API retornou um histórico inválido.");
+    }
+
+    public static async Task<ProntuarioMedicoResposta> ObterProntuarioAsync(int idConsulta, CancellationToken ct = default)
+    {
+        using var pedido = new HttpRequestMessage(HttpMethod.Get, $"api/consultas/{idConsulta}/prontuario");
+        using var resposta = await EnviarAsync(pedido, ct);
+        return await resposta.Content.ReadFromJsonAsync<ProntuarioMedicoResposta>(ct)
+            ?? throw new InvalidOperationException("A API retornou um prontuário inválido.");
+    }
+
+    public static async Task<ProntuarioMedicoResposta?> BuscarProntuarioAsync(int idConsulta, CancellationToken ct = default)
+    {
+        using var pedido = new HttpRequestMessage(HttpMethod.Get, $"api/consultas/{idConsulta}/prontuario");
+        using var resposta = await EnviarAsync(pedido, ct, permitirNaoEncontrado: true);
+        if (resposta.StatusCode == HttpStatusCode.NotFound) return null;
+        return await resposta.Content.ReadFromJsonAsync<ProntuarioMedicoResposta>(ct)
+            ?? throw new InvalidOperationException("A API retornou um prontuário inválido.");
+    }
+
     public static async Task RegistrarAtendimentoAsync(int idConsulta, string observacoes)
     {
         using var pedido = new HttpRequestMessage(HttpMethod.Post,
@@ -87,6 +123,18 @@ internal static class MedicoApi
         };
         // Esta operação já grava o prontuário e marca a consulta como REALIZADA na API.
         using var resposta = await EnviarAsync(pedido);
+    }
+
+    public static async Task<RelatorioMedicoResposta> ObterRelatorioAsync(
+        DateOnly inicio, DateOnly fim, CancellationToken ct = default)
+    {
+        using var pedido = new HttpRequestMessage(HttpMethod.Post, "api/relatorios")
+        {
+            Content = JsonContent.Create(new { inicio = inicio.ToString("yyyy-MM-dd"), fim = fim.ToString("yyyy-MM-dd") })
+        };
+        using var resposta = await EnviarAsync(pedido, ct);
+        return await resposta.Content.ReadFromJsonAsync<RelatorioMedicoResposta>(ct)
+            ?? throw new InvalidOperationException("A API retornou um relatório inválido.");
     }
 }
 
@@ -101,3 +149,12 @@ public sealed record ConsultaMedicoApi(int Id, string Status, string TipoAtendim
 public sealed record PacienteAgendaApi(int Id, string Nome, int Idade);
 public sealed record ResponsavelAgendaApi(string Nome, string Telefone);
 public sealed record AtendimentoMedicoApi(DateTime Data, HorarioMedicoApi Horario);
+
+public sealed record PacienteMedicoResposta(int Id, string Nome, DateOnly DataNascimento, string Responsavel);
+public sealed record ProntuarioMedicoResposta(int Id, int IdConsulta, int IdPaciente, string Observacoes, DateTime DataRegistro)
+{
+    public string ConsultaTexto => $"Consulta nº {IdConsulta}";
+    public string RegistroTexto => $"Registrado em {DataRegistro.ToLocalTime():dd/MM/yyyy HH:mm}";
+}
+
+

@@ -58,7 +58,7 @@ public class RelatorioService(IRelatorioRepositorio relatorios, IAgendaRepositor
                 "MEDICO_NAO_ENCONTRADO", "Médico não encontrado.");
 
         var id = _relatorios.Registrar(idMedico.Value, inicio!.Value, fim!.Value);
-        return ResultadoClinica<RelatorioCompleto>.Ok(Montar(_relatorios.Buscar(id)!));
+        return ResultadoClinica<RelatorioCompleto>.Ok(Montar(_relatorios.Buscar(id)!, ator.EhMedico));
     }
 
     public ResultadoClinica<IReadOnlyList<RelatorioGerado>> Historico(Ator ator)
@@ -84,12 +84,14 @@ public class RelatorioService(IRelatorioRepositorio relatorios, IAgendaRepositor
             return ResultadoClinica<RelatorioCompleto>.Erro(TipoFalhaClinica.SemPermissao,
                 "SEM_PERMISSAO", "Esse relatório é de outro médico.");
 
-        return ResultadoClinica<RelatorioCompleto>.Ok(Montar(cabecalho));
+        return ResultadoClinica<RelatorioCompleto>.Ok(Montar(cabecalho, ator.EhMedico));
     }
 
-    private RelatorioCompleto Montar(RelatorioGerado cabecalho)
+    private RelatorioCompleto Montar(RelatorioGerado cabecalho, bool somenteRealizadas)
     {
         var consultas = _relatorios.Consultas(cabecalho.IdMedico, cabecalho.Inicio, cabecalho.Fim);
+        if (somenteRealizadas)
+            consultas = consultas.Where(c => c.Status == StatusConsulta.Realizada).ToList();
         var (ofertados, bloqueados) = _relatorios.Horarios(cabecalho.IdMedico, cabecalho.Inicio, cabecalho.Fim);
 
         int Contar(string status) => consultas.Count(c => c.Status == status);
@@ -118,3 +120,4 @@ public class RelatorioService(IRelatorioRepositorio relatorios, IAgendaRepositor
         ResultadoClinica<T>.Erro(TipoFalhaClinica.SemPermissao, "SEM_PERMISSAO",
                                  "Seu usuário não está ligado a um médico.");
 }
+

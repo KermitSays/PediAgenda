@@ -104,7 +104,7 @@
                         TextColor="{StaticResource TextDark}" />
 
                                 <Label
-                        Text="{Binding UltimaConsultaTexto}"
+                        Text="{Binding Responsavel, StringFormat='Responsável: {0}'}"
                         FontSize="14"
                         TextColor="{StaticResource InputPlaceholder}" />
 
@@ -154,7 +154,11 @@
         </CollectionView>
 
         <!-- Retorno ao menu anterior -->
-        <controls:BotaoVoltar Grid.Row="3" />
+        <VerticalStackLayout Grid.Row="3" Spacing="8">
+            <Label x:Name="EstadoLabel" TextColor="Black" />
+            <Button Text="Atualizar" Clicked="AtualizarButton_Clicked" />
+            <controls:BotaoVoltar />
+        </VerticalStackLayout>
     </Grid>
 
 </ContentPage>

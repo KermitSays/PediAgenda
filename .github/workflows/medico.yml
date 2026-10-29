@@ -1,0 +1,59 @@
+name: Médico - API, integração e Android
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [feat/medico-conclusao]
+
+permissions:
+  contents: read
+
+jobs:
+  api-e-integracao:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: pediagenda-ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h127.0.0.1 -uroot -ppediagenda-ci"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    env:
+      PEDIAGENDA_TEST_CONEXAO: Server=127.0.0.1;Port=3306;User ID=root;Password=pediagenda-ci;SslMode=None
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+      - run: dotnet build api/PediAgenda.Api.csproj --configuration Release --nologo
+      - run: dotnet test testes/PediAgenda.Testes.csproj --configuration Release --nologo --logger "trx;LogFileName=medico.trx"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: testes-medico
+          path: testes/TestResults/*.trx
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-java@v4
+        with:
+          distribution: microsoft
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
+      - run: dotnet workload install maui-android --skip-manifest-update
+      - run: dotnet build PediAgenda/PediAgenda.csproj -f net10.0-android --configuration Debug --nologo -p:AndroidSdkDirectory="$ANDROID_HOME" -p:JavaSdkDirectory="$JAVA_HOME"

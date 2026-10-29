@@ -81,7 +81,7 @@ public partial class MenuMedico : ContentPage
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object sender, EventArgs e)
+    private async void AtualizarButton_Clicked(object? sender, EventArgs e)
         => await AtualizarConsultasAsync();
 
     private async Task AtualizarConsultasAsync()
@@ -89,7 +89,7 @@ public partial class MenuMedico : ContentPage
         carregamento?.Cancel();
         using var atual = new CancellationTokenSource();
         carregamento = atual;
-        int usuario = SessaoUsuario.IdUsuario;
+        long sessao = SessaoUsuario.Versao;
         ConsultasLista.Clear();
         ConsultasCollectionView.IsVisible = false;
         SemConsultasContainer.IsVisible = false;
@@ -103,7 +103,7 @@ public partial class MenuMedico : ContentPage
                 return;
             }
             var horarios = await MedicoApi.ObterAgendaAsync(DateTime.Today, atual.Token);
-            if (atual.IsCancellationRequested || usuario != SessaoUsuario.IdUsuario) return;
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
             foreach (var horario in horarios)
             {
                 var consulta = horario.Consulta;
@@ -123,6 +123,7 @@ public partial class MenuMedico : ContentPage
         catch (Exception) when (atual.IsCancellationRequested) { }
         catch (Exception ex)
         {
+            if (sessao != SessaoUsuario.Versao) return;
             EstadoAgendaLabel.Text = "Não foi possível carregar as consultas. Toque em Atualizar.";
             await DisplayAlertAsync("Consultas", ex is InvalidOperationException
                 ? ex.Message : "Não foi possível carregar a agenda. Tente novamente.", "OK");
@@ -185,15 +186,9 @@ public partial class MenuMedico : ContentPage
     // =============================================
 
     private async void MedicoPacientesButton_Clicked(
-        object sender,
+        object? sender,
         TappedEventArgs e)
     {
-        if (!MedicoApi.ModoTeste)
-        {
-            await DisplayAlertAsync("Integração em andamento",
-                "Esta tela ainda usa dados de exemplo. Ela permanece disponível pelo acesso de teste visual.", "OK");
-            return;
-        }
         await Shell.Current.GoToAsync(
             nameof(PacientesMedico));
     }
@@ -204,7 +199,7 @@ public partial class MenuMedico : ContentPage
     // =============================================
 
     private async void MedicoConsultasButton_Clicked(
-        object sender,
+        object? sender,
         TappedEventArgs e)
     {
         await Shell.Current.GoToAsync(
@@ -217,15 +212,9 @@ public partial class MenuMedico : ContentPage
     // =============================================
 
     private async void MedicoRelatoriosButton_Clicked(
-        object sender,
+        object? sender,
         TappedEventArgs e)
     {
-        if (!MedicoApi.ModoTeste)
-        {
-            await DisplayAlertAsync("Integração em andamento",
-                "Esta tela ainda usa dados de exemplo. Ela permanece disponível pelo acesso de teste visual.", "OK");
-            return;
-        }
         await Shell.Current.GoToAsync(
             nameof(RelatoriosMedico));
     }
@@ -265,3 +254,5 @@ public class ConsultaHoje
         set;
     } = string.Empty;
 }
+
+

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using PediAgenda.Dados;
 
 namespace PediAgenda.Views.Usuarios.Medico;
 
@@ -20,6 +21,16 @@ public partial class LiberarHorarios : ContentPage
     private int? idMedicoSelecionado;
     private string idMedico = string.Empty;
     private bool processando;
+    private bool confirmando;
+    private CancellationTokenSource? carregamento;
+
+    protected override void OnDisappearing()
+    {
+        carregamento?.Cancel();
+        base.OnDisappearing();
+    }
+
+    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarBloqueiosAsync();
 
     public string IdMedico
     {
@@ -51,6 +62,13 @@ public partial class LiberarHorarios : ContentPage
             return;
 
         processando = true;
+        using var atual = new CancellationTokenSource();
+        carregamento = atual;
+        long sessao = SessaoUsuario.Versao;
+        Bloqueios.Clear();
+        BloqueiosCollectionView.IsVisible = false;
+        AtualizarButton.IsEnabled = false;
+        EstadoLabel.Text = "Carregando bloqueios…";
         try
         {
             string token = await ObterTokenAsync();
@@ -62,12 +80,15 @@ public partial class LiberarHorarios : ContentPage
             requisicao.Headers.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
 
-            using var resposta = await http.SendAsync(requisicao);
+            using var resposta = await http.SendAsync(requisicao, atual.Token);
             if (!resposta.IsSuccessStatusCode)
                 throw new InvalidOperationException(await LerErroAsync(resposta));
 
             var resultado = await resposta.Content
-                .ReadFromJsonAsync<List<PeriodoBloqueadoApi>>() ?? new();
+                .ReadFromJsonAsync<List<PeriodoBloqueadoApi>>(atual.Token)
+                ?? throw new InvalidOperationException("A API retornou uma lista de bloqueios inválida.");
+
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
 
             Bloqueios.Clear();
             foreach (var periodo in resultado)
@@ -78,7 +99,7 @@ public partial class LiberarHorarios : ContentPage
                     CultureInfo.InvariantCulture, out TimeSpan inicio) ||
                     !TimeSpan.TryParseExact(periodo.Fim, @"hh\:mm",
                     CultureInfo.InvariantCulture, out TimeSpan fim))
-                    continue;
+                    throw new InvalidOperationException("A API retornou um período inválido.");
 
                 Bloqueios.Add(new BloqueioExibicao
                 {
@@ -89,39 +110,53 @@ public partial class LiberarHorarios : ContentPage
                     PeriodoHorario = inicio.ToString(@"hh\:mm") + " às " + fim.ToString(@"hh\:mm")
                 });
             }
+            EstadoLabel.Text = Bloqueios.Count == 0 ? "Nenhum período bloqueado." : "Bloqueios da agenda";
+            BloqueiosCollectionView.IsVisible = Bloqueios.Count > 0;
         }
         catch (Exception ex)
         {
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
             Bloqueios.Clear();
+            EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar bloqueios.";
             await DisplayAlertAsync("Não foi possível carregar os bloqueios", ex.Message, "OK");
         }
         finally
         {
             processando = false;
+            AtualizarButton.IsEnabled = true;
+            if (ReferenceEquals(carregamento, atual)) carregamento = null;
         }
     }
 
-    private async void LiberarPeriodoButton_Clicked(object sender, EventArgs e)
+    private async void LiberarPeriodoButton_Clicked(object? sender, EventArgs e)
     {
-        if (processando || sender is not Button button ||
+        if (processando || confirmando || sender is not Button button ||
             button.BindingContext is not BloqueioExibicao item)
             return;
 
-        bool confirmar = await DisplayAlertAsync(
+        long sessao = SessaoUsuario.Versao;
+        confirmando = true;
+        bool confirmar;
+        try
+        {
+            confirmar = await DisplayAlertAsync(
             "Liberar período",
             $"Deseja liberar todo este período?\n\n" +
             $"Data: {item.PeriodoData}\n" +
             $"Horário: {item.PeriodoHorario}\n\n" +
             "As consultas canceladas pelo bloqueio não serão restauradas.",
             "Liberar", "Cancelar");
+        }
+        finally { confirmando = false; }
 
-        if (!confirmar)
-            return;
+        if (!confirmar || sessao != SessaoUsuario.Versao) return;
 
         processando = true;
+        AtualizarButton.IsEnabled = false;
         try
         {
             string token = await ObterTokenAsync();
+            if (sessao != SessaoUsuario.Versao) return;
             using var requisicao = new HttpRequestMessage(
                 HttpMethod.Post, "api/agenda/periodos/liberar")
             {
@@ -141,17 +176,23 @@ public partial class LiberarHorarios : ContentPage
             if (!resposta.IsSuccessStatusCode)
                 throw new InvalidOperationException(await LerErroAsync(resposta));
 
+            if (sessao != SessaoUsuario.Versao) return;
+            Bloqueios.Clear();
+            BloqueiosCollectionView.IsVisible = false;
+
             await DisplayAlertAsync("Período liberado",
                 "O período foi liberado com sucesso.", "OK");
         }
         catch (Exception ex)
         {
+            if (sessao != SessaoUsuario.Versao) return;
             await DisplayAlertAsync("Não foi possível liberar o período", ex.Message, "OK");
             return;
         }
         finally
         {
             processando = false;
+            AtualizarButton.IsEnabled = true;
         }
 
         await CarregarBloqueiosAsync();
@@ -182,7 +223,7 @@ public partial class LiberarHorarios : ContentPage
         return $"A API retornou erro HTTP {(int)resposta.StatusCode}.";
     }
 
-    private async void VoltarButton_Clicked(object sender, EventArgs e)
+    private async void VoltarButton_Clicked(object? sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("..");
     }
@@ -205,3 +246,4 @@ public partial class LiberarHorarios : ContentPage
         public string PeriodoHorario { get; set; } = string.Empty;
     }
 }
+

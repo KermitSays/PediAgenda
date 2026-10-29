@@ -118,7 +118,7 @@ public partial class ConsultasMedico : ContentPage
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object sender, EventArgs e)
+    private async void AtualizarButton_Clicked(object? sender, EventArgs e)
         => await CarregarAgendaAsync(DataConsultaPicker.Date ?? DateTime.Today);
 
     private async Task CarregarAgendaAsync(DateTime data)
@@ -126,7 +126,7 @@ public partial class ConsultasMedico : ContentPage
         carregamento?.Cancel();
         using var atual = new CancellationTokenSource();
         carregamento = atual;
-        int usuario = SessaoUsuario.IdUsuario;
+        long sessao = SessaoUsuario.Versao;
         Agenda.Clear();
         AgendaCollectionView.IsVisible = false;
         EstadoAgendaLabel.Text = MedicoApi.ModoTeste
@@ -140,7 +140,7 @@ public partial class ConsultasMedico : ContentPage
                 return;
             }
             var horarios = await MedicoApi.ObterAgendaAsync(data, atual.Token);
-            if (atual.IsCancellationRequested || usuario != SessaoUsuario.IdUsuario) return;
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
             foreach (var horario in horarios)
             {
                 string status = horario.Consulta != null
@@ -167,6 +167,7 @@ public partial class ConsultasMedico : ContentPage
         catch (Exception) when (atual.IsCancellationRequested) { }
         catch (Exception ex)
         {
+            if (sessao != SessaoUsuario.Versao) return;
             EstadoAgendaLabel.Text = "Não foi possível carregar a agenda. Toque em Atualizar.";
             await DisplayAlertAsync("Agenda", ex is InvalidOperationException
                 ? ex.Message : "Não foi possível carregar a agenda. Tente novamente.", "OK");
@@ -296,7 +297,7 @@ public partial class ConsultasMedico : ContentPage
     // ============================================
 
     private async void AgendaCollectionView_SelectionChanged(
-        object sender,
+        object? sender,
         SelectionChangedEventArgs e)
     {
         if (e.CurrentSelection.FirstOrDefault()
@@ -310,11 +311,33 @@ public partial class ConsultasMedico : ContentPage
         if (item.AtendimentoApi is { } atendimento)
         {
             if (atendimento.Horario.Consulta == null) return;
-            if (StatusConsulta.EhCancelada(item.Status) || StatusConsulta.EhRealizada(item.Status))
+            if (StatusConsulta.EhCancelada(item.Status))
             {
                 await DisplayAlertAsync("Atendimento indisponível",
-                    "Esta consulta está cancelada ou já foi realizada.", "OK");
+                    "Esta consulta está cancelada.", "OK");
                 return;
+            }
+            if (StatusConsulta.EhRealizada(item.Status))
+            {
+                long sessao = SessaoUsuario.Versao;
+                try
+                {
+                    var registro = await MedicoApi.BuscarProntuarioAsync(atendimento.Horario.Consulta.Id);
+                    if (sessao != SessaoUsuario.Versao) return;
+                    if (registro != null)
+                    {
+                        await Shell.Current.GoToAsync(nameof(DetalhesProntuario),
+                            new Dictionary<string, object> { ["IdConsulta"] = registro.IdConsulta });
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (sessao != SessaoUsuario.Versao) return;
+                    await DisplayAlertAsync("Prontuário", ex is InvalidOperationException
+                        ? ex.Message : "Não foi possível conferir o prontuário. Tente novamente.", "OK");
+                    return;
+                }
             }
             await Shell.Current.GoToAsync(nameof(RegistrarAtendimento),
                 new Dictionary<string, object> { ["AtendimentoApi"] = atendimento });
@@ -505,17 +528,19 @@ public partial class ConsultasMedico : ContentPage
     // ============================================
 
     private async void BloquearHorarioButton_Clicked(
-        object sender,
+        object? sender,
         EventArgs e)
     {
-        if (!MedicoApi.ModoTeste)
+        if (MedicoApi.ModoTeste)
         {
-            await DisplayAlertAsync("Integração em andamento",
-                "O bloqueio por período ainda não está conectado à API. Esta ação permanece disponível no teste visual.", "OK");
+            await DisplayAlertAsync(
+                "Acesso de teste",
+                "Para bloquear horários reais, entre com e-mail e senha de médico.",
+                "OK");
             return;
         }
-        await Shell.Current.GoToAsync(
-            nameof(BloquearHorario));
+
+        await Shell.Current.GoToAsync(nameof(BloquearHorario));
     }
 
     // ============================================
@@ -523,17 +548,19 @@ public partial class ConsultasMedico : ContentPage
     // ============================================
 
     private async void LiberarHorariosButton_Clicked(
-        object sender,
+        object? sender,
         EventArgs e)
     {
-        if (!MedicoApi.ModoTeste)
+        if (MedicoApi.ModoTeste)
         {
-            await DisplayAlertAsync("Integração em andamento",
-                "O bloqueio por período ainda não está conectado à API. Esta ação permanece disponível no teste visual.", "OK");
+            await DisplayAlertAsync(
+                "Acesso de teste",
+                "Para liberar horários reais, entre com e-mail e senha de médico.",
+                "OK");
             return;
         }
-        await Shell.Current.GoToAsync(
-            nameof(LiberarHorarios));
+
+        await Shell.Current.GoToAsync(nameof(LiberarHorarios));
     }
 
     // ============================================
@@ -541,7 +568,7 @@ public partial class ConsultasMedico : ContentPage
     // ============================================
 
     private async void VoltarButton_Clicked(
-        object sender,
+        object? sender,
         EventArgs e)
     {
         await Shell.Current.GoToAsync("..");
@@ -554,6 +581,7 @@ public partial class ConsultasMedico : ContentPage
 
 public class ConsultaAgenda
 {
+
     public AtendimentoMedicoApi? AtendimentoApi { get; set; }
 
     public Guid? IdConsulta { get; set; }
@@ -572,4 +600,5 @@ public class ConsultaAgenda
     public Color StatusCor { get; set; } =
         Colors.Black;
 }
+
 

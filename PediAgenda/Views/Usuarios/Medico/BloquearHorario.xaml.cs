@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using PediAgenda.Views.Usuarios.Recepcao;
+using PediAgenda.Dados;
 
 namespace PediAgenda.Views.Usuarios.Medico;
 
@@ -40,7 +41,7 @@ public partial class BloquearHorario : ContentPage
         HorarioFinalPicker.Time = new TimeSpan(12, 30, 0);
     }
 
-    private async void BloquearHorarioButton_Clicked(object sender, EventArgs e)
+    private async void BloquearHorarioButton_Clicked(object? sender, EventArgs e)
     {
         if (processando)
             return;
@@ -66,15 +67,17 @@ public partial class BloquearHorario : ContentPage
         }
 
         processando = true;
+        long sessao = SessaoUsuario.Versao;
         try
         {
             // A API respeita o médico autenticado; a Recepção informa o ID real.
             // A consulta prévia identifica as consultas que seriam canceladas.
             var consultasAfetadas = await BuscarConsultasAfetadasAsync(
-                dataInicial, dataFinal, horarioInicial, horarioFinal);
+                dataInicial, dataFinal, horarioInicial, horarioFinal, sessao);
+            if (sessao != SessaoUsuario.Versao) return;
 
             string mensagem =
-                $"Deseja bloquear o período?\n\n" +
+                $"Deseja bloquear o período?\nTodos os horários que coincidirem com o intervalo serão bloqueados por inteiro.\n\n" +
                 $"Período: {dataInicial:dd/MM/yyyy} {horarioInicial:hh\\:mm} " +
                 $"até {dataFinal:dd/MM/yyyy} {horarioFinal:hh\\:mm}";
 
@@ -94,10 +97,11 @@ public partial class BloquearHorario : ContentPage
 
             bool confirmar = await DisplayAlertAsync(
                 "Confirmar bloqueio", mensagem, "Bloquear", "Cancelar");
-            if (!confirmar)
+            if (!confirmar || sessao != SessaoUsuario.Versao)
                 return;
 
             var token = await ObterTokenAsync();
+            if (sessao != SessaoUsuario.Versao) return;
             using var requisicao = new HttpRequestMessage(
                 HttpMethod.Post, "api/agenda/periodos/bloquear")
             {
@@ -116,6 +120,7 @@ public partial class BloquearHorario : ContentPage
             if (!resposta.IsSuccessStatusCode)
                 throw new InvalidOperationException(await LerErroAsync(resposta));
 
+            if (sessao != SessaoUsuario.Versao) return;
             var resultado = await resposta.Content.ReadFromJsonAsync<ResultadoBloqueioPeriodoApi>();
             int horarios = resultado?.HorariosAlterados ?? 0;
             int canceladas = resultado?.ConsultasCanceladas ?? 0;
@@ -131,6 +136,7 @@ public partial class BloquearHorario : ContentPage
         }
         catch (Exception ex)
         {
+            if (sessao != SessaoUsuario.Versao) return;
             await DisplayAlertAsync("Não foi possível bloquear o período", ex.Message, "OK");
         }
         finally
@@ -141,7 +147,7 @@ public partial class BloquearHorario : ContentPage
 
     private async Task<List<string>> BuscarConsultasAfetadasAsync(
         DateTime dataInicial, DateTime dataFinal,
-        TimeSpan horarioInicial, TimeSpan horarioFinal)
+        TimeSpan horarioInicial, TimeSpan horarioFinal, long sessao)
     {
         var consultas = new List<string>();
         var idsEncontrados = new HashSet<int>();
@@ -150,7 +156,9 @@ public partial class BloquearHorario : ContentPage
 
         for (DateTime dia = dataInicial; dia <= dataFinal; dia = dia.AddDays(1))
         {
+            if (sessao != SessaoUsuario.Versao) throw new OperationCanceledException();
             var agenda = await AgendaRecepcaoApi.ConsultarAsync(dia, idMedicoSelecionado);
+            if (sessao != SessaoUsuario.Versao) throw new OperationCanceledException();
             foreach (var medico in agenda.Medicos)
             {
                 foreach (var horario in medico.Horarios)
@@ -159,8 +167,8 @@ public partial class BloquearHorario : ContentPage
                             CultureInfo.InvariantCulture, out var inicio) ||
                         !TimeSpan.TryParseExact(horario.Fim, @"hh\:mm",
                             CultureInfo.InvariantCulture, out var fim) ||
-                        dia.Add(inicio) < inicioPeriodo ||
-                        dia.Add(fim) > fimPeriodo)
+                        dia.Add(fim) <= inicioPeriodo ||
+                        dia.Add(inicio) >= fimPeriodo)
                         continue;
 
                     if (horario.Consulta is not { } consulta ||
@@ -211,7 +219,7 @@ public partial class BloquearHorario : ContentPage
         return $"A API retornou erro HTTP {(int)resposta.StatusCode}.";
     }
 
-    private async void CancelarButton_Clicked(object sender, EventArgs e)
+    private async void CancelarButton_Clicked(object? sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("..");
     }
@@ -222,3 +230,4 @@ public partial class BloquearHorario : ContentPage
         public int ConsultasCanceladas { get; set; }
     }
 }
+

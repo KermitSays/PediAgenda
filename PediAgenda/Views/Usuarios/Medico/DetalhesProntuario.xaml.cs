@@ -1,69 +1,65 @@
+using PediAgenda.Dados;
+
 namespace PediAgenda.Views.Usuarios.Medico;
 
-[QueryProperty(nameof(TipoConsulta), "TipoConsulta")]
-[QueryProperty(nameof(DataConsulta), "DataConsulta")]
-[QueryProperty(nameof(Observacoes), "Observacoes")]
-public partial class DetalhesProntuario : ContentPage
+public partial class DetalhesProntuario : ContentPage, IQueryAttributable
 {
-    private string tipoConsulta = string.Empty;
-    private string dataConsulta = string.Empty;
-    private string observacoes = string.Empty;
+    private int idConsulta;
+    private CancellationTokenSource? carregamento;
+    public DetalhesProntuario() { InitializeComponent(); }
 
-    public string TipoConsulta
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        get => tipoConsulta;
+        idConsulta = query.TryGetValue("IdConsulta", out var valor)
+            && int.TryParse(valor?.ToString(), out int id) ? id : 0;
+    }
 
-        set
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await CarregarAsync();
+    }
+
+    protected override void OnDisappearing()
+    {
+        carregamento?.Cancel();
+        base.OnDisappearing();
+    }
+
+    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarAsync();
+
+    private async Task CarregarAsync()
+    {
+        carregamento?.Cancel();
+        using var atual = new CancellationTokenSource();
+        carregamento = atual;
+        long sessao = SessaoUsuario.Versao;
+        TipoConsultaLabel.Text = DataConsultaLabel.Text = ObservacoesLabel.Text = "";
+        EstadoLabel.Text = "Carregando registro…";
+        try
         {
-            tipoConsulta = value;
-
-            if (TipoConsultaLabel != null)
-            {
-                TipoConsultaLabel.Text = value;
-            }
+            if (idConsulta <= 0) throw new InvalidOperationException("Selecione um registro no histórico.");
+            var registro = await MedicoApi.ObterProntuarioAsync(idConsulta, atual.Token);
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
+            TipoConsultaLabel.Text = registro.IdConsulta.ToString();
+            DataConsultaLabel.Text = registro.DataRegistro.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+            ObservacoesLabel.Text = registro.Observacoes;
+            EstadoLabel.Text = "Registro do prontuário";
+        }
+        catch (Exception ex)
+        {
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
+            EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar.";
+            await DisplayAlertAsync("Prontuário", ex is InvalidOperationException
+                ? ex.Message : "Falha ao carregar o registro. Tente novamente.", "OK");
+        }
+        finally
+        {
+            if (ReferenceEquals(carregamento, atual)) carregamento = null;
         }
     }
 
-    public string DataConsulta
-    {
-        get => dataConsulta;
-
-        set
-        {
-            dataConsulta = value;
-
-            if (DataConsultaLabel != null)
-            {
-                DataConsultaLabel.Text = value;
-            }
-        }
-    }
-
-    public string Observacoes
-    {
-        get => observacoes;
-
-        set
-        {
-            observacoes = value;
-
-            if (ObservacoesLabel != null)
-            {
-                ObservacoesLabel.Text = value;
-            }
-        }
-    }
-
-    public DetalhesProntuario()
-    {
-        InitializeComponent();
-    }
-
-    // Volta para o prontuário
-    private async void VoltarButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        await Shell.Current.GoToAsync("..");
-    }
+    private async void VoltarButton_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync("..");
 }
+
+

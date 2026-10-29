@@ -88,7 +88,7 @@ public partial class MenuResponsavel : ContentPage
 
             if (string.IsNullOrWhiteSpace(token))
             {
-                await DisplayAlert(
+                await DisplayAlertAsync(
                     "Acesso não autorizado",
                     "Faça login novamente.",
                     "OK");
@@ -106,7 +106,7 @@ public partial class MenuResponsavel : ContentPage
 
             if (!respPacientes.IsSuccessStatusCode)
             {
-                await DisplayAlert(
+                await DisplayAlertAsync(
                     "Erro",
                     "Não foi possível carregar os pacientes.",
                     "OK");
@@ -127,7 +127,7 @@ public partial class MenuResponsavel : ContentPage
 
             if (!respConsultas.IsSuccessStatusCode)
             {
-                await DisplayAlert(
+                await DisplayAlertAsync(
                     "Erro",
                     "Não foi possível carregar as consultas.",
                     "OK");
@@ -188,7 +188,7 @@ public partial class MenuResponsavel : ContentPage
         {
             System.Diagnostics.Debug.WriteLine(ex);
 
-            await DisplayAlert(
+            await DisplayAlertAsync(
                 "Erro de conexão",
                 "Não foi possível atualizar as consultas. Verifique se a API está funcionando.",
                 "OK");

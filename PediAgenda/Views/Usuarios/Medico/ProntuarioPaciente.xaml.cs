@@ -1,172 +1,88 @@
+using PediAgenda.Dados;
+
 namespace PediAgenda.Views.Usuarios.Medico;
 
-[QueryProperty(nameof(IdPaciente), "IdPaciente")]
-public partial class ProntuarioPaciente : ContentPage
+public partial class ProntuarioPaciente : ContentPage, IQueryAttributable
 {
     private int idPaciente;
+    private CancellationTokenSource? carregamento;
+    private bool navegando;
 
-    private PacienteMedicoItem?
-        pacienteAtual;
+    public ProntuarioPaciente() { InitializeComponent(); }
 
-
-    public int IdPaciente
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        get => idPaciente;
-
-        set
-        {
-            idPaciente =
-                value;
-
-
-            CarregarPaciente();
-        }
+        idPaciente = query.TryGetValue("IdPaciente", out var valor)
+            && int.TryParse(valor?.ToString(), out int id) ? id : 0;
     }
 
-
-    public ProntuarioPaciente()
-    {
-        InitializeComponent();
-    }
-
-
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-
-
-        CarregarPaciente();
+        await CarregarAsync();
     }
 
-
-    // CARREGA OS DADOS DO PACIENTE
-
-    private void CarregarPaciente()
+    protected override void OnDisappearing()
     {
-        if (IdPaciente <= 0)
-            return;
+        carregamento?.Cancel();
+        base.OnDisappearing();
+    }
 
+    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarAsync();
 
-        pacienteAtual =
-            MedicoDados
-                .ObterPacientePorId(
-                    IdPaciente);
-
-
-        if (pacienteAtual == null)
+    private async Task CarregarAsync()
+    {
+        carregamento?.Cancel();
+        using var atual = new CancellationTokenSource();
+        carregamento = atual;
+        long sessao = SessaoUsuario.Versao;
+        NomePacienteLabel.Text = DataNascimentoLabel.Text = ResponsavelLabel.Text = "";
+        HistoricoCollectionView.ItemsSource = null;
+        HistoricoCollectionView.IsVisible = false;
+        SemHistoricoLabel.IsVisible = false;
+        EstadoLabel.Text = "Carregando prontuário…";
+        try
         {
-            NomePacienteLabel.Text =
-                "Paciente não encontrado";
-
-
-            DataNascimentoLabel.Text =
-                "-";
-
-
-            ResponsavelLabel.Text =
-                "-";
-
-
-            HistoricoCollectionView.ItemsSource =
-                null;
-
-
-            HistoricoCollectionView.IsVisible =
-                false;
-
-
-            SemHistoricoLabel.IsVisible =
-                true;
-
-
-            return;
+            if (idPaciente <= 0) throw new InvalidOperationException("Selecione um paciente na lista.");
+            var pacientes = await MedicoApi.ObterPacientesAsync(atual.Token);
+            var paciente = pacientes.FirstOrDefault(p => p.Id == idPaciente)
+                ?? throw new InvalidOperationException("Paciente não encontrado na sua agenda.");
+            var historico = await MedicoApi.ObterHistoricoAsync(idPaciente, atual.Token);
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
+            NomePacienteLabel.Text = paciente.Nome;
+            DataNascimentoLabel.Text = paciente.DataNascimento.ToString("dd/MM/yyyy");
+            ResponsavelLabel.Text = paciente.Responsavel;
+            HistoricoCollectionView.ItemsSource = historico.OrderByDescending(p => p.DataRegistro).ThenByDescending(p => p.Id).ToList();
+            HistoricoCollectionView.IsVisible = historico.Count > 0;
+            SemHistoricoLabel.IsVisible = historico.Count == 0;
+            EstadoLabel.Text = "Registros do prontuário";
         }
-
-
-        NomePacienteLabel.Text =
-            pacienteAtual.Nome;
-
-
-        DataNascimentoLabel.Text =
-            pacienteAtual
-                .DataNascimento
-                .ToString(
-                    "dd/MM/yyyy");
-
-
-        ResponsavelLabel.Text =
-            pacienteAtual.Responsavel;
-
-
-        List<ConsultaHistoricoMedicoItem>
-            historicoOrdenado =
-                pacienteAtual
-                    .Historico
-                    .OrderByDescending(h =>
-                        h.Data)
-                    .ToList();
-
-
-        HistoricoCollectionView.ItemsSource =
-            historicoOrdenado;
-
-
-        SemHistoricoLabel.IsVisible =
-            historicoOrdenado.Count == 0;
-
-
-        HistoricoCollectionView.IsVisible =
-            historicoOrdenado.Count > 0;
-    }
-
-
-    // ABRE OS DETALHES DO REGISTRO
-
-    private async void ConsultaHistorico_Clicked(
-        object sender,
-        TappedEventArgs e)
-    {
-        if (sender is not Border border)
-            return;
-
-
-        if (border.BindingContext
-            is not ConsultaHistoricoMedicoItem consulta)
+        catch (Exception ex)
         {
-            return;
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
+            EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar.";
+            await DisplayAlertAsync("Prontuário", ex is InvalidOperationException
+                ? ex.Message : "Falha ao carregar o prontuário. Tente novamente.", "OK");
         }
-
-
-        await Shell.Current.GoToAsync(
-            nameof(DetalhesProntuario),
-            new Dictionary<string, object>
-            {
-                {
-                    "TipoConsulta",
-                    consulta.TipoConsulta
-                },
-
-                {
-                    "DataConsulta",
-                    consulta.Data.ToString(
-                        "dd/MM/yyyy")
-                },
-
-                {
-                    "Observacoes",
-                    consulta.Observacoes
-                }
-            });
+        finally
+        {
+            if (ReferenceEquals(carregamento, atual)) carregamento = null;
+        }
     }
 
-
-    // VOLTAR
-
-    private async void VoltarButton_Clicked(
-        object sender,
-        EventArgs e)
+    private async void ConsultaHistorico_Clicked(object? sender, TappedEventArgs e)
     {
-        await Shell.Current.GoToAsync(
-            "..");
+        if (navegando || sender is not Border { BindingContext: ProntuarioMedicoResposta registro }) return;
+        navegando = true;
+        try
+        {
+            await Shell.Current.GoToAsync(nameof(DetalhesProntuario),
+                new Dictionary<string, object> { ["IdConsulta"] = registro.IdConsulta });
+        }
+        finally { navegando = false; }
     }
+
+    private async void VoltarButton_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync("..");
 }
+
+

@@ -582,3 +582,7 @@ record PacienteResposta(int Id, string Nome, string DataNascimento, int Idade)
         new(p.Id, p.Nome, p.DataNascimento.ToString("yyyy-MM-dd"),
             p.IdadeEm(DateOnly.FromDateTime(RelogioClinica.Instancia.GetLocalNow().DateTime)));
 }
+
+// Ponto de entrada acessível ao servidor de integração dos testes.
+public partial class Program { }
+

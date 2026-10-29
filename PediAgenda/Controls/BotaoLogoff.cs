@@ -1,12 +1,13 @@
 using System;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
+using PediAgenda.Dados;
 
 namespace PediAgenda.Controls;
 
-// Componente visual provisorio. A sessao NAO e encerrada nesta etapa.
 public sealed class BotaoLogoff : ImageButton
 {
+    private bool saindo;
     public BotaoLogoff()
     {
         Source = "logoff_icon.png";
@@ -26,13 +27,24 @@ public sealed class BotaoLogoff : ImageButton
 
     private async void AoClicar(object? sender, EventArgs e)
     {
-        // Evita simular um logout que ainda nao limpa a sessao.
-        if (Shell.Current is not null)
+        if (saindo || Shell.Current?.Window is not { } janela) return;
+        saindo = true;
+        try
         {
-            await Shell.Current.DisplayAlert(
-                "Sair da conta",
-                "O encerramento de sessao sera ativado quando a autenticacao estiver integrada.",
-                "Entendi");
+            SecureStorage.Default.Remove("pediagenda_token");
+            SessaoUsuario.Limpar();
+            // Uma Shell nova descarta a pilha autenticada e os dados das telas.
+            janela.Page = new AppShell();
+        }
+        catch (Exception)
+        {
+            await Shell.Current.DisplayAlertAsync("Sair da conta",
+                "Não foi possível encerrar a sessão. Tente novamente.", "OK");
+        }
+        finally
+        {
+            saindo = false;
         }
     }
 }
+

@@ -1,138 +1,90 @@
 using System.Collections.ObjectModel;
+using PediAgenda.Dados;
 
 namespace PediAgenda.Views.Usuarios.Medico;
 
 public partial class PacientesMedico : ContentPage
 {
-    public ObservableCollection<PacienteMedicoItem>
-        Pacientes
-    { get; set; }
-
-
-    public ObservableCollection<PacienteMedicoItem>
-        PacientesFiltrados
-    { get; set; }
-
+    private List<PacienteMedicoResposta> pacientes = new();
+    public ObservableCollection<PacienteMedicoResposta> PacientesFiltrados { get; } = new();
+    private CancellationTokenSource? carregamento;
+    private bool navegando;
 
     public PacientesMedico()
     {
         InitializeComponent();
-
-
-        Pacientes =
-            MedicoDados.Pacientes;
-
-
-        PacientesFiltrados =
-            new ObservableCollection<PacienteMedicoItem>(
-                Pacientes);
-
-
-        BindingContext =
-            this;
+        BindingContext = this;
     }
 
-
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-
-
-        AtualizarLista();
+        await CarregarAsync();
     }
 
-
-    // ATUALIZA A LISTA
-
-    private void AtualizarLista()
+    protected override void OnDisappearing()
     {
-        string textoBusca =
-            BuscarPacienteEntry?.Text?
-                .Trim()
-            ?? string.Empty;
-
-
-        FiltrarPacientes(
-            textoBusca);
+        carregamento?.Cancel();
+        base.OnDisappearing();
     }
 
+    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarAsync();
 
-    // PESQUISA PACIENTES PELO NOME
-
-    private void BuscarPacienteEntry_TextChanged(
-        object sender,
-        TextChangedEventArgs e)
+    private async Task CarregarAsync()
     {
-        string textoBusca =
-            e.NewTextValue?.Trim()
-            ?? string.Empty;
-
-
-        FiltrarPacientes(
-            textoBusca);
-    }
-
-
-    private void FiltrarPacientes(
-        string textoBusca)
-    {
+        carregamento?.Cancel();
+        using var atual = new CancellationTokenSource();
+        carregamento = atual;
+        long sessao = SessaoUsuario.Versao;
+        pacientes.Clear();
         PacientesFiltrados.Clear();
-
-
-        IEnumerable<PacienteMedicoItem>
-            pacientesFiltrados =
-                Pacientes;
-
-
-        if (!string.IsNullOrWhiteSpace(
-            textoBusca))
+        PacientesCollectionView.IsVisible = false;
+        EstadoLabel.Text = "Carregando pacientes…";
+        try
         {
-            pacientesFiltrados =
-                pacientesFiltrados
-                    .Where(p =>
-                        p.Nome.Contains(
-                            textoBusca,
-                            StringComparison.OrdinalIgnoreCase));
+            var resposta = await MedicoApi.ObterPacientesAsync(atual.Token);
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
+            pacientes = resposta;
+            Filtrar();
+            EstadoLabel.Text = pacientes.Count == 0
+                ? "Nenhum paciente vinculado à sua agenda." : "Pacientes vinculados à sua agenda";
+            PacientesCollectionView.IsVisible = pacientes.Count > 0;
         }
-
-
-        foreach (
-            PacienteMedicoItem paciente
-            in pacientesFiltrados
-                .OrderBy(p =>
-                    p.Nome))
+        catch (Exception ex)
         {
-            PacientesFiltrados.Add(
-                paciente);
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
+            EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar.";
+            await DisplayAlertAsync("Pacientes", ex is InvalidOperationException
+                ? ex.Message : "Falha ao carregar os pacientes. Tente novamente.", "OK");
+        }
+        finally
+        {
+            if (ReferenceEquals(carregamento, atual)) carregamento = null;
         }
     }
 
+    private void BuscarPacienteEntry_TextChanged(object? sender, TextChangedEventArgs e) => Filtrar();
 
-    // ABRE O PRONTUÁRIO DO PACIENTE
-
-    private async void PacientesMedico_Clicked(
-        object sender,
-        TappedEventArgs e)
+    private void Filtrar()
     {
-        if (sender is not Border border)
-            return;
+        string busca = BuscarPacienteEntry?.Text?.Trim() ?? "";
+        PacientesFiltrados.Clear();
+        foreach (var paciente in pacientes.Where(p => p.Nome.Contains(busca,
+            StringComparison.OrdinalIgnoreCase)).OrderBy(p => p.Nome))
+            PacientesFiltrados.Add(paciente);
+    }
 
-
-        if (border.BindingContext
-            is not PacienteMedicoItem paciente)
+    private async void PacientesMedico_Clicked(object? sender, TappedEventArgs e)
+    {
+        if (navegando || sender is not Border { BindingContext: PacienteMedicoResposta paciente }) return;
+        navegando = true;
+        try
         {
-            return;
+            await Shell.Current.GoToAsync(nameof(ProntuarioPaciente),
+                new Dictionary<string, object> { ["IdPaciente"] = paciente.Id });
         }
-
-
-        await Shell.Current.GoToAsync(
-            nameof(ProntuarioPaciente),
-            new Dictionary<string, object>
-            {
-                {
-                    "IdPaciente",
-                    paciente.IdPaciente
-                }
-            });
+        finally { navegando = false; }
     }
 }
+
+

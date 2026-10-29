@@ -14,10 +14,13 @@
             Spacing="18">
 
             <Label
-                Text="Detalhes da consulta"
+                Text="Registro do prontuário"
                 FontSize="28"
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />
+
+            <Label x:Name="EstadoLabel" TextColor="Black" />
+            <Button Text="Atualizar" Clicked="AtualizarButton_Clicked" />
 
             <Border
                 BackgroundColor="{StaticResource White}"
@@ -44,7 +47,7 @@
                         <Label
                             Grid.Row="0"
                             Grid.Column="0"
-                            Text="Tipo:"
+                            Text="Consulta nº:"
                             FontAttributes="Bold"
                             TextColor="{StaticResource TextDark}" />
 
@@ -57,7 +60,7 @@
                         <Label
                             Grid.Row="1"
                             Grid.Column="0"
-                            Text="Data:"
+                            Text="Registrado em:"
                             FontAttributes="Bold"
                             TextColor="{StaticResource TextDark}" />
 

@@ -45,7 +45,7 @@ public partial class PacientesResponsavel : ContentPage
 
             if (string.IsNullOrWhiteSpace(token))
             {
-                await DisplayAlert(
+                await DisplayAlertAsync(
                     "Acesso não autorizado",
                     "Faça login para consultar seus dependentes.",
                     "OK");
@@ -64,7 +64,7 @@ public partial class PacientesResponsavel : ContentPage
 
             if (!resposta.IsSuccessStatusCode)
             {
-                await DisplayAlert(
+                await DisplayAlertAsync(
                     "Erro",
                     "Não foi possível consultar os dependentes.",
                     "OK");
@@ -106,7 +106,7 @@ public partial class PacientesResponsavel : ContentPage
         {
             System.Diagnostics.Debug.WriteLine(ex);
 
-            await DisplayAlert(
+            await DisplayAlertAsync(
                 "Erro de conexão",
                 "Não foi possível carregar os dependentes. Verifique se a API está funcionando.",
                 "OK");

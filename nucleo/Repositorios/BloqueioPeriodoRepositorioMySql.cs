@@ -16,10 +16,12 @@ public record PeriodoBloqueadoAgenda(DateOnly Data, TimeOnly Inicio, TimeOnly Fi
 public sealed class BloqueioPeriodoRepositorioMySql
 {
     private readonly string conexao;
+    private readonly TimeProvider relogio;
 
-    public BloqueioPeriodoRepositorioMySql(string stringDeConexao)
+    public BloqueioPeriodoRepositorioMySql(string stringDeConexao, TimeProvider? relogio = null)
     {
         conexao = stringDeConexao;
+        this.relogio = relogio ?? PediAgenda.Nucleo.RelogioClinica.Instancia;
     }
 
     public ResultadoPeriodoAgenda Bloquear(
@@ -53,7 +55,7 @@ public sealed class BloqueioPeriodoRepositorioMySql
         if (idMedico <= 0)
             throw new PeriodoAgendaException("Médico inválido.");
 
-        DateTime agora = PediAgenda.Nucleo.RelogioClinica.Instancia.GetLocalNow().DateTime;
+        DateTime agora = relogio.GetLocalNow().DateTime;
 
         using var con = new MySqlConnection(conexao);
         con.Open();
@@ -118,8 +120,7 @@ public sealed class BloqueioPeriodoRepositorioMySql
 
         if (bloquear)
         {
-            DateTime agora = PediAgenda.Nucleo.RelogioClinica.Instancia
-                .GetLocalNow().DateTime;
+            DateTime agora = relogio.GetLocalNow().DateTime;
             DateOnly hoje = DateOnly.FromDateTime(agora);
 
             if (dataInicial < hoje ||
@@ -139,13 +140,13 @@ public sealed class BloqueioPeriodoRepositorioMySql
         var horarios = new List<int>();
 
         using (var consulta = new MySqlCommand("""
-            SELECT h.id_horario
+            SELECT h.id_horario, h.data_horario, h.hora_inicio
             FROM horario h
             INNER JOIN agenda_medica a ON a.id_agenda = h.id_agenda
             WHERE a.id_medico = @medico
               AND h.data_horario BETWEEN @dataInicial AND @dataFinal
-              AND (h.data_horario > @dataInicial OR h.hora_inicio >= @horaInicial)
-              AND (h.data_horario < @dataFinal OR h.hora_fim <= @horaFinal)
+              AND (h.data_horario > @dataInicial OR h.hora_fim > @horaInicial)
+              AND (h.data_horario < @dataFinal OR h.hora_inicio < @horaFinal)
             ORDER BY h.data_horario, h.hora_inicio, h.id_horario
             FOR UPDATE
             """, con, tx))
@@ -155,6 +156,10 @@ public sealed class BloqueioPeriodoRepositorioMySql
             using var leitor = consulta.ExecuteReader();
             while (leitor.Read())
             {
+                if (bloquear && leitor.GetDateOnly("data_horario").ToDateTime(
+                    TimeOnly.FromTimeSpan(leitor.GetTimeSpan("hora_inicio"))) <=
+                    relogio.GetLocalNow().DateTime)
+                    throw new PeriodoAgendaException("O período atinge um horário que já começou. Nenhuma alteração foi realizada.");
                 horarios.Add(leitor.GetInt32("id_horario"));
             }
         }
@@ -175,8 +180,8 @@ public sealed class BloqueioPeriodoRepositorioMySql
             INNER JOIN agenda_medica a ON a.id_agenda = h.id_agenda
             WHERE a.id_medico = @medico
               AND h.data_horario BETWEEN @dataInicial AND @dataFinal
-              AND (h.data_horario > @dataInicial OR h.hora_inicio >= @horaInicial)
-              AND (h.data_horario < @dataFinal OR h.hora_fim <= @horaFinal)
+              AND (h.data_horario > @dataInicial OR h.hora_fim > @horaInicial)
+              AND (h.data_horario < @dataFinal OR h.hora_inicio < @horaFinal)
               AND c.status <> 'CANCELADA'
             FOR UPDATE
             """, con, tx))
@@ -207,8 +212,8 @@ public sealed class BloqueioPeriodoRepositorioMySql
                 SET c.status = 'CANCELADA'
                 WHERE a.id_medico = @medico
                   AND h.data_horario BETWEEN @dataInicial AND @dataFinal
-                  AND (h.data_horario > @dataInicial OR h.hora_inicio >= @horaInicial)
-                  AND (h.data_horario < @dataFinal OR h.hora_fim <= @horaFinal)
+                  AND (h.data_horario > @dataInicial OR h.hora_fim > @horaInicial)
+                  AND (h.data_horario < @dataFinal OR h.hora_inicio < @horaFinal)
                   AND c.status IN ('AGENDADA', 'CONFIRMADA')
                 """, con, tx);
 
@@ -224,8 +229,8 @@ public sealed class BloqueioPeriodoRepositorioMySql
             SET h.disponivel = @disponivel
             WHERE a.id_medico = @medico
               AND h.data_horario BETWEEN @dataInicial AND @dataFinal
-              AND (h.data_horario > @dataInicial OR h.hora_inicio >= @horaInicial)
-              AND (h.data_horario < @dataFinal OR h.hora_fim <= @horaFinal)
+              AND (h.data_horario > @dataInicial OR h.hora_fim > @horaInicial)
+              AND (h.data_horario < @dataFinal OR h.hora_inicio < @horaFinal)
               AND h.disponivel <> @disponivel
             """, con, tx);
 
@@ -252,3 +257,4 @@ public sealed class BloqueioPeriodoRepositorioMySql
         cmd.Parameters.AddWithValue("@horaFinal", horarioFinal.ToTimeSpan());
     }
 }
+
