@@ -28,14 +28,14 @@ public partial class ProntuarioPaciente : ContentPage, IQueryAttributable
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object sender, EventArgs e) => await CarregarAsync();
+    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarAsync();
 
     private async Task CarregarAsync()
     {
         carregamento?.Cancel();
         using var atual = new CancellationTokenSource();
         carregamento = atual;
-        int usuario = SessaoUsuario.IdUsuario;
+        long sessao = SessaoUsuario.Versao;
         NomePacienteLabel.Text = DataNascimentoLabel.Text = ResponsavelLabel.Text = "";
         HistoricoCollectionView.ItemsSource = null;
         HistoricoCollectionView.IsVisible = false;
@@ -48,7 +48,7 @@ public partial class ProntuarioPaciente : ContentPage, IQueryAttributable
             var paciente = pacientes.FirstOrDefault(p => p.Id == idPaciente)
                 ?? throw new InvalidOperationException("Paciente não encontrado na sua agenda.");
             var historico = await MedicoApi.ObterHistoricoAsync(idPaciente, atual.Token);
-            if (atual.IsCancellationRequested || usuario != SessaoUsuario.IdUsuario) return;
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
             NomePacienteLabel.Text = paciente.Nome;
             DataNascimentoLabel.Text = paciente.DataNascimento.ToString("dd/MM/yyyy");
             ResponsavelLabel.Text = paciente.Responsavel;
@@ -59,7 +59,7 @@ public partial class ProntuarioPaciente : ContentPage, IQueryAttributable
         }
         catch (Exception ex)
         {
-            if (atual.IsCancellationRequested || usuario != SessaoUsuario.IdUsuario) return;
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
             EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar.";
             await DisplayAlertAsync("Prontuário", ex is InvalidOperationException
                 ? ex.Message : "Falha ao carregar o prontuário. Tente novamente.", "OK");
@@ -70,7 +70,7 @@ public partial class ProntuarioPaciente : ContentPage, IQueryAttributable
         }
     }
 
-    private async void ConsultaHistorico_Clicked(object sender, TappedEventArgs e)
+    private async void ConsultaHistorico_Clicked(object? sender, TappedEventArgs e)
     {
         if (navegando || sender is not Border { BindingContext: ProntuarioMedicoResposta registro }) return;
         navegando = true;
@@ -82,6 +82,7 @@ public partial class ProntuarioPaciente : ContentPage, IQueryAttributable
         finally { navegando = false; }
     }
 
-    private async void VoltarButton_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync("..");
+    private async void VoltarButton_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync("..");
 }
+
 

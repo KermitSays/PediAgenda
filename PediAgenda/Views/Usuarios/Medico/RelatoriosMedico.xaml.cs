@@ -1,324 +1,124 @@
-
 using System.Collections.ObjectModel;
-using ClosedXML.Excel;
 using CommunityToolkit.Maui.Storage;
+using PediAgenda.Dados;
 
 namespace PediAgenda.Views.Usuarios.Medico;
 
 public partial class RelatoriosMedico : ContentPage
 {
-    public ObservableCollection<RelatorioConsultaItem> Resultados
-    { get; set; } = new();
+    public ObservableCollection<LinhaRelatorioMedicoApi> Resultados { get; } = new();
+    private CancellationTokenSource? carregamento;
+    private RelatorioMedicoDocumento? documento;
+    private long sessaoDocumento;
+    private bool exportando;
 
     public RelatoriosMedico()
     {
         InitializeComponent();
-
         BindingContext = this;
-
-        ConfigurarDatas();
-        BuscarAtendimentos();
+        DataInicialPicker.Date = DateTime.Today.AddMonths(-1);
+        DataFinalPicker.Date = DateTime.Today;
+        DataInicialPicker.DateSelected += PeriodoAlterado;
+        DataFinalPicker.DateSelected += PeriodoAlterado;
     }
 
-    // ============================================
-    // CONFIGURAR PERÍODO INICIAL
-    // ============================================
-
-    private void ConfigurarDatas()
+    protected override async void OnAppearing()
     {
-        if (ConsultasMedicoDados.Consultas.Count > 0)
-        {
-            DataInicialPicker.Date =
-                ConsultasMedicoDados.Consultas
-                    .Min(c => c.Data);
-
-            DataFinalPicker.Date =
-                ConsultasMedicoDados.Consultas
-                    .Max(c => c.Data);
-        }
-        else
-        {
-            DataInicialPicker.Date =
-                DateTime.Today.AddMonths(-1);
-
-            DataFinalPicker.Date = DateTime.Today;
-        }
+        base.OnAppearing();
+        await BuscarAsync();
     }
 
-    // ============================================
-    // BOTÃO BUSCAR
-    // ============================================
-
-    private async void BuscarButton_Clicked(
-        object sender,
-        EventArgs e)
+    protected override void OnDisappearing()
     {
-        DateTime dataInicial =
-            DataInicialPicker.Date ?? DateTime.Today;
-
-        DateTime dataFinal =
-            DataFinalPicker.Date ?? DateTime.Today;
-
-        if (dataFinal.Date < dataInicial.Date)
-        {
-            await DisplayAlertAsync(
-                "Período inválido",
-                "A data final não pode ser anterior à data inicial.",
-                "OK");
-
-            return;
-        }
-
-        BuscarAtendimentos();
+        carregamento?.Cancel();
+        base.OnDisappearing();
     }
 
-    // ============================================
-    // BUSCAR CONSULTAS REALIZADAS
-    // ============================================
-
-    private void BuscarAtendimentos()
+    private void LimparResultado()
     {
-        DateTime dataInicial =
-            DataInicialPicker.Date ?? DateTime.Today;
-
-        DateTime dataFinal =
-            DataFinalPicker.Date ?? DateTime.Today;
-
-        // Mantém somente consultas realizadas.
-        var consultasFiltradas =
-            ConsultasMedicoDados.Consultas
-                .Where(c =>
-                    c.Data.Date >= dataInicial.Date &&
-                    c.Data.Date <= dataFinal.Date &&
-                    string.Equals(
-                        c.Status,
-                        "Realizada",
-                        StringComparison.OrdinalIgnoreCase))
-                .OrderBy(c => c.Data)
-                .ThenBy(c => c.Horario)
-                .ToList();
-
+        documento = null;
         Resultados.Clear();
-
-        foreach (var consulta in consultasFiltradas)
-        {
-            Resultados.Add(new RelatorioConsultaItem
-            {
-                Paciente = consulta.Paciente,
-                Data = consulta.Data,
-                Horario = consulta.Horario,
-                Status = consulta.Status
-            });
-        }
-
-        AtualizarResumo();
+        TotalRealizadasLabel.Text = "0";
+        ResultadosCollectionView.IsVisible = false;
+        GerarExcelButton.IsEnabled = false;
     }
 
-    // ============================================
-    // ATUALIZAR TOTAL
-    // ============================================
-
-    private void AtualizarResumo()
+    private void PeriodoAlterado(object? sender, DateChangedEventArgs e)
     {
-        TotalRealizadasLabel.Text =
-            Resultados.Count.ToString();
+        carregamento?.Cancel();
+        LimparResultado();
+        EstadoLabel.Text = "Período alterado. Toque em Buscar atendimentos.";
     }
 
-    // ============================================
-    // GERAR RELATÓRIO EM EXCEL
-    // ============================================
+    private async void BuscarButton_Clicked(object? sender, EventArgs e) => await BuscarAsync();
 
-    private async void GerarExcelButton_Clicked(
-        object sender,
-        EventArgs e)
+    private async Task BuscarAsync()
     {
-        if (Resultados.Count == 0)
-        {
-            await DisplayAlertAsync(
-                "Relatórios",
-                "Não existem consultas realizadas para gerar o relatório.",
-                "OK");
-
-            return;
-        }
-
+        carregamento?.Cancel();
+        using var atual = new CancellationTokenSource();
+        carregamento = atual;
+        long sessao = SessaoUsuario.Versao;
+        LimparResultado();
+        EstadoLabel.Text = "Carregando atendimentos…";
         try
         {
-            using var workbook = new XLWorkbook();
-
-            var planilha =
-                workbook.Worksheets.Add("Atendimentos");
-
-            // ====================================
-            // CABEÇALHO
-            // ====================================
-
-            planilha.Cell("A1").Value = "PediAgenda";
-
-            planilha.Cell("A2").Value =
-                "Relatório de Atendimentos Realizados";
-
-            planilha.Range("A1:C1").Merge();
-            planilha.Range("A2:C2").Merge();
-
-            planilha.Cell("A1").Style.Font.Bold = true;
-            planilha.Cell("A1").Style.Font.FontSize = 18;
-
-            planilha.Cell("A2").Style.Font.Bold = true;
-            planilha.Cell("A2").Style.Font.FontSize = 14;
-
-            // ====================================
-            // PERÍODO UTILIZADO
-            // ====================================
-
-            DateTime dataInicial =
-                DataInicialPicker.Date ?? DateTime.Today;
-
-            DateTime dataFinal =
-                DataFinalPicker.Date ?? DateTime.Today;
-
-            planilha.Cell("A4").Value = "Período:";
-
-            planilha.Cell("B4").Value =
-                $"{dataInicial:dd/MM/yyyy} até " +
-                $"{dataFinal:dd/MM/yyyy}";
-
-            // ====================================
-            // RESUMO
-            // ====================================
-
-            planilha.Cell("A6").Value =
-                "Total de consultas realizadas";
-
-            planilha.Cell("B6").Value =
-                Resultados.Count;
-
-            planilha.Cell("A6").Style.Font.Bold = true;
-
-            // ====================================
-            // CABEÇALHO DA TABELA
-            // ====================================
-
-            int linhaCabecalho = 8;
-
-            planilha.Cell(linhaCabecalho, 1).Value =
-                "Paciente";
-
-            planilha.Cell(linhaCabecalho, 2).Value =
-                "Data";
-
-            planilha.Cell(linhaCabecalho, 3).Value =
-                "Horário";
-
-            var cabecalho = planilha.Range(
-                linhaCabecalho,
-                1,
-                linhaCabecalho,
-                3);
-
-            cabecalho.Style.Font.Bold = true;
-
-            // ====================================
-            // CONSULTAS REALIZADAS
-            // ====================================
-
-            int linhaAtual = linhaCabecalho + 1;
-
-            foreach (var consulta in Resultados)
-            {
-                planilha.Cell(linhaAtual, 1).Value =
-                    consulta.Paciente;
-
-                planilha.Cell(linhaAtual, 2).Value =
-                    consulta.Data;
-
-                planilha.Cell(linhaAtual, 2)
-                    .Style.DateFormat.Format =
-                    "dd/MM/yyyy";
-
-                planilha.Cell(linhaAtual, 3).Value =
-                    consulta.Horario.ToString(@"hh\:mm");
-
-                linhaAtual++;
-            }
-
-            // ====================================
-            // AJUSTAR COLUNAS
-            // ====================================
-
-            planilha.Columns().AdjustToContents();
-
-            // ====================================
-            // SALVAR ARQUIVO
-            // ====================================
-
-            using var stream = new MemoryStream();
-
-            workbook.SaveAs(stream);
-
-            stream.Position = 0;
-
-            string nomeArquivo =
-                $"Relatorio_PediAgenda_" +
-                $"{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
-
-            var resultado = await FileSaver.Default.SaveAsync(
-                nomeArquivo,
-                stream);
-
-            if (resultado.IsSuccessful)
-            {
-                await DisplayAlertAsync(
-                    "Relatório gerado",
-                    "O arquivo Excel foi salvo com sucesso.",
-                    "OK");
-            }
-            else
-            {
-                await DisplayAlertAsync(
-                    "Relatórios",
-                    "O arquivo não foi salvo.",
-                    "OK");
-            }
+            var inicio = DateOnly.FromDateTime(DataInicialPicker.Date ?? DateTime.Today);
+            var fim = DateOnly.FromDateTime(DataFinalPicker.Date ?? DateTime.Today);
+            if (fim < inicio || fim.DayNumber - inicio.DayNumber + 1 > 366)
+                throw new InvalidOperationException("Selecione um período válido de até 366 dias.");
+            var resposta = await MedicoApi.ObterRelatorioAsync(inicio, fim, atual.Token);
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
+            documento = RelatorioMedicoDocumento.Criar(resposta, inicio, fim);
+            sessaoDocumento = sessao;
+            foreach (var item in documento.Atendimentos) Resultados.Add(item);
+            TotalRealizadasLabel.Text = Resultados.Count.ToString();
+            EstadoLabel.Text = $"Período consultado: {inicio:dd/MM/yyyy} até {fim:dd/MM/yyyy}";
+            ResultadosCollectionView.IsVisible = true;
+            GerarExcelButton.IsEnabled = Resultados.Count > 0 && !exportando;
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync(
-                "Erro",
-                "Não foi possível gerar o arquivo Excel.\n\n" +
-                ex.Message,
-                "OK");
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
+            EstadoLabel.Text = "Não foi possível carregar. Toque em Buscar atendimentos para tentar novamente.";
+            await DisplayAlertAsync("Relatórios", ex is InvalidOperationException
+                ? ex.Message : "Falha ao carregar os atendimentos. Tente novamente.", "OK");
+        }
+        finally
+        {
+            if (ReferenceEquals(carregamento, atual)) carregamento = null;
         }
     }
 
-    // ============================================
-    // VOLTAR
-    // ============================================
-
-    private async void VoltarButton_Clicked(
-        object sender,
-        EventArgs e)
+    private async void GerarExcelButton_Clicked(object? sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("..");
+        if (exportando || documento is not { } resultado || resultado.Atendimentos.Count == 0) return;
+        if (sessaoDocumento != SessaoUsuario.Versao)
+        {
+            LimparResultado();
+            EstadoLabel.Text = "Sua sessão mudou. Consulte os atendimentos novamente.";
+            return;
+        }
+        exportando = true;
+        GerarExcelButton.IsEnabled = false;
+        try
+        {
+            using var stream = ExportadorExcelMedico.Gerar(resultado);
+            var salvo = await FileSaver.Default.SaveAsync($"Relatorio_PediAgenda_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx", stream);
+            if (sessaoDocumento != SessaoUsuario.Versao) return;
+            await DisplayAlertAsync("Relatórios", salvo.IsSuccessful
+                ? "O arquivo Excel foi salvo com sucesso." : "O arquivo não foi salvo.", "OK");
+        }
+        catch (Exception)
+        {
+            await DisplayAlertAsync("Relatórios", "Não foi possível salvar o Excel. Tente novamente.", "OK");
+        }
+        finally
+        {
+            exportando = false;
+            GerarExcelButton.IsEnabled = documento?.Atendimentos.Count > 0
+                && sessaoDocumento == SessaoUsuario.Versao;
+        }
     }
-}
 
-// ============================================
-// MODELO DE EXIBIÇÃO
-// ============================================
-
-public class RelatorioConsultaItem
-{
-    public string Paciente { get; set; } =
-        string.Empty;
-
-    public DateTime Data { get; set; }
-
-    public TimeSpan Horario { get; set; }
-
-    public string Status { get; set; } =
-        string.Empty;
-
-    public string DataHoraFormatada =>
-        $"{Data:dd/MM/yyyy} • {Horario:hh\\:mm}";
+    private async void VoltarButton_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync("..");
 }

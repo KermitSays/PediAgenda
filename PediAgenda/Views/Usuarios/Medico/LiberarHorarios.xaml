@@ -28,12 +28,16 @@
                 FontSize="14"
                 TextColor="{StaticResource InputPlaceholder}" />
 
+            <Label x:Name="EstadoLabel" TextColor="{StaticResource TextDark}" />
+            <Button x:Name="AtualizarButton" Text="Atualizar bloqueios" Clicked="AtualizarButton_Clicked" />
+
         </VerticalStackLayout>
 
         <!-- LISTA DE BLOQUEIOS -->
         <CollectionView
             Grid.Row="1"
             x:Name="BloqueiosCollectionView"
+            IsVisible="False"
             SelectionMode="None">
 
             <CollectionView.ItemsLayout>
@@ -122,3 +126,4 @@
     </Grid>
 
 </ContentPage>
+

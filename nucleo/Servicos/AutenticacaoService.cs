@@ -78,23 +78,6 @@ public class AutenticacaoService(
         if (email.Length is 0 or > 160)
             return ResultadoLogin.Falha(MensagemGenerica, MotivoFalha.CredenciaisInvalidas);
 
-        // A mesma política de senha usada no cadastro
-        // também é utilizada no login.
-        if (!PoliticaSenha.Valida(
-            senha,
-            out var erroSenha))
-        {
-            _repo.RegistrarTentativa(
-                email,
-                null,
-                false,
-                "senha fora da politica");
-
-            return ResultadoLogin.Falha(
-                erroSenha,
-                MotivoFalha.SenhaForaDaPolitica);
-        }
-
         var usuario =
             _repo.BuscarPorEmail(email);
 
@@ -165,7 +148,9 @@ public class AutenticacaoService(
 
         // Neste ponto PossuiCredenciais já garantiu
         // que hash e salt existem.
-        if (!HashSenha.Conferir(
+        // Senhas curtas, vazias ou longas também contam como tentativa inválida.
+        // A política continua sendo exigida na criação das credenciais.
+        if (!PoliticaSenha.Valida(senha, out _) || !HashSenha.Conferir(
             senha!,
             usuario.SenhaHash!,
             usuario.SenhaSalt!,

@@ -28,14 +28,14 @@ public partial class PacientesMedico : ContentPage
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object sender, EventArgs e) => await CarregarAsync();
+    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarAsync();
 
     private async Task CarregarAsync()
     {
         carregamento?.Cancel();
         using var atual = new CancellationTokenSource();
         carregamento = atual;
-        int usuario = SessaoUsuario.IdUsuario;
+        long sessao = SessaoUsuario.Versao;
         pacientes.Clear();
         PacientesFiltrados.Clear();
         PacientesCollectionView.IsVisible = false;
@@ -43,7 +43,7 @@ public partial class PacientesMedico : ContentPage
         try
         {
             var resposta = await MedicoApi.ObterPacientesAsync(atual.Token);
-            if (atual.IsCancellationRequested || usuario != SessaoUsuario.IdUsuario) return;
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
             pacientes = resposta;
             Filtrar();
             EstadoLabel.Text = pacientes.Count == 0
@@ -52,7 +52,7 @@ public partial class PacientesMedico : ContentPage
         }
         catch (Exception ex)
         {
-            if (atual.IsCancellationRequested || usuario != SessaoUsuario.IdUsuario) return;
+            if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
             EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar.";
             await DisplayAlertAsync("Pacientes", ex is InvalidOperationException
                 ? ex.Message : "Falha ao carregar os pacientes. Tente novamente.", "OK");
@@ -63,7 +63,7 @@ public partial class PacientesMedico : ContentPage
         }
     }
 
-    private void BuscarPacienteEntry_TextChanged(object sender, TextChangedEventArgs e) => Filtrar();
+    private void BuscarPacienteEntry_TextChanged(object? sender, TextChangedEventArgs e) => Filtrar();
 
     private void Filtrar()
     {
@@ -74,7 +74,7 @@ public partial class PacientesMedico : ContentPage
             PacientesFiltrados.Add(paciente);
     }
 
-    private async void PacientesMedico_Clicked(object sender, TappedEventArgs e)
+    private async void PacientesMedico_Clicked(object? sender, TappedEventArgs e)
     {
         if (navegando || sender is not Border { BindingContext: PacienteMedicoResposta paciente }) return;
         navegando = true;
@@ -86,4 +86,5 @@ public partial class PacientesMedico : ContentPage
         finally { navegando = false; }
     }
 }
+
 
