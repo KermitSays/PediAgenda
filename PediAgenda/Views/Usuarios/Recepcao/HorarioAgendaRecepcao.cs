@@ -1,4 +1,4 @@
-﻿using Microsoft.Maui.Graphics;
+using Microsoft.Maui.Graphics;
 
 // Evita conflito entre:
 // - a propriedade "StatusConsulta"
@@ -21,6 +21,8 @@ public class HorarioAgendaRecepcao
         get;
         set;
     }
+    // ID real da consulta, diferente do ID do horario.
+    public int? IdConsulta { get; set; }
 
 
     public string Medico
@@ -202,10 +204,7 @@ public class HorarioAgendaRecepcao
                 !string.IsNullOrWhiteSpace(
                     StatusConsulta))
             {
-                return
-                    StatusConsultaHelper
-                        .Normalizar(
-                            StatusConsulta);
+                return "Consulta registrada";
             }
 
 

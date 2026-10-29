@@ -111,42 +111,12 @@ public partial class DetalhesPacienteRecepcao : ContentPage
     // AGENDAR CONSULTA
     // ============================================
 
-    private async void AgendarConsultaButton_Clicked(
-        object sender,
-        EventArgs e)
+    private async void AgendarConsultaButton_Clicked(object sender, EventArgs e)
     {
-
-        if (_pacienteDaApi is not null)
+        if (_pacienteDaApi is null)
         {
-            await DisplayAlertAsync(
-                "Agendamento em integração",
-                "O agendamento de pacientes cadastrados no banco de dados ainda está sendo integrado.",
-                "OK");
-
-            return;
-        }
-
-
-        if (_paciente == null)
-        {
-            await DisplayAlertAsync(
-                "Atenção",
-                "Nenhum paciente foi selecionado.",
-                "OK");
-
-            return;
-        }
-
-
-        if (_pacienteDaApi is not null)
-        {
-            await Shell.Current.GoToAsync(
-                nameof(AgendarConsultaRecepcao),
-                new Dictionary<string, object>
-                {
-            { "PacienteDaApi", _pacienteDaApi }
-                });
-
+            await DisplayAlertAsync("Atenção",
+                "Selecione o paciente na listagem atualizada do banco de dados.", "OK");
             return;
         }
 
@@ -154,9 +124,8 @@ public partial class DetalhesPacienteRecepcao : ContentPage
             nameof(AgendarConsultaRecepcao),
             new Dictionary<string, object>
             {
-        { "PacienteId", _paciente!.Id.ToString() }
+                ["PacienteDaApi"] = _pacienteDaApi
             });
-
     }
 
     // ============================================

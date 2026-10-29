@@ -46,6 +46,8 @@ builder.Services.AddSingleton<MedicoRepositorioMySql>(
     _ => new MedicoRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddSingleton<IConsultaRepositorio>(
     _ => new ConsultaRepositorioMySql(Configuracao.StringDeConexao!));
+builder.Services.AddSingleton<RecepcaoAgendamentoRepositorioMySql>(_ => new RecepcaoAgendamentoRepositorioMySql(Configuracao.StringDeConexao!));
+builder.Services.AddSingleton<RecepcaoGestaoConsultaRepositorioMySql>(_ => new RecepcaoGestaoConsultaRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<ConsultaService>();
 builder.Services.AddSingleton<IAgendaRepositorio>(
     _ => new AgendaRepositorioMySql(Configuracao.StringDeConexao!));
@@ -453,6 +455,8 @@ clinica.MapGet("/relatorios/{id:int}/exportar", (int id, ClaimsPrincipal usuario
 
 
 app.MapearBloqueioPeriodo();
+app.MapearAgendamentosRecepcao();
+app.MapearGestaoConsultasRecepcao();
 app.Run();
 return 0;
 
