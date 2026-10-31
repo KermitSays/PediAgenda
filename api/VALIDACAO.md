@@ -1,4 +1,6 @@
-# Validação da API
+# Validação histórica da API
+
+> **Registro histórico:** resultados associados ao commit e ao ambiente descritos abaixo. Não comprovam a versão atual com Brevo, remoção de `tipo_atendimento` e novas telas. O procedimento final deve ser validado novamente antes do deploy. Não executar as antigas instruções de remoção de verificação de e-mail.
 
 Base revisada: `master`, commit `1be6a35b30a3204a6cdd5ad32d64bae8dc382c0a` de `KermitSays/PediAgenda`.
 
@@ -60,6 +62,6 @@ Também foram testados rota inexistente, método incorreto e JSON malformado. O 
 
 ## Alcance
 
-Os testes usam dados fictícios em uma instância local. Não foram aplicadas migrações no Aiven nem feita publicação no Render. A interface MAUI não foi alterada nem testada; a integração das telas com as novas rotas continua sendo trabalho do aplicativo. Recuperação de senha, reativação de contas e envio de lembretes não estão implementados nesta API.
+Os testes usam dados fictícios em uma instância local. Não foram aplicadas migrações no Aiven nem feita publicação no Render. A interface MAUI não foi alterada nem testada; a integração das telas com as novas rotas continua sendo trabalho do aplicativo. Reativação de contas e envio de lembretes não estão implementados nesta API.
 
-Antes de publicar a API atualizada, aplique `banco/03_remover_verificacao_email.sql` no banco existente. O JWT de login continua necessário; somente a confirmação do cadastro foi removida.
+> **Instrução histórica obsoleta:** não remover a verificação de e-mail. O fluxo final utiliza Brevo e o script atual é `banco/03_migracao_confirmacao_brevo.sql` (já aplicado no Aiven em 30/10/2026).

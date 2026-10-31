@@ -5,7 +5,7 @@ namespace PediAgenda.Views.Usuarios.Medico;
 
 public sealed record MedicoRelatorioApi(int Id, string Nome, string Especialidade);
 public sealed record LinhaRelatorioMedicoApi(DateOnly Data, string Inicio, string Paciente,
-    int Idade, string TipoAtendimento, string Status)
+    int Idade, string Status)
 {
     public string DataHoraFormatada => $"{Data:dd/MM/yyyy} • {Inicio}";
 }

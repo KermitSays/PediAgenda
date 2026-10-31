@@ -26,7 +26,6 @@ public partial class DetalhesProntuario : ContentPage, IQueryAttributable
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarAsync();
 
     private async Task CarregarAsync()
     {
@@ -34,14 +33,14 @@ public partial class DetalhesProntuario : ContentPage, IQueryAttributable
         using var atual = new CancellationTokenSource();
         carregamento = atual;
         long sessao = SessaoUsuario.Versao;
-        TipoConsultaLabel.Text = DataConsultaLabel.Text = ObservacoesLabel.Text = "";
+        NumeroConsultaLabel.Text = DataConsultaLabel.Text = ObservacoesLabel.Text = "";
         EstadoLabel.Text = "Carregando registro…";
         try
         {
             if (idConsulta <= 0) throw new InvalidOperationException("Selecione um registro no histórico.");
             var registro = await MedicoApi.ObterProntuarioAsync(idConsulta, atual.Token);
             if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
-            TipoConsultaLabel.Text = registro.IdConsulta.ToString();
+            NumeroConsultaLabel.Text = registro.IdConsulta.ToString();
             DataConsultaLabel.Text = registro.DataRegistro.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
             ObservacoesLabel.Text = registro.Observacoes;
             EstadoLabel.Text = "Registro do prontuário";
@@ -49,7 +48,7 @@ public partial class DetalhesProntuario : ContentPage, IQueryAttributable
         catch (Exception ex)
         {
             if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
-            EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar.";
+            EstadoLabel.Text = "Não foi possível carregar. Volte à tela anterior e tente novamente.";
             await DisplayAlertAsync("Prontuário", ex is InvalidOperationException
                 ? ex.Message : "Falha ao carregar o registro. Tente novamente.", "OK");
         }

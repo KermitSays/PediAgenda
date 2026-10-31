@@ -130,8 +130,6 @@ public partial class MinhasConsultas : ContentPage
 
         public string Status { get; set; } = string.Empty;
 
-        public string? TipoAtendimento { get; set; }
-
         public string Data { get; set; } = string.Empty;
 
         public string Inicio { get; set; } = string.Empty;
@@ -210,8 +208,7 @@ public partial class MinhasConsultas : ContentPage
                 Especialidade = consulta.Medico.Especialidade,
                 Data = data,
                 Horario = horario,
-                Status = consulta.Status,
-                Modalidade = consulta.TipoAtendimento ?? string.Empty
+                Status = consulta.Status
             });
         }
     }

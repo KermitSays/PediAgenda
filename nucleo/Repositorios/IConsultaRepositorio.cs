@@ -32,7 +32,7 @@ public interface IConsultaRepositorio
     /// pedidos chegam para o mesmo horário ao mesmo tempo, só um consegue.
     /// </summary>
     (ResultadoReserva Resultado, int IdConsulta) Reservar(
-        int idResponsavel, int idPaciente, int idHorario, string tipoAtendimento, DateTime agora);
+        int idResponsavel, int idPaciente, int idHorario, DateTime agora);
 
     IReadOnlyList<ConsultaDetalhe> ListarDoResponsavel(int idResponsavel);
 

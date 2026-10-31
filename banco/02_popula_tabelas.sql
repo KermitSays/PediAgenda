@@ -35,6 +35,13 @@ VALUES
   (18, 'Julia Barbosa', '90000000013', 'julia.barbosa@example.com', 0x2f07e74759d731a542a78eba0971855cb880534c00f5c4ec541c01c2d7cafc99, 0xbc5c39fbbd09e98cf204b55fdbd04853, 100000, TRUE, 0, NULL),
   (19, 'Marcos Ribeiro', '90000000014', 'marcos.ribeiro@example.com', 0xe3a9206c22a5e6a1f614e2188f002292ca9c4404afe250f35ec4d992f20847a9, 0xae4d092dd3f9ed869f8543e79558318e, 100000, TRUE, 0, NULL);
 
+-- Contas completas deste conjunto ficticio ja tem e-mail confirmado.
+-- O pre-cadastro sem senha abaixo segue inativo e nao verificado.
+UPDATE usuario
+SET email_verificado = TRUE,
+    email_verificado_em = UTC_TIMESTAMP()
+WHERE ativo = TRUE AND senha_hash IS NOT NULL AND senha_salt IS NOT NULL;
+
 -- Pré-cadastro com e-mail informado pela clínica e sem senha.
 INSERT INTO usuario
   (id_usuario, nome, cpf, email, senha_hash, senha_salt, ativo)
@@ -122,28 +129,28 @@ VALUES
 -- 8. Consultas de exemplo. Buscar id_horario pela chave natural
 -- evita depender da numeração gerada automaticamente nos 121 horários.
 INSERT INTO consulta
-  (id_consulta, status, tipo_atendimento, id_paciente, id_horario)
-SELECT 1, 'AGENDADA', 'PARTICULAR', 2, h.id_horario
+  (id_consulta, status, id_paciente, id_horario)
+SELECT 1, 'AGENDADA', 2, h.id_horario
 FROM horario h
 WHERE h.id_agenda = 1 AND h.data_horario = @dia1 AND h.hora_inicio = '09:00:00';
 
 INSERT INTO consulta
-  (id_consulta, status, tipo_atendimento, id_paciente, id_horario)
-SELECT 2, 'CONFIRMADA', 'CONVENIO', 3, h.id_horario
+  (id_consulta, status, id_paciente, id_horario)
+SELECT 2, 'CONFIRMADA', 3, h.id_horario
 FROM horario h
 WHERE h.id_agenda = 2 AND h.data_horario = @dia1 AND h.hora_inicio = '09:30:00';
 
 INSERT INTO consulta
-  (id_consulta, status, tipo_atendimento, id_paciente, id_horario)
-SELECT 3, 'REALIZADA', 'PARTICULAR', 5, h.id_horario
+  (id_consulta, status, id_paciente, id_horario)
+SELECT 3, 'REALIZADA', 5, h.id_horario
 FROM horario h
 WHERE h.id_agenda = 3
   AND h.data_horario = DATE_SUB(CURDATE(), INTERVAL 7 DAY)
   AND h.hora_inicio = '14:00:00';
 
 INSERT INTO consulta
-  (id_consulta, status, tipo_atendimento, id_paciente, id_horario)
-SELECT 4, 'CANCELADA', 'PARTICULAR', 8, h.id_horario
+  (id_consulta, status, id_paciente, id_horario)
+SELECT 4, 'CANCELADA', 8, h.id_horario
 FROM horario h
 WHERE h.id_agenda = 4 AND h.data_horario = @dia1 AND h.hora_inicio = '10:30:00';
 
@@ -151,21 +158,14 @@ WHERE h.id_agenda = 4 AND h.data_horario = @dia1 AND h.hora_inicio = '10:30:00';
 INSERT INTO prontuario (id_prontuario, observacoes, id_consulta)
 VALUES (1, 'Registro fictício de atendimento para teste da API.', 3);
 
--- 10. Notificações do sistema.
-INSERT INTO notificacao (id_notificacao, canal, mensagem, data_envio, id_consulta)
-VALUES
-  (1, 'SISTEMA', 'Consulta agendada para teste.', NULL, 1),
-  (2, 'SISTEMA', 'Consulta confirmada para teste.', NULL, 2),
-  (3, 'SISTEMA', 'Consulta cancelada para teste.', NULL, 4);
-
--- 11. Relatórios ligados a médicos existentes.
+-- 10. Relatórios ligados a médicos existentes.
 INSERT INTO relatorio_atendimento
   (id_relatorio, inicio_periodo, fim_periodo, id_medico)
 VALUES
   (1, DATE_SUB(CURDATE(), INTERVAL 30 DAY), CURDATE(), 3),
   (2, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 30 DAY), 1);
 
--- 12. Histórico fictício de tentativas de login.
+-- 11. Histórico fictício de tentativas de login.
 INSERT INTO tentativa_login
   (id_tentativa, email_informado, sucesso, motivo, ocorrido_em, id_usuario)
 VALUES
@@ -179,7 +179,7 @@ VALUES
 
 COMMIT;
 
--- Conferência: 12 tabelas / totais esperados logo após a carga.
+-- Conferência: 11 tabelas / totais esperados logo após a carga.
 SELECT 'usuario' AS tabela, COUNT(*) AS total FROM usuario
 UNION ALL SELECT 'responsavel', COUNT(*) FROM responsavel
 UNION ALL SELECT 'medico', COUNT(*) FROM medico
@@ -189,7 +189,6 @@ UNION ALL SELECT 'agenda_medica', COUNT(*) FROM agenda_medica
 UNION ALL SELECT 'horario', COUNT(*) FROM horario
 UNION ALL SELECT 'consulta', COUNT(*) FROM consulta
 UNION ALL SELECT 'prontuario', COUNT(*) FROM prontuario
-UNION ALL SELECT 'notificacao', COUNT(*) FROM notificacao
 UNION ALL SELECT 'relatorio_atendimento', COUNT(*) FROM relatorio_atendimento
 UNION ALL SELECT 'tentativa_login', COUNT(*) FROM tentativa_login;
 

@@ -1,39 +1,24 @@
-# Banco de dados — PediAgenda
+# Banco de dados — PediAgenda (MySQL 8)
 
-O projeto utiliza **MySQL 8**. Esta pasta contém a estrutura do banco e os dados de demonstração.
+A estrutura final destinada a um **banco novo e vazio** contém 11 tabelas: `usuario`, `responsavel`, `medico`, `recepcionista`, `paciente`, `agenda_medica`, `horario`, `consulta`, `prontuario`, `relatorio_atendimento` e `tentativa_login`. Não há tabela `notificacao`, nem coluna `consulta.tipo_atendimento`. O status `CONFIRMADA` continua disponível.
 
-## Arquivos
+## Scripts
 
-| Arquivo | O que faz |
+| Arquivo | Objetivo |
 | --- | --- |
-| `01_Schema.sql` | Cria as 12 tabelas, seus campos e os relacionamentos. |
-| `02_popula_tabelas.sql` | Adiciona usuários, pacientes, médicos, horários e consultas para testar o sistema. |
+| `01_Schema.sql` | Cria o schema em um banco NOVO e vazio; **não** é uma migração do Aiven atual. |
+| `02_popula_tabelas.sql` | Dados fictícios e credenciais para um banco de testes isolado; **não executar no Aiven em uso**. |
+| `03_migracao_confirmacao_brevo.sql` | Adiciona os quatro campos de verificação de e-mail a bancos antigos; **já executado no Aiven em 30/10/2026**, não repetir. |
+| `04_migracao_remocao_tipo_atendimento.sql` | Roteiro de conferência; `DROP COLUMN` fica comentado até a API do Render e todas as integrações estarem atualizadas. |
 
-## Como executar
+## Verificação de e-mail
 
-1. Abra a conexão do banco no MySQL Workbench.
-2. Em uma base vazia, execute primeiro `01_Schema.sql`.
-3. Depois, execute `02_popula_tabelas.sql` para adicionar os dados de teste.
+A tabela `usuario` contém `email_verificado`, `email_verificado_em`, `token_verificacao_hash` e `token_verificacao_expira_em` para a ativação por link enviado via Brevo. Não existe campo de código de ativação para digitação no aplicativo.
 
-Se o banco `pediagenda` já estiver criado no Aiven, execute o schema a partir da linha `USE pediagenda;`.
+Em um banco novo, a carga fictícia marca como verificados os usuários de demonstração que já têm credenciais, preservando o responsável de pré-cadastro como inativo/não verificado. Os dados fictícios **não** refletem necessariamente a situação atual do Aiven.
 
-Os horários de demonstração são criados para os próximos três dias úteis.
+## Segurança e atualização
 
-## Acessos para teste
+Não execute `01_Schema.sql` ou `02_popula_tabelas.sql` sobre o Aiven em utilização. Faça backup e compare a estrutura com as versões implantadas antes de quaisquer alterações. `ALTER TABLE` implica confirmação automática e **não é revertido por `ROLLBACK`**. Não versionar dump de produção, dados de usuários ou segredos de conexão.
 
-A senha de todas as contas abaixo é **`senhaDemo123`**.
-
-| Perfil | E-mail |
-| --- | --- |
-| Responsável | `maria@teste.local` |
-| Outro responsável | `ana.oliveira@example.com` |
-| Médico | `medico.teste@example.com` |
-| Outro médico | `helena.duarte@example.com` |
-| Recepção | `recepcao.teste@example.com` |
-
-Também existe um responsável pré-cadastrado para testar a criação do acesso:
-
-- **CPF:** `52998224725`
-- **E-mail:** `precadastro@example.com`
-
-Para concluir esse cadastro, informe esses dados, escolha uma senha e aceite os termos de uso.
+As operações de cancelamento da aplicação preservam o histórico da consulta por atualização de status (exclusão lógica).

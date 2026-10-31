@@ -7,7 +7,8 @@
     x:Class="PediAgenda.Views.Login.LoginResponsavel"
     Title="Login"
     BackgroundColor="{StaticResource PageBlue}"
-    NavigationPage.HasNavigationBar="False">
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
 
     <ScrollView>
 

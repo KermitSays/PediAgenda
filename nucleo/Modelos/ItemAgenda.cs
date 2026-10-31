@@ -16,7 +16,7 @@ public record Ator(int IdUsuario, string Perfil)
 public record ItemAgenda(
     int IdHorario, DateOnly Data, TimeOnly Inicio, TimeOnly Fim, bool Disponivel,
     int IdMedico, string NomeMedico, string Especialidade,
-    int? IdConsulta, string? StatusConsulta, string? TipoAtendimento,
+    int? IdConsulta, string? StatusConsulta,
     int? IdPaciente, string? NomePaciente, DateOnly? NascimentoPaciente,
     string? NomeResponsavel, string? TelefoneResponsavel)
 {

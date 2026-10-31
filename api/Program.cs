@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using PediAgenda.Api.Seguranca;
+using PediAgenda.Api.Servicos;
 using PediAgenda.Nucleo;
 using PediAgenda.Nucleo.Modelos;
 using PediAgenda.Nucleo.Repositorios;
@@ -36,6 +37,8 @@ builder.Services.AddSingleton<IUsuarioRepositorio>(
     _ => new UsuarioRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<AutenticacaoService>();
 builder.Services.AddScoped<CadastroService>();
+builder.Services.AddScoped<ConfirmacaoEmailService>();
+builder.Services.AddHttpClient<EmailService>();
 builder.Services.AddSingleton<IPacienteRepositorio>(
     _ => new PacienteRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<PacienteService>();
@@ -46,6 +49,8 @@ builder.Services.AddSingleton<MedicoRepositorioMySql>(
     _ => new MedicoRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddSingleton<IConsultaRepositorio>(
     _ => new ConsultaRepositorioMySql(Configuracao.StringDeConexao!));
+builder.Services.AddSingleton<RecepcaoAgendamentoRepositorioMySql>(_ => new RecepcaoAgendamentoRepositorioMySql(Configuracao.StringDeConexao!));
+builder.Services.AddSingleton<RecepcaoGestaoConsultaRepositorioMySql>(_ => new RecepcaoGestaoConsultaRepositorioMySql(Configuracao.StringDeConexao!));
 builder.Services.AddScoped<ConsultaService>();
 builder.Services.AddSingleton<IAgendaRepositorio>(
     _ => new AgendaRepositorioMySql(Configuracao.StringDeConexao!));
@@ -94,6 +99,7 @@ builder.Services
                 var repo = contexto.HttpContext.RequestServices.GetRequiredService<IUsuarioRepositorio>();
                 var usuario = repo.BuscarPorEmail(principal.FindFirstValue("email")!);
                 if (usuario is null || usuario.Id != id || !usuario.Ativo || !usuario.PossuiCredenciais
+                    || (usuario.Perfil == Perfil.Responsavel && !usuario.EmailVerificado)
                     || usuario.Perfil.ToString().ToUpperInvariant() != principal.FindFirstValue("role"))
                     contexto.Fail("Usuário inativo ou perfil alterado.");
                 return Task.CompletedTask;
@@ -157,45 +163,144 @@ app.MapGet("/api/auth/eu", (ClaimsPrincipal usuario) =>
         usuario.FindFirstValue("role")!)))
    .RequireAuthorization();
 
-// O responsável previamente cadastrado pela clínica completa seu acesso com
-// CPF, e-mail, senha e aceite dos termos. O cadastro fica
-// ativo imediatamente; não existe confirmação por link enviado por e-mail.
-app.MapPost("/api/cadastro/responsavel", (CadastroRequisicao req, CadastroService cadastro) =>
-{
-    var resultado = cadastro.Cadastrar(new DadosResponsavel(
-        req.Cpf, req.Email, req.Senha, req.AceiteTermos));
-
-    if (resultado.Sucesso)
+// Conclusão do cadastro de acesso do responsável.
+//
+// O responsável já foi previamente cadastrado pela clínica.
+// Aqui ele informa CPF, e-mail previamente cadastrado pela clínica
+// e senha para utilizar o aplicativo.
+//
+// Esta rota não exige login, porque o responsável ainda
+// está justamente criando o acesso dele.
+app.MapPost(
+    "/api/cadastro/responsavel",
+    async (
+        CadastroRequisicao req,
+        CadastroService cadastro,
+        EmailService emailService) =>
     {
-        var responsavel = resultado.Usuario!;
-        return Results.Json(new
+        var resultado =
+            cadastro.Cadastrar(
+                new DadosResponsavel(
+                    req.Cpf,
+                    req.Email,
+                    req.Senha,
+                    req.AceiteTermos));
+
+        if (resultado.Sucesso)
         {
-            mensagem = "Cadastro concluído. Você já pode entrar com seu e-mail e senha.",
-            usuario = new
-            {
-                id = responsavel.Id,
-                nome = responsavel.Nome,
-                email = responsavel.Email
-            }
-        }, statusCode: StatusCodes.Status201Created);
-    }
+            var responsavel =
+                resultado.Usuario!;
 
-    return resultado.Motivo switch
-    {
-        MotivoRecusa.DadosInvalidos => Results.Json(
-            new ErroValidacao("DADOS_INVALIDOS", resultado.Mensagem, resultado.Campos!),
-            statusCode: StatusCodes.Status400BadRequest),
-        MotivoRecusa.ResponsavelNaoEncontrado => Erro(
-            "RESPONSAVEL_NAO_ENCONTRADO", resultado.Mensagem, StatusCodes.Status404NotFound),
-        MotivoRecusa.DadosCadastraisNaoConferem => Erro(
-            "DADOS_CADASTRAIS_NAO_CONFEREM", resultado.Mensagem, StatusCodes.Status400BadRequest),
-        MotivoRecusa.EmailJaCadastrado => Erro(
-            "EMAIL_JA_CADASTRADO", resultado.Mensagem, StatusCodes.Status409Conflict),
-        MotivoRecusa.CadastroJaIniciado => Erro(
-            "CADASTRO_JA_INICIADO", resultado.Mensagem, StatusCodes.Status409Conflict),
-        _ => Erro("ERRO_CADASTRO", resultado.Mensagem, StatusCodes.Status400BadRequest)
-    };
-});
+            try
+            {
+                await emailService
+                    .EnviarConfirmacaoCadastroAsync(
+                        responsavel.Email!,
+                        responsavel.Nome,
+                        resultado.TokenVerificacaoEmail!);
+            }
+            catch (Exception e)
+                when (
+                    e is HttpRequestException
+                    or TaskCanceledException
+                    or InvalidOperationException)
+            {
+                // O cadastro fica pendente no banco.
+                // O cadastro fica pendente; o responsável pode
+                // tentar novamente com os mesmos dados e receber novo link.
+                Console.Error.WriteLine(
+                    $"Falha ao enviar e-mail de confirmação: {e.Message}");
+
+                return Results.Json(
+                    new ErroApi(
+                        "EMAIL_NAO_ENVIADO",
+                        "Não foi possível enviar o e-mail de confirmação. Tente novamente em alguns instantes."),
+                    statusCode:
+                        StatusCodes.Status502BadGateway);
+            }
+
+            // O token verdadeiro não é devolvido ao aplicativo.
+            // Ele é enviado exclusivamente por e-mail.
+            return Results.Json(
+                new
+                {
+                    mensagem =
+                        "Cadastro iniciado. Enviamos um link de confirmação para o e-mail informado.",
+
+                    usuario = new
+                    {
+                        id = responsavel.Id,
+                        nome = responsavel.Nome,
+                        email = responsavel.Email
+                    }
+                },
+                statusCode:
+                    StatusCodes.Status202Accepted);
+        }
+
+        if (resultado.Motivo
+            == MotivoRecusa.DadosInvalidos)
+        {
+            return Results.Json(
+                new ErroValidacao(
+                    "DADOS_INVALIDOS",
+                    resultado.Mensagem,
+                    resultado.Campos!),
+                statusCode:
+                    StatusCodes.Status400BadRequest);
+        }
+
+        if (resultado.Motivo
+            == MotivoRecusa.ResponsavelNaoEncontrado)
+        {
+            return Results.Json(
+                new ErroApi(
+                    "RESPONSAVEL_NAO_ENCONTRADO",
+                    resultado.Mensagem),
+                statusCode:
+                    StatusCodes.Status404NotFound);
+        }
+
+        if (resultado.Motivo
+            == MotivoRecusa.DadosCadastraisNaoConferem)
+        {
+            return Results.Json(
+                new ErroApi(
+                    "DADOS_CADASTRAIS_NAO_CONFEREM",
+                    resultado.Mensagem),
+                statusCode:
+                    StatusCodes.Status400BadRequest);
+        }
+
+        if (resultado.Motivo
+            == MotivoRecusa.EmailJaCadastrado)
+        {
+            return Results.Json(
+                new ErroApi(
+                    "EMAIL_JA_CADASTRADO",
+                    resultado.Mensagem),
+                statusCode:
+                    StatusCodes.Status409Conflict);
+        }
+
+        if (resultado.Motivo
+            == MotivoRecusa.CadastroJaIniciado)
+        {
+            return Results.Json(
+                new ErroApi(
+                    "CADASTRO_JA_INICIADO",
+                    resultado.Mensagem),
+                statusCode:
+                    StatusCodes.Status409Conflict);
+        }
+
+        return Results.Json(
+            new ErroApi(
+                "ERRO_CADASTRO",
+                resultado.Mensagem),
+            statusCode:
+                StatusCodes.Status400BadRequest);
+    });
 
 // Pré-cadastro pela recepção. Ainda não gera senha nem sessão.
 app.MapPost("/api/responsaveis", (PreCadastroRequisicao req, CadastroService cadastro) =>
@@ -345,7 +450,7 @@ consultas.MapGet("", (ClaimsPrincipal usuario, ConsultaService servico) =>
 
 consultas.MapPost("", (AgendamentoRequisicao req, ClaimsPrincipal usuario, ConsultaService servico) =>
 {
-    var resultado = servico.Agendar(IdUsuario(usuario), req.IdPaciente, req.IdHorario, req.TipoAtendimento);
+    var resultado = servico.Agendar(IdUsuario(usuario), req.IdPaciente, req.IdHorario);
     return resultado.Sucesso
         ? Results.Json(ConsultaResposta.De(resultado.Consulta!), statusCode: StatusCodes.Status201Created)
         : ErroDeConsulta(resultado);
@@ -386,7 +491,7 @@ clinica.MapGet("/agenda", (string? data, int? medico, ClaimsPrincipal usuario, A
             g.Select(i => new AgendaHorario(
                 i.IdHorario, i.Inicio.ToString("HH:mm"), i.Fim.ToString("HH:mm"), i.Situacao,
                 i.IdConsulta is null ? null : new AgendaConsulta(
-                    i.IdConsulta.Value, i.StatusConsulta!, i.TipoAtendimento!,
+                    i.IdConsulta.Value, i.StatusConsulta!,
                     new AgendaPaciente(i.IdPaciente!.Value, i.NomePaciente!,
                         new Paciente { DataNascimento = i.NascimentoPaciente!.Value }.IdadeEm(dia)),
                     new ContatoResponsavel(i.NomeResponsavel!, i.TelefoneResponsavel!)))).ToList()))
@@ -453,6 +558,47 @@ clinica.MapGet("/relatorios/{id:int}/exportar", (int id, ClaimsPrincipal usuario
 
 
 app.MapearBloqueioPeriodo();
+app.MapearAgendamentosRecepcao();
+app.MapearGestaoConsultasRecepcao();
+// Confirma o e-mail do responsável por meio do token
+// enviado no link de verificação.
+app.MapGet(
+    "/api/cadastro/confirmar-email",
+    (
+        string? token,
+        ConfirmacaoEmailService confirmacao) =>
+    {
+        var resultado =
+            confirmacao.Confirmar(token);
+
+        if (resultado.Sucesso)
+        {
+            return Results.Ok(
+                new
+                {
+                    mensagem = resultado.Mensagem
+                });
+        }
+
+        if (resultado.Motivo
+            == MotivoFalhaConfirmacaoEmail.TokenAusente)
+        {
+            return Results.Json(
+                new ErroApi(
+                    "TOKEN_NAO_INFORMADO",
+                    resultado.Mensagem),
+                statusCode:
+                    StatusCodes.Status400BadRequest);
+        }
+
+        return Results.Json(
+            new ErroApi(
+                "TOKEN_INVALIDO_OU_EXPIRADO",
+                resultado.Mensagem),
+            statusCode:
+                StatusCodes.Status400BadRequest);
+    });
+
 app.Run();
 return 0;
 
@@ -540,11 +686,11 @@ record RelatorioResposta(int Id, MedicoResumo Medico, string Inicio, string Fim,
         return new(c.Id, c.Medico, c.Inicio, c.Fim, c.GeradoEm, r.Resumo,
                    r.Consultas.Select(l => new LinhaRelatorioResposta(
                        l.Data.ToString("yyyy-MM-dd"), l.Inicio.ToString("HH:mm"), l.NomePaciente,
-                       l.IdadePaciente, l.TipoAtendimento, l.Status)).ToList());
+                       l.IdadePaciente, l.Status)).ToList());
     }
 }
 record LinhaRelatorioResposta(string Data, string Inicio, string Paciente, int Idade,
-                              string TipoAtendimento, string Status);
+                              string Status);
 
 record AberturaRequisicao(int? IdMedico, string? Data, string? Inicio, string? Fim, int? Duracao);
 record HorariosAbertosResposta(int Criados, int Ignorados);
@@ -553,17 +699,17 @@ record StatusConsultaResposta(int Id, string Status);
 record AgendaDoDia(string Data, IReadOnlyList<AgendaMedico> Medicos);
 record AgendaMedico(int Id, string Nome, string Especialidade, IReadOnlyList<AgendaHorario> Horarios);
 record AgendaHorario(int Id, string Inicio, string Fim, string Situacao, AgendaConsulta? Consulta);
-record AgendaConsulta(int Id, string Status, string TipoAtendimento, AgendaPaciente Paciente,
+record AgendaConsulta(int Id, string Status, AgendaPaciente Paciente,
                       ContatoResponsavel Responsavel);
 record AgendaPaciente(int Id, string Nome, int Idade);
 record ContatoResponsavel(string Nome, string Telefone);
 
-record AgendamentoRequisicao(int? IdPaciente, int? IdHorario, string? TipoAtendimento);
-record ConsultaResposta(int Id, string Status, string TipoAtendimento, string Data, string Inicio, string Fim,
+record AgendamentoRequisicao(int? IdPaciente, int? IdHorario);
+record ConsultaResposta(int Id, string Status, string Data, string Inicio, string Fim,
                         MedicoResumo Medico, PacienteResumo Paciente)
 {
     public static ConsultaResposta De(ConsultaDetalhe c) => new(
-        c.Id, c.Status, c.TipoAtendimento,
+        c.Id, c.Status,
         c.Data.ToString("yyyy-MM-dd"), c.Inicio.ToString("HH:mm"), c.Fim.ToString("HH:mm"),
         new MedicoResumo(c.IdMedico, c.NomeMedico, c.Especialidade),
         new PacienteResumo(c.IdPaciente, c.NomePaciente));

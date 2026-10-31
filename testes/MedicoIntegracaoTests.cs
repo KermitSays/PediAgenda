@@ -66,6 +66,22 @@ public class MedicoIntegracaoTests
         Assert.True(excel.Length > 0);
     }
 
+    [Fact]
+    public async Task Relatorio_sem_consultas_realizadas_retorna_zero_sem_erro()
+    {
+        // Médico 2 tem somente consulta AGENDADA neste período.
+        using var medico = await banco.Autenticado(2);
+        var resposta = await medico.PostAsJsonAsync("/api/relatorios", new
+        {
+            inicio = banco.Hoje.AddDays(-1).ToString("yyyy-MM-dd"),
+            fim = banco.Hoje.ToString("yyyy-MM-dd")
+        });
+        Assert.Equal(HttpStatusCode.Created, resposta.StatusCode);
+        var json = await resposta.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Empty(json.GetProperty("consultas").EnumerateArray());
+        Assert.Equal(0, json.GetProperty("resumo").GetProperty("totalConsultas").GetInt32());
+    }
+
     [Theory]
     [InlineData(1)]
     [InlineData(2)]
@@ -229,7 +245,7 @@ public class MedicoIntegracaoTests
         var dia = banco.Hoje.AddDays(1);
         var inicio = new TimeOnly(14, 0); var fim = new TimeOnly(14, 30);
         var bloqueio = Task.Run(() => new BloqueioPeriodoRepositorioMySql(banco.Conexao).Bloquear(1, dia, dia, inicio, fim));
-        var reserva = Task.Run(() => new ConsultaRepositorioMySql(banco.Conexao).Reservar(1, 1, 14, "PARTICULAR", dia.AddDays(-1).ToDateTime(TimeOnly.MinValue)));
+        var reserva = Task.Run(() => new ConsultaRepositorioMySql(banco.Conexao).Reservar(1, 1, 14, dia.AddDays(-1).ToDateTime(TimeOnly.MinValue)));
         await Task.WhenAll(bloqueio, reserva);
         Assert.Equal(0L, Convert.ToInt64(banco.Escalar("SELECT COUNT(*) FROM consulta c JOIN horario h ON h.id_horario=c.id_horario WHERE h.id_horario=14 AND h.disponivel=FALSE AND c.status<>'CANCELADA'")));
         Assert.Equal(0L, Convert.ToInt64(banco.Escalar("SELECT disponivel FROM horario WHERE id_horario=14")));

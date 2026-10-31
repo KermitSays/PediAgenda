@@ -306,13 +306,6 @@ public class ConsultaResponsavelItem
     }
 
 
-    public string Modalidade
-    {
-        get;
-        set;
-    } = string.Empty;
-
-
     public string Valor
     {
         get;

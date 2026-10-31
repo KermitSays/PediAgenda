@@ -75,20 +75,6 @@ public partial class LoginResponsavel : ContentPage
 
 
     // =============================================
-    // RECUPERAÇÃO DE SENHA
-    // =============================================
-
-    private async void EsqueciSenhaButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        await Shell.Current.GoToAsync(
-            nameof(
-                RecuperarSenha));
-    }
-
-
-    // =============================================
     // LOGIN
     // =============================================
 

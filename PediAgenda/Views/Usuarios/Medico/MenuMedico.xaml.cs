@@ -42,19 +42,41 @@ public partial class MenuMedico : ContentPage
     // SAUDAÇÃO
     // =============================================
 
+
     private void AtualizarSaudacao()
     {
-        string nome =
-            SessaoUsuario.PrimeiroNome;
+        string nomeCompleto = SessaoUsuario.Nome?.Trim() ?? string.Empty;
 
+        if (string.IsNullOrWhiteSpace(nomeCompleto))
+        {
+            SaudacaoLabel.Text = "Olá!";
+            return;
+        }
 
-        SaudacaoLabel.Text =
-            string.IsNullOrWhiteSpace(nome)
+        string[] partes = nomeCompleto.Split(
+            ' ',
+            StringSplitOptions.RemoveEmptyEntries);
 
-                ? "Olá, Dr(a).!"
+        string primeiroTermo = partes[0].TrimEnd('.');
 
-                : $"Olá, Dr(a). {nome}!";
+        string titulo = primeiroTermo.ToLowerInvariant() switch
+        {
+            "dr" => "Dr.",
+            "dra" => "Dra.",
+            _ => string.Empty
+        };
+
+        string primeiroNome = !string.IsNullOrEmpty(titulo)
+            ? (partes.Length > 1 ? partes[1] : string.Empty)
+            : partes[0];
+
+        SaudacaoLabel.Text = string.IsNullOrWhiteSpace(primeiroNome)
+            ? "Olá!"
+            : string.IsNullOrEmpty(titulo)
+                ? $"Olá, {primeiroNome}!"
+                : $"Olá, {titulo} {primeiroNome}!";
     }
+
 
 
     // =============================================
@@ -81,8 +103,17 @@ public partial class MenuMedico : ContentPage
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object? sender, EventArgs e)
-        => await AtualizarConsultasAsync();
+    private async void ConsultasRefreshView_Refreshing(object? sender, EventArgs e)
+    {
+        try
+        {
+            await AtualizarConsultasAsync();
+        }
+        finally
+        {
+            ConsultasRefreshView.IsRefreshing = false;
+        }
+    }
 
     private async Task AtualizarConsultasAsync()
     {
@@ -91,8 +122,6 @@ public partial class MenuMedico : ContentPage
         carregamento = atual;
         long sessao = SessaoUsuario.Versao;
         ConsultasLista.Clear();
-        ConsultasCollectionView.IsVisible = false;
-        SemConsultasContainer.IsVisible = false;
         EstadoAgendaLabel.Text = MedicoApi.ModoTeste
             ? "Teste visual — dados de exemplo" : "Carregando consultas…";
         try
@@ -116,15 +145,13 @@ public partial class MenuMedico : ContentPage
                 });
             }
             EstadoAgendaLabel.Text = "Consultas do médico conectado";
-            ConsultasCollectionView.IsVisible = ConsultasLista.Count > 0;
-            SemConsultasContainer.IsVisible = ConsultasLista.Count == 0;
         }
         catch (OperationCanceledException) when (atual.IsCancellationRequested) { }
         catch (Exception) when (atual.IsCancellationRequested) { }
         catch (Exception ex)
         {
             if (sessao != SessaoUsuario.Versao) return;
-            EstadoAgendaLabel.Text = "Não foi possível carregar as consultas. Toque em Atualizar.";
+            EstadoAgendaLabel.Text = "Não foi possível carregar as consultas. Puxe a lista para baixo para tentar novamente.";
             await DisplayAlertAsync("Consultas", ex is InvalidOperationException
                 ? ex.Message : "Não foi possível carregar a agenda. Tente novamente.", "OK");
         }
@@ -168,16 +195,10 @@ public partial class MenuMedico : ContentPage
         }
 
 
-        bool temConsultas =
-            ConsultasLista.Count > 0;
 
 
-        ConsultasCollectionView.IsVisible =
-            temConsultas;
 
 
-        SemConsultasContainer.IsVisible =
-            !temConsultas;
     }
 
  

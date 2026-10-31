@@ -15,7 +15,7 @@ public class ConsultaRepositorioMySql(string stringDeConexao) : IConsultaReposit
     }
 
     public (ResultadoReserva Resultado, int IdConsulta) Reservar(
-        int idResponsavel, int idPaciente, int idHorario, string tipoAtendimento, DateTime agora)
+        int idResponsavel, int idPaciente, int idHorario, DateTime agora)
     {
         using var con = Abrir();
         // Sair do método sem Commit desfaz tudo: o using da transação faz o rollback.
@@ -100,14 +100,10 @@ public class ConsultaRepositorioMySql(string stringDeConexao) : IConsultaReposit
 
         // 5. Tudo certo: grava.
         using (var cmd = new MySqlCommand("""
-            INSERT INTO consulta (tipo_atendimento, id_paciente, id_horario)
-            VALUES (@tipo, @paciente, @horario)
+            INSERT INTO consulta (id_paciente, id_horario)
+            VALUES (@paciente, @horario)
             """, con, tx))
         {
-            cmd.Parameters.AddWithValue("@tipo",
-                string.IsNullOrWhiteSpace(tipoAtendimento)
-                ? DBNull.Value
-                : tipoAtendimento);
             cmd.Parameters.AddWithValue("@paciente", idPaciente);
             cmd.Parameters.AddWithValue("@horario", idHorario);
             cmd.ExecuteNonQuery();
@@ -119,7 +115,7 @@ public class ConsultaRepositorioMySql(string stringDeConexao) : IConsultaReposit
 
     // Consulta + horário + médico + paciente, restrito aos filhos do responsável.
     private const string SelectDetalhe = """
-        SELECT   c.id_consulta, c.status, c.tipo_atendimento,
+        SELECT   c.id_consulta, c.status,
                  h.data_horario, h.hora_inicio, h.hora_fim,
                  m.id_medico, um.nome AS nome_medico, m.especialidade,
                  p.id_paciente, p.nome AS nome_paciente
@@ -200,9 +196,6 @@ public class ConsultaRepositorioMySql(string stringDeConexao) : IConsultaReposit
     private static ConsultaDetalhe Ler(MySqlDataReader r) => new(
         r.GetInt32("id_consulta"),
         r.GetString("status"),
-        r.IsDBNull(r.GetOrdinal("tipo_atendimento"))
-             ? string.Empty
-             : r.GetString("tipo_atendimento"),
         r.GetDateOnly("data_horario"),
         TimeOnly.FromTimeSpan(r.GetTimeSpan("hora_inicio")),
         TimeOnly.FromTimeSpan(r.GetTimeSpan("hora_fim")),

@@ -31,6 +31,14 @@ public sealed class BotaoLogoff : ImageButton
         saindo = true;
         try
         {
+            bool confirmar = await Shell.Current.DisplayAlertAsync(
+                "Sair da conta",
+                "Deseja realmente sair da sua conta?",
+                "Sair",
+                "Cancelar");
+
+            if (!confirmar)
+                return;
             SecureStorage.Default.Remove("pediagenda_token");
             SessaoUsuario.Limpar();
             // Uma Shell nova descarta a pilha autenticada e os dados das telas.

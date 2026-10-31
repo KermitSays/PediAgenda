@@ -254,6 +254,7 @@ public partial class MedicosRecepcao : ContentPage
                     Data = data.Date,
                     Horario = horaInicio,
                     Status = status,
+                    IdConsulta = horario.Consulta?.Id,
                     StatusConsulta = horario.Consulta?.Status ?? "",
                     Paciente = horario.Consulta?.Paciente?.Nome ?? ""
                 });
@@ -399,356 +400,64 @@ public partial class MedicosRecepcao : ContentPage
     // AGENDAR CONSULTA
     // =============================================
 
-    private async Task AgendarHorarioAsync(
-        HorarioAgendaRecepcao horario)
+    private bool agendamentoRecepcaoEmAndamento;
+
+    private async Task AgendarHorarioAsync(HorarioAgendaRecepcao horario)
     {
-        if (
-            PacientesRecepcaoDados
-                .Pacientes.Count ==
-            0)
+        if (agendamentoRecepcaoEmAndamento) return;
+
+        var seletor = new SelecionarPacienteRecepcao();
+        var paciente = await seletor.AbrirAsync(this);
+        if (paciente is null) return;
+
+        bool confirmar = await DisplayAlertAsync(
+            "Confirmar agendamento",
+            $"Paciente: {paciente.Nome}\nResponsável: {paciente.Responsavel}\n\n" +
+            $"Médico: {horario.Medico}\nData: {horario.Data:dd/MM/yyyy}\n" +
+            $"Horário: {horario.HorarioFormatado}",
+            "AGENDAR", "CANCELAR");
+        if (!confirmar) return;
+
+        agendamentoRecepcaoEmAndamento = true;
+        try
         {
-            await DisplayAlertAsync(
-                "Nenhum paciente",
-                "Não existem pacientes disponíveis para realizar o agendamento.",
-                "OK");
-
-
-            return;
-        }
-
-
-        // =========================================
-        // SELETOR PESQUISÁVEL DE PACIENTES
-        // =========================================
-
-        SelecionarPacienteRecepcao
-            paginaSelecao =
-                new();
-
-
-        PacienteRecepcaoItem?
-            paciente =
-                await paginaSelecao
-                    .AbrirAsync(
-                        this);
-
-
-        if (paciente == null)
-            return;
-
-
-        // =========================================
-        // CONFIRMAÇÃO
-        // =========================================
-
-        bool confirmar =
-            await DisplayAlertAsync(
-                "Confirmar agendamento",
-
-                $"Paciente: {paciente.Nome}\n" +
-                $"Responsável: {paciente.Responsavel}\n\n" +
-                $"Médico: {horario.Medico}\n" +
-                $"Data: {horario.Data:dd/MM/yyyy}\n" +
-                $"Horário: {horario.HorarioFormatado}",
-
-                "AGENDAR",
-                "CANCELAR");
-
-
-        if (!confirmar)
-            return;
-
-
-        // =========================================
-        // RESERVA O HORÁRIO COMPARTILHADO
-        // =========================================
-
-        bool reservado =
-            HorarioAgendamentoDados
-                .ReservarHorario(
-                    horario.Id);
-
-
-        if (!reservado)
-        {
-            await DisplayAlertAsync(
-                "Horário indisponível",
-                "Este horário não está mais disponível.",
-                "OK");
-
-
+            await AgendamentoRecepcaoApi.AgendarAsync(paciente.Id, horario.Id);
+            await DisplayAlertAsync("Consulta agendada",
+                "A consulta foi registrada.", "OK");
             CarregarAgenda();
-
-
-            return;
         }
-
-
-        // =========================================
-        // CRIA CONSULTA LOCAL
-        // =========================================
-        //
-        // Futuramente esta operação será feita
-        // através da API.
-
-        paciente.Consultas.Add(
-            new ConsultaPacienteRecepcaoItem
-            {
-                HorarioId =
-                    horario.Id,
-
-                Data =
-                    horario.Data,
-
-                Horario =
-                    horario.Horario,
-
-                Medico =
-                    horario.Medico,
-
-                Especialidade =
-                    "Pediatria Geral",
-
-                // Campo legado mantido por compatibilidade.
-                // A forma de pagamento é definida na clínica.
-                //Não remover ainda porque outros arquivos podem depender dela até a atualização do Núcleo e do banco.
-                TipoAtendimento =
-                        string.Empty,
-
-                Status =
-                    StatusConsulta.PorConfirmar
-            });
-
-
-        CarregarAgenda();
-
-
-        await DisplayAlertAsync(
-            "Consulta agendada",
-            $"A consulta de {paciente.Nome} foi agendada com sucesso.",
-            "OK");
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Não foi possível agendar", ex.Message, "OK");
+            CarregarAgenda();
+        }
+        finally
+        {
+            agendamentoRecepcaoEmAndamento = false;
+        }
     }
-
 
     // =============================================
     // ABRIR CONSULTA
     // =============================================
 
-    private async Task AbrirConsultaAsync(
-        HorarioAgendaRecepcao horario)
+    private async Task AbrirConsultaAsync(HorarioAgendaRecepcao horario)
     {
-        // =========================================
-        // PROCURA CONSULTA DA RECEPÇÃO
-        // =========================================
-
-        var consultaRecepcao =
-            PacientesRecepcaoDados
-                .Pacientes
-                .SelectMany(
-                    paciente =>
-                        paciente.Consultas.Select(
-                            consulta =>
-                                new
-                                {
-                                    Paciente =
-                                        paciente,
-
-                                    Consulta =
-                                        consulta
-                                }))
-                .FirstOrDefault(item =>
-                    item.Consulta.HorarioId ==
-                        horario.Id
-
-                    &&
-
-                    !StatusConsulta.EhCancelada(
-                        item.Consulta.Status));
-
-
-        // =========================================
-        // CONSULTA GERENCIADA PELA RECEPÇÃO
-        // =========================================
-
-        if (
-            consultaRecepcao !=
-            null)
+        if (horario.IdConsulta is not > 0)
         {
-            await Shell.Current.GoToAsync(
-                nameof(
-                    DetalhesConsultaRecepcao),
-
-                new Dictionary<string, object>
-                {
-                    {
-                        "HorarioId",
-                        horario.Id.ToString()
-                    }
-                });
-
-
+            await DisplayAlertAsync("Consulta",
+                "Nao foi possivel identificar a consulta na API. Atualize a agenda.", "OK");
+            CarregarAgenda();
             return;
         }
 
-
-        // =========================================
-        // CONSULTA LOCAL DO MÉDICO
-        // =========================================
-        //
-        // ConsultasMedicoDados representa,
-        // temporariamente, o médico de ID 1.
-        //
-        // Quando a API estiver integrada,
-        // Médico e Recepção consultarão a mesma
-        // entidade de consulta.
-
-        int idMedico =
-            AgendaMedicaRecepcaoDados
-                .ObterIdMedico(
-                    horario.Medico);
-
-
-        ConsultaMedico?
-            consultaMedico =
-                null;
-
-
-        if (
-            idMedico ==
-            1)
-        {
-            consultaMedico =
-                ConsultasMedicoDados
-                    .Consultas
-                    .FirstOrDefault(c =>
-                        c.Data.Date ==
-                            horario.Data.Date
-
-                        &&
-
-                        c.Horario ==
-                            horario.Horario
-
-                        &&
-
-                        !StatusConsulta.EhCancelada(
-                            c.Status));
-        }
-
-
-        // =========================================
-        // OCUPADO SEM DADOS LOCAIS
-        // =========================================
-
-        if (
-            consultaMedico ==
-            null)
-        {
-            await DisplayAlertAsync(
-                "Horário ocupado",
-
-                string.IsNullOrWhiteSpace(
-                    horario.Paciente)
-
-                    ? "Este horário já está ocupado."
-                    : $"Paciente: {horario.Paciente}",
-
-                "OK");
-
-
-            return;
-        }
-
-
-        // =========================================
-        // RESUMO ADMINISTRATIVO
-        // =========================================
-        //
-        // A Recepção vê somente informações
-        // necessárias para administrar a consulta.
-        //
-        // Não são exibidos prontuário, diagnóstico,
-        // observações clínicas ou outros dados
-        // médicos.
-
-        string detalhes =
-            $"Paciente: {consultaMedico.Paciente}\n" +
-            $"Médico: {horario.Medico}\n" +
-            $"Data: {horario.Data:dd/MM/yyyy}\n" +
-            $"Horário: {horario.HorarioFormatado}\n" +
-            $"Status: {consultaMedico.Status}";
-
-
-        // =========================================
-        // CONSULTA REALIZADA
-        // =========================================
-
-        if (
-            StatusConsulta.EhRealizada(
-                consultaMedico.Status))
-        {
-            await DisplayAlertAsync(
-                "Consulta",
-                detalhes,
-                "OK");
-
-
-            return;
-        }
-
-
-        // =========================================
-        // CANCELAR CONSULTA
-        // =========================================
-
-        bool cancelar =
-            await DisplayAlertAsync(
-                "Consulta",
-
-                detalhes +
-                "\n\nDeseja cancelar esta consulta e liberar o horário?",
-
-                "CANCELAR CONSULTA",
-                "VOLTAR");
-
-
-        if (!cancelar)
-            return;
-
-
-        bool confirmar =
-            await DisplayAlertAsync(
-                "Confirmar cancelamento",
-
-                $"Deseja realmente cancelar a consulta de " +
-                $"{consultaMedico.Paciente}?",
-
-                "SIM",
-                "NÃO");
-
-
-        if (!confirmar)
-            return;
-
-
-        consultaMedico.Status =
-            StatusConsulta.Cancelada;
-
-
-        HorarioAgendamentoDados
-            .LiberarHorario(
-                horario.Id);
-
-
-        CarregarAgenda();
-
-
-        await DisplayAlertAsync(
-            "Consulta cancelada",
-            "A consulta foi cancelada e o horário foi liberado.",
-            "OK");
+        await Shell.Current.GoToAsync(
+            nameof(DetalhesConsultaRecepcao),
+            new Dictionary<string, object>
+            {
+                ["ConsultaId"] = horario.IdConsulta.Value.ToString()
+            });
     }
-
 
     // =============================================
     // EXIBIR BLOQUEIO
@@ -811,7 +520,8 @@ public partial class MedicosRecepcao : ContentPage
             nameof(BloquearHorario),
             new Dictionary<string, object>
             {
-                ["IdMedico"] = idMedico.ToString()
+                ["IdMedico"] = idMedico.ToString(),
+                ["DataSelecionada"] = (DataPicker.Date ?? DateTime.Today).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)
             });
     }
 

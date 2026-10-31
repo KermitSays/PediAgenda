@@ -39,28 +39,25 @@ public class ConsultaService(IConsultaRepositorio consultas, IPacienteRepositori
 
     private DateTime Agora => _relogio.GetLocalNow().DateTime;
 
-    public ResultadoConsulta Agendar(int idUsuario, int? idPaciente, int? idHorario, string? tipoInformado)
+    public ResultadoConsulta Agendar(int idUsuario, int? idPaciente, int? idHorario)
     {
         var idResponsavel = _pacientes.IdResponsavelDoUsuario(idUsuario);
         if (idResponsavel is null)
             return NaoEResponsavel();
 
-        var tipo = (tipoInformado ?? "").Trim().ToUpperInvariant();
         var campos = new Dictionary<string, string>();
 
         if (idPaciente is null or <= 0)
             campos["idPaciente"] = "Escolha o paciente.";
         if (idHorario is null or <= 0)
             campos["idHorario"] = "Escolha o horário.";
-        if (!string.IsNullOrEmpty(tipo) && !TipoAtendimento.Validos.Contains(tipo))
-            campos["tipoAtendimento"] = "Tipo de atendimento inválido.";
 
         if (campos.Count > 0)
             return new ResultadoConsulta(false, "Verifique os campos destacados.",
                                          MotivoConsulta.DadosInvalidos, Campos: campos);
 
         var (resultado, idConsulta) = _consultas.Reservar(
-            idResponsavel.Value, idPaciente!.Value, idHorario!.Value, tipo, Agora);
+            idResponsavel.Value, idPaciente!.Value, idHorario!.Value, Agora);
 
         return resultado switch
         {

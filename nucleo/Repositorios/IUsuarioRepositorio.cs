@@ -13,6 +13,8 @@ public interface IUsuarioRepositorio
     // decide criar seu acesso ao aplicativo.
     Usuario? BuscarResponsavelPorCpf(string cpf);
 
+    bool ConfirmarEmailResponsavel(byte[] tokenHash, DateTime confirmadoEm);
+
     void Atualizar(Usuario usuario);
 
     // Incremento atômico para não perder tentativas simultâneas.
@@ -41,7 +43,9 @@ public interface IUsuarioRepositorio
     bool CompletarCadastroResponsavel(
         int usuarioId,
         string email,
-        string senha);
+        string senha,
+        byte[] tokenHash,
+        DateTime tokenExpiraEm);
 
     /// Pré-cadastro pela recepção; ainda não permite login.
     int PreCadastrarResponsavel(string nome, string cpf, string email, string telefone);

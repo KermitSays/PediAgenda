@@ -6,15 +6,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:PediAgenda.Controls"
     Title="Menu Médico"
-    BackgroundColor="{StaticResource PageBlue}">
+    BackgroundColor="{StaticResource PageBlue}"
+    Shell.NavBarIsVisible="False">
 
     <Grid
         RowDefinitions="Auto,Auto,*"
-        Padding="24,30,24,20">
+        Padding="24,36,24,20">
 
         <!-- CABEÇALHO -->
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Grid.Row="0" Margin="0,0,0,20">
-    <VerticalStackLayout Grid.Column="0" Spacing="4">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Grid.Row="0" Margin="0,0,0,28">
+    <VerticalStackLayout Grid.Column="0" Spacing="8">
 
             <Label
                 x:Name="SaudacaoLabel"
@@ -28,8 +29,7 @@
                 FontSize="15"
                 TextColor="{StaticResource InputPlaceholder}" />
 
-            <Label x:Name="EstadoAgendaLabel" FontSize="12" TextColor="Black" />
-            <Button Text="Atualizar" Clicked="AtualizarButton_Clicked" />
+            <Label x:Name="EstadoAgendaLabel" FontSize="12" TextColor="Black" IsVisible="False" />
         </VerticalStackLayout>
     <controls:BotaoLogoff Grid.Column="1" />
 </Grid>
@@ -40,7 +40,7 @@
             Grid.Row="1"
             ColumnDefinitions="*,*,*"
             ColumnSpacing="20"
-            Margin="0,0,0,20">
+            Margin="0,0,0,28">
 
             <!-- PACIENTES -->
             <VerticalStackLayout
@@ -123,46 +123,41 @@
 
 
         <!-- CONSULTAS DE HOJE -->
-        <VerticalStackLayout
-            Grid.Row="2"
-            Spacing="14">
+        <Grid Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="14">
 
-            <Label
+            <Label Grid.Row="0"
                 Text="Consultas de hoje"
                 FontSize="20"
                 FontAttributes="Bold"
                 TextColor="{StaticResource TextDark}" />
 
 
-            <!-- ESTADO SEM CONSULTAS -->
-            <VerticalStackLayout
-                x:Name="SemConsultasContainer"
-                IsVisible="False"
-                Spacing="6"
-                Padding="20,20,20,10"
-                HorizontalOptions="Center">
-
-                <Label
-                    Text="Nenhuma consulta hoje"
-                    FontSize="17"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource TextDark}"
-                    HorizontalTextAlignment="Center" />
-
-                <Label
-                    Text="Você não possui consultas agendadas para hoje."
-                    FontSize="14"
-                    TextColor="{StaticResource InputPlaceholder}"
-                    HorizontalTextAlignment="Center" />
-
-            </VerticalStackLayout>
 
 
             <!-- LISTA DE CONSULTAS -->
-            <CollectionView
-                x:Name="ConsultasCollectionView"
+            <RefreshView Grid.Row="1"
+                         x:Name="ConsultasRefreshView"
+                         Refreshing="ConsultasRefreshView_Refreshing">
+                <CollectionView
+                    x:Name="ConsultasCollectionView"
                 ItemsSource="{Binding ConsultasLista}"
                 SelectionMode="None">
+
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout Spacing="6"
+                                             Padding="20,20,20,10"
+                                             HorizontalOptions="Fill">
+                            <Label Text="Nenhuma consulta hoje"
+                                   FontSize="17"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource TextDark}"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="Você não possui consultas agendadas para hoje."
+                                   FontSize="14"
+                                   TextColor="{StaticResource InputPlaceholder}"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
 
                 <CollectionView.ItemsLayout>
 
@@ -245,9 +240,9 @@
 
                 </CollectionView.ItemTemplate>
 
-            </CollectionView>
-
-        </VerticalStackLayout>
+                </CollectionView>
+            </RefreshView>
+        </Grid>
 
     </Grid>
 

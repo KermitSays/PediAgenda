@@ -363,3 +363,15 @@ MigrationBackup/
 FodyWeavers.xsd
 
 publish-teste/
+# PediAgenda: segredos locais e dumps do banco
+.env
+.env.*
+*.env
+*.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+**/appsettings.*.local.json
+**/*aiven-conexao*.txt
+**/pediagenda-Aiven*.sql

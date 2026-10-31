@@ -56,7 +56,7 @@ public sealed class BancoFixture : IDisposable
         con.Open();
         new MySqlCommand("""
             DELETE FROM tentativa_login; DELETE FROM relatorio_atendimento;
-            DELETE FROM notificacao; DELETE FROM prontuario; DELETE FROM consulta;
+            DELETE FROM prontuario; DELETE FROM consulta;
             DELETE FROM horario; DELETE FROM agenda_medica; DELETE FROM paciente;
             DELETE FROM medico; DELETE FROM recepcionista; DELETE FROM responsavel; DELETE FROM usuario;
             """, con).ExecuteNonQuery();
@@ -64,8 +64,8 @@ public sealed class BancoFixture : IDisposable
         for (int i = 1; i <= 4; i++)
         {
             using var cmd = new MySqlCommand("""
-                INSERT INTO usuario (id_usuario,nome,cpf,email,senha_hash,senha_salt,senha_iteracoes,ativo)
-                VALUES (@id,@nome,@cpf,@email,@hash,@salt,@iteracoes,TRUE)
+                INSERT INTO usuario (id_usuario,nome,cpf,email,senha_hash,senha_salt,senha_iteracoes,ativo,email_verificado)
+                VALUES (@id,@nome,@cpf,@email,@hash,@salt,@iteracoes,TRUE,TRUE)
                 """, con);
             cmd.Parameters.AddWithValue("@id", i);
             cmd.Parameters.AddWithValue("@nome", "Usuário " + i);
@@ -93,13 +93,13 @@ public sealed class BancoFixture : IDisposable
                 (13,@depois,'09:00','09:30',TRUE,1),
                 (14,@amanha,'14:00','14:30',TRUE,1),
                 (20,@amanha,'10:00','10:30',TRUE,2);
-            INSERT INTO consulta (id_consulta,status,tipo_atendimento,id_paciente,id_horario) VALUES
-                (1,'AGENDADA','PARTICULAR',1,1),
-                (2,'CONFIRMADA','CONVENIO',1,2),
-                (3,'AGENDADA','PARTICULAR',2,3),
-                (4,'CANCELADA','PARTICULAR',1,4),
-                (10,'AGENDADA','PARTICULAR',1,10),
-                (11,'CONFIRMADA','CONVENIO',1,11);
+            INSERT INTO consulta (id_consulta,status,id_paciente,id_horario) VALUES
+                (1,'AGENDADA',1,1),
+                (2,'CONFIRMADA',1,2),
+                (3,'AGENDADA',2,3),
+                (4,'CANCELADA',1,4),
+                (10,'AGENDADA',1,10),
+                (11,'CONFIRMADA',1,11);
             """, con);
         seed.Parameters.AddWithValue("@ontem", Hoje.AddDays(-1));
         seed.Parameters.AddWithValue("@amanha", Hoje.AddDays(1));

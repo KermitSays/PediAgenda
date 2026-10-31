@@ -28,6 +28,10 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
                 u.senha_salt,
                 u.senha_iteracoes,
                 u.ativo,
+                u.email_verificado,
+                u.token_verificacao_hash,
+                u.token_verificacao_expira_em,
+                u.email_verificado_em,
                 u.tentativas_invalidas,
                 u.bloqueado_ate,
 
@@ -113,6 +117,10 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
                 r.GetBoolean("ativo")
                 && !semPerfil,
 
+            EmailVerificado = r.GetBoolean("email_verificado"),
+            TokenVerificacaoHash = r.IsDBNull(r.GetOrdinal("token_verificacao_hash")) ? null : (byte[])r["token_verificacao_hash"],
+            TokenVerificacaoExpiraEm = r.IsDBNull(r.GetOrdinal("token_verificacao_expira_em")) ? null : r.GetDateTime("token_verificacao_expira_em"),
+            EmailVerificadoEm = r.IsDBNull(r.GetOrdinal("email_verificado_em")) ? null : r.GetDateTime("email_verificado_em"),
             TentativasInvalidas =
                 r.GetInt32(
                     "tentativas_invalidas"),
@@ -139,6 +147,10 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
                 u.senha_salt,
                 u.senha_iteracoes,
                 u.ativo,
+                u.email_verificado,
+                u.token_verificacao_hash,
+                u.token_verificacao_expira_em,
+                u.email_verificado_em,
                 u.tentativas_invalidas,
                 u.bloqueado_ate
 
@@ -204,6 +216,10 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
             Ativo =
                 r.GetBoolean("ativo"),
 
+            EmailVerificado = r.GetBoolean("email_verificado"),
+            TokenVerificacaoHash = r.IsDBNull(r.GetOrdinal("token_verificacao_hash")) ? null : (byte[])r["token_verificacao_hash"],
+            TokenVerificacaoExpiraEm = r.IsDBNull(r.GetOrdinal("token_verificacao_expira_em")) ? null : r.GetDateTime("token_verificacao_expira_em"),
+            EmailVerificadoEm = r.IsDBNull(r.GetOrdinal("email_verificado_em")) ? null : r.GetDateTime("email_verificado_em"),
             TentativasInvalidas =
                 r.GetInt32(
                     "tentativas_invalidas"),
@@ -217,23 +233,25 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
         };
     }
 
-    public bool CompletarCadastroResponsavel(int usuarioId, string email, string senha)
+    public bool CompletarCadastroResponsavel(int usuarioId, string email, string senha,
+        byte[] tokenHash, DateTime tokenExpiraEm)
     {
         if (!PoliticaSenha.Valida(senha, out var erro))
             throw new ArgumentException(erro, nameof(senha));
-
         var (hash, salt, iteracoes) = HashSenha.Gerar(senha);
-        // Só conclui um pré-cadastro sem senha e com o e-mail da clínica.
-        // Duas chamadas concorrentes não podem substituir a senha uma da outra.
+        // Reenvio seguro para cadastro ainda inativo. Não altera conta ativa.
         const string sql = """
             UPDATE usuario u
             INNER JOIN responsavel r ON r.id_usuario = u.id_usuario
             SET u.senha_hash = @hash, u.senha_salt = @salt,
-                u.senha_iteracoes = @iteracoes, u.ativo = 1,
+                u.senha_iteracoes = @iteracoes, u.ativo = 0,
+                u.email_verificado = 0, u.email_verificado_em = NULL,
+                u.token_verificacao_hash = @token,
+                u.token_verificacao_expira_em = @expira,
                 u.tentativas_invalidas = 0, u.bloqueado_ate = NULL,
-                u.termos_aceitos_em = UTC_TIMESTAMP()
+                u.termos_aceitos_em = COALESCE(u.termos_aceitos_em, UTC_TIMESTAMP())
             WHERE u.id_usuario = @id AND u.email = @email
-              AND u.senha_hash IS NULL AND u.senha_salt IS NULL
+              AND u.ativo = 0 AND u.email_verificado = 0
             """;
         using var con = Abrir();
         using var cmd = new MySqlCommand(sql, con);
@@ -242,6 +260,30 @@ public class UsuarioRepositorioMySql(string stringDeConexao) : IUsuarioRepositor
         cmd.Parameters.AddWithValue("@hash", hash);
         cmd.Parameters.AddWithValue("@salt", salt);
         cmd.Parameters.AddWithValue("@iteracoes", iteracoes);
+        cmd.Parameters.AddWithValue("@token", tokenHash);
+        cmd.Parameters.AddWithValue("@expira", tokenExpiraEm);
+        return cmd.ExecuteNonQuery() == 1;
+    }
+
+    public bool ConfirmarEmailResponsavel(byte[] tokenHash, DateTime confirmadoEm)
+    {
+        const string sql = """
+            UPDATE usuario u
+            INNER JOIN responsavel r ON r.id_usuario = u.id_usuario
+            SET u.email_verificado = 1, u.email_verificado_em = @agora,
+                u.ativo = 1, u.token_verificacao_hash = NULL,
+                u.token_verificacao_expira_em = NULL,
+                u.tentativas_invalidas = 0, u.bloqueado_ate = NULL
+            WHERE u.token_verificacao_hash = @token
+              AND u.token_verificacao_expira_em >= @agora
+              AND u.email_verificado = 0 AND u.ativo = 0
+              AND u.email IS NOT NULL AND u.senha_hash IS NOT NULL
+              AND u.senha_salt IS NOT NULL
+            """;
+        using var con = Abrir();
+        using var cmd = new MySqlCommand(sql, con);
+        cmd.Parameters.AddWithValue("@token", tokenHash);
+        cmd.Parameters.AddWithValue("@agora", confirmadoEm);
         return cmd.ExecuteNonQuery() == 1;
     }
 

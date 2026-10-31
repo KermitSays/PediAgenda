@@ -26,10 +26,12 @@ public record ResultadoCadastro(
     string Mensagem,
     MotivoRecusa Motivo,
     Usuario? Usuario = null,
-    IReadOnlyDictionary<string, string>? Campos = null)
+    IReadOnlyDictionary<string, string>? Campos = null,
+    string? TokenVerificacaoEmail = null)
 {
-    public static ResultadoCadastro Ok(Usuario usuario) =>
-        new(true, $"Cadastro concluído para {usuario.Nome}.", MotivoRecusa.Nenhum, usuario);
+    public static ResultadoCadastro Ok(Usuario usuario, string? token = null) =>
+        new(true, $"Cadastro iniciado para {usuario.Nome}.", MotivoRecusa.Nenhum, usuario,
+            TokenVerificacaoEmail: token);
 
     public static ResultadoCadastro Invalido(IReadOnlyDictionary<string, string> campos) =>
         new(false, "Verifique os campos destacados.", MotivoRecusa.DadosInvalidos, Campos: campos);
@@ -48,6 +50,7 @@ public partial class CadastroService(
     IUsuarioRepositorio repositorio)
 {
     public const int TamanhoMaximoEmail = 160;
+    public static readonly TimeSpan DuracaoTokenEmail = TimeSpan.FromHours(24);
 
     private readonly IUsuarioRepositorio _repo =
         repositorio;
@@ -122,13 +125,12 @@ public partial class CadastroService(
                 "Não foi encontrado um responsável cadastrado pela clínica com esse CPF.");
         }
 
-        // Cadastro não é recuperação de senha: não altera credenciais existentes,
-        // inclusive quando a clínica desativou o acesso.
-        if (responsavel.SenhaHash is { Length: > 0 } || responsavel.SenhaSalt is { Length: > 0 })
+        // Conta já ativada não pode voltar ao fluxo de cadastro.
+        // Pendente de confirmação pode solicitar novo link.
+        if (responsavel.Ativo || responsavel.EmailVerificado)
         {
-            return ResultadoCadastro.Falha(
-                MotivoRecusa.CadastroJaIniciado,
-                "Este responsável já definiu suas credenciais. Procure a recepção se precisar recuperar o acesso.");
+            return ResultadoCadastro.Falha(MotivoRecusa.CadastroJaIniciado,
+                "Este responsável já possui acesso ativo. Procure a recepção se precisar recuperar a conta.");
         }
 
         // O e-mail precisa ter sido registrado pela clínica
@@ -155,10 +157,12 @@ public partial class CadastroService(
                 "Já existe outra conta utilizando esse e-mail.");
         }
 
+        var (token, hashToken) = TokenVerificacaoEmail.Gerar();
+        var expiraEm = DateTime.UtcNow.Add(DuracaoTokenEmail);
         try
         {
             // A condição também é conferida pelo repositório de forma atômica.
-            if (!_repo.CompletarCadastroResponsavel(responsavel.Id, email, dados.Senha!))
+            if (!_repo.CompletarCadastroResponsavel(responsavel.Id, email, dados.Senha!, hashToken, expiraEm))
             {
                 return ResultadoCadastro.Falha(
                     MotivoRecusa.CadastroJaIniciado,
@@ -172,8 +176,9 @@ public partial class CadastroService(
                 "Já existe uma conta utilizando esse e-mail.");
         }
         responsavel.Email = email;
-        responsavel.Ativo = true;
-        return ResultadoCadastro.Ok(responsavel);
+        responsavel.Ativo = false;
+        responsavel.EmailVerificado = false;
+        return ResultadoCadastro.Ok(responsavel, token);
     }
 
     public ResultadoCadastro PreCadastrar(string? nomeInformado, string? cpfInformado,

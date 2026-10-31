@@ -4,7 +4,8 @@
     x:Class="PediAgenda.Views.Usuarios.Recepcao.SelecionarMedicoRecepcao"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    BackgroundColor="{StaticResource PageBlue}">
+    BackgroundColor="{StaticResource PageBlue}"
+    Shell.NavBarIsVisible="False">
 
     <Grid
         RowDefinitions="Auto,Auto,*,Auto"

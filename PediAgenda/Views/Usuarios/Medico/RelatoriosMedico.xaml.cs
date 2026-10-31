@@ -74,7 +74,7 @@ public partial class RelatoriosMedico : ContentPage
             TotalRealizadasLabel.Text = Resultados.Count.ToString();
             EstadoLabel.Text = $"Período consultado: {inicio:dd/MM/yyyy} até {fim:dd/MM/yyyy}";
             ResultadosCollectionView.IsVisible = true;
-            GerarExcelButton.IsEnabled = Resultados.Count > 0 && !exportando;
+            GerarExcelButton.IsEnabled = documento is not null && !exportando;
         }
         catch (Exception ex)
         {
@@ -89,36 +89,67 @@ public partial class RelatoriosMedico : ContentPage
         }
     }
 
+
     private async void GerarExcelButton_Clicked(object? sender, EventArgs e)
     {
-        if (exportando || documento is not { } resultado || resultado.Atendimentos.Count == 0) return;
+        if (exportando || documento is not { } resultado)
+            return;
+
+        if (resultado.Atendimentos.Count == 0)
+        {
+            await DisplayAlertAsync(
+                "Nenhum atendimento encontrado",
+                "Não há consultas realizadas no período selecionado para gerar o relatório.",
+                "OK");
+
+            return;
+        }
+
         if (sessaoDocumento != SessaoUsuario.Versao)
         {
             LimparResultado();
             EstadoLabel.Text = "Sua sessão mudou. Consulte os atendimentos novamente.";
             return;
         }
+
         exportando = true;
         GerarExcelButton.IsEnabled = false;
+
         try
         {
             using var stream = ExportadorExcelMedico.Gerar(resultado);
-            var salvo = await FileSaver.Default.SaveAsync($"Relatorio_PediAgenda_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx", stream);
-            if (sessaoDocumento != SessaoUsuario.Versao) return;
-            await DisplayAlertAsync("Relatórios", salvo.IsSuccessful
-                ? "O arquivo Excel foi salvo com sucesso." : "O arquivo não foi salvo.", "OK");
+
+            var salvo = await FileSaver.Default.SaveAsync(
+                $"Relatorio_PediAgenda_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                stream);
+
+            if (sessaoDocumento != SessaoUsuario.Versao)
+                return;
+
+            await DisplayAlertAsync(
+                "Relatórios",
+                salvo.IsSuccessful
+                    ? "O arquivo Excel foi salvo com sucesso."
+                    : "O arquivo não foi salvo.",
+                "OK");
         }
         catch (Exception)
         {
-            await DisplayAlertAsync("Relatórios", "Não foi possível salvar o Excel. Tente novamente.", "OK");
+            await DisplayAlertAsync(
+                "Relatórios",
+                "Não foi possível salvar o Excel. Tente novamente.",
+                "OK");
         }
         finally
         {
             exportando = false;
-            GerarExcelButton.IsEnabled = documento?.Atendimentos.Count > 0
-                && sessaoDocumento == SessaoUsuario.Versao;
+
+            GerarExcelButton.IsEnabled =
+                documento is not null &&
+                sessaoDocumento == SessaoUsuario.Versao;
         }
     }
+
 
     private async void VoltarButton_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync("..");
 }

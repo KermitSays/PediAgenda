@@ -34,6 +34,12 @@ public class Usuario
     // e-mail e define a senha para concluir seu acesso.
     public bool Ativo { get; set; }
 
+    // Verificação exigida somente para o responsável. Funcionários continuam com contas da clínica.
+    public bool EmailVerificado { get; set; }
+    public byte[]? TokenVerificacaoHash { get; set; }
+    public DateTime? TokenVerificacaoExpiraEm { get; set; }
+    public DateTime? EmailVerificadoEm { get; set; }
+
     // RNF02 — bloquear acesso após 5 tentativas inválidas.
     public int TentativasInvalidas { get; set; }
 

@@ -8,6 +8,7 @@ using PediAgenda.Dados;
 namespace PediAgenda.Views.Usuarios.Medico;
 
 [QueryProperty(nameof(IdMedico), "IdMedico")]
+[QueryProperty(nameof(DataSelecionada), "DataSelecionada")]
 public partial class BloquearHorario : ContentPage
 {
     private static readonly HttpClient http = new()
@@ -19,6 +20,27 @@ public partial class BloquearHorario : ContentPage
     private int? idMedicoSelecionado;
     private string idMedico = string.Empty;
     private bool processando;
+
+    private string dataSelecionada = string.Empty;
+
+    public string DataSelecionada
+    {
+        get => dataSelecionada;
+        set
+        {
+            dataSelecionada = value ?? string.Empty;
+            if (DateTime.TryParseExact(
+                    dataSelecionada,
+                    "yyyy-MM-dd",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out DateTime data))
+            {
+                DataInicialPicker.Date = data.Date;
+                DataFinalPicker.Date = data.Date;
+            }
+        }
+    }
 
     public string IdMedico
     {

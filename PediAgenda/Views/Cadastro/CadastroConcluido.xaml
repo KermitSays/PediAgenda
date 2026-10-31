@@ -5,7 +5,8 @@
              x:Class="PediAgenda.Views.Cadastro.CadastroConcluido"
              Title="Verificação de E-mail"
              BackgroundColor="{StaticResource PageBlue}"
-             NavigationPage.HasNavigationBar="False">
+             NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
 
     <Grid
         Padding="30">

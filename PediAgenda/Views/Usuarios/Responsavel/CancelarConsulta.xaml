@@ -6,7 +6,8 @@
     x:Class="PediAgenda.Views.Usuarios.Responsavel.CancelarConsulta"
     Title="Cancelar consulta"
     BackgroundColor="{StaticResource PageBlue}"
-    NavigationPage.HasNavigationBar="False">
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
 
     <ScrollView>
         <VerticalStackLayout Padding="24,35" Spacing="18">

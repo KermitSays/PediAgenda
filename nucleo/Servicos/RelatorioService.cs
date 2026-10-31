@@ -105,8 +105,6 @@ public class RelatorioService(IRelatorioRepositorio relatorios, IAgendaRepositor
             Confirmadas: Contar(StatusConsulta.Confirmada),
             Realizadas: Contar(StatusConsulta.Realizada),
             Canceladas: canceladas,
-            Convenio: consultas.Count(c => c.TipoAtendimento == TipoAtendimento.Convenio),
-            Particular: consultas.Count(c => c.TipoAtendimento == TipoAtendimento.Particular),
             HorariosOfertados: ofertados,
             HorariosBloqueados: bloqueados,
             // Percentuais com uma casa; null quando não há base para calcular.

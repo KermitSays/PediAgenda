@@ -34,13 +34,24 @@ public partial class RegistrarAtendimento : ContentPage, IQueryAttributable
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarAsync();
+    private async void ConsultaRefreshView_Refreshing(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (!salvando)
+                await CarregarAsync();
+        }
+        finally
+        {
+            ConsultaRefreshView.IsRefreshing = false;
+        }
+    }
 
     private string? Impedimento()
     {
         if (sessao != SessaoUsuario.Versao || atendimento?.Horario.Consulta is not { } consulta)
             return "Abra a consulta novamente pela agenda.";
-        if (!carregado) return "Atualize os dados da consulta antes de finalizar.";
+        if (!carregado) return "Puxe a tela para baixo para atualizar os dados antes de finalizar.";
         if (registrado) return "Esta consulta já possui um prontuário.";
         if (consulta.Status == "CANCELADA") return "Não é possível atender uma consulta cancelada.";
         if (!TimeOnly.TryParseExact(atendimento.Horario.Inicio, "HH:mm", CultureInfo.InvariantCulture,
@@ -75,17 +86,16 @@ public partial class RegistrarAtendimento : ContentPage, IQueryAttributable
             ResponsavelLabel.Text = consulta.Responsavel.Nome;
             DataLabel.Text = atendimento.Data.ToString("dd/MM/yyyy");
             HorarioLabel.Text = horario.Inicio;
-            TipoConsultaLabel.Text = consulta.TipoAtendimento;
             registrado = prontuario != null;
             carregado = true;
             EstadoLabel.Text = Impedimento() ?? "Consulta disponível para registrar o atendimento.";
             ObservacoesEditor.IsEnabled = !registrado;
-            FinalizarAtendimentoButton.IsEnabled = Impedimento() == null;
+            FinalizarAtendimentoButton.IsEnabled = carregado && !registrado;
         }
         catch (Exception ex)
         {
             if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
-            EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar consulta.";
+            EstadoLabel.Text = "Não foi possível carregar. Puxe a tela para baixo para atualizar.";
             await DisplayAlertAsync("Atendimento", ex is InvalidOperationException
                 ? ex.Message : "Falha ao carregar a consulta. Tente novamente.", "OK");
         }
@@ -100,7 +110,11 @@ public partial class RegistrarAtendimento : ContentPage, IQueryAttributable
         if (salvando) return;
         if (Impedimento() is { } impedimento)
         {
-            await DisplayAlertAsync("Atendimento indisponível", impedimento, "OK");
+            string mensagem = impedimento == "A consulta ainda não começou."
+                ? $"Esta consulta está marcada para as {atendimento?.Horario.Inicio}. Você poderá finalizar o atendimento a partir desse horário."
+                : impedimento;
+
+            await DisplayAlertAsync("Atendimento indisponível", mensagem, "OK");
             return;
         }
         string observacoes = ObservacoesEditor.Text?.Trim() ?? "";
@@ -110,7 +124,8 @@ public partial class RegistrarAtendimento : ContentPage, IQueryAttributable
             return;
         }
         salvando = true;
-        FinalizarAtendimentoButton.IsEnabled = AtualizarButton.IsEnabled = false;
+        FinalizarAtendimentoButton.IsEnabled = false;
+        ConsultaRefreshView.IsEnabled = false;
         try
         {
             bool confirmar = await DisplayAlertAsync("Finalizar atendimento",
@@ -131,16 +146,16 @@ public partial class RegistrarAtendimento : ContentPage, IQueryAttributable
             // O servidor pode ter confirmado antes de a conexão cair. Exige releitura
             // para não incentivar o reenvio de um registro já persistido.
             carregado = false;
-            EstadoLabel.Text = "Atualize a consulta para conferir o registro antes de tentar novamente.";
+            EstadoLabel.Text = "Puxe a tela para baixo para conferir o registro antes de tentar novamente.";
             await DisplayAlertAsync("Não foi possível confirmar o registro",
                 (ex is InvalidOperationException ? ex.Message : "Verifique a conexão.")
-                + "\nSuas observações foram mantidas. Atualize a consulta antes de repetir o envio.", "OK");
+                + "\nSuas observações foram mantidas. Puxe a tela para baixo antes de repetir o envio.", "OK");
         }
         finally
         {
             salvando = false;
-            AtualizarButton.IsEnabled = true;
-            FinalizarAtendimentoButton.IsEnabled = Impedimento() == null;
+            ConsultaRefreshView.IsEnabled = true;
+            FinalizarAtendimentoButton.IsEnabled = carregado && !registrado && sessao == SessaoUsuario.Versao;
         }
     }
 

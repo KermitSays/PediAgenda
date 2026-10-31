@@ -5,7 +5,8 @@
     x:Class="PediAgenda.Views.Usuarios.Responsavel.MinhasConsultas"
     Title="Minhas consultas"
     BackgroundColor="{StaticResource PageBlue}"
-    NavigationPage.HasNavigationBar="False">
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
 
     <Grid Padding="24,30,24,24" RowDefinitions="Auto,*,Auto">
         <VerticalStackLayout Grid.Row="0" Spacing="5">

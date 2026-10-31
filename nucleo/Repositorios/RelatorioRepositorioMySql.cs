@@ -68,7 +68,7 @@ public class RelatorioRepositorioMySql(string stringDeConexao) : IRelatorioRepos
         // (id_agenda, data_horario, hora_inicio) já cobre essa busca.
         const string sql = """
             SELECT   h.data_horario, h.hora_inicio, p.nome, p.data_nascimento,
-                     c.tipo_atendimento, c.status
+                     c.status
             FROM     consulta      c
             JOIN     horario       h ON h.id_horario  = c.id_horario
             JOIN     agenda_medica a ON a.id_agenda   = h.id_agenda
@@ -93,7 +93,6 @@ public class RelatorioRepositorioMySql(string stringDeConexao) : IRelatorioRepos
                 TimeOnly.FromTimeSpan(r.GetTimeSpan("hora_inicio")),
                 r.GetString("nome"),
                 r.GetDateOnly("data_nascimento"),
-                r.GetString("tipo_atendimento"),
                 r.GetString("status")));
         }
         return linhas;
