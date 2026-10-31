@@ -56,7 +56,7 @@ public sealed class BancoFixture : IDisposable
         con.Open();
         new MySqlCommand("""
             DELETE FROM tentativa_login; DELETE FROM relatorio_atendimento;
-            DELETE FROM notificacao; DELETE FROM prontuario; DELETE FROM consulta;
+            DELETE FROM prontuario; DELETE FROM consulta;
             DELETE FROM horario; DELETE FROM agenda_medica; DELETE FROM paciente;
             DELETE FROM medico; DELETE FROM recepcionista; DELETE FROM responsavel; DELETE FROM usuario;
             """, con).ExecuteNonQuery();
