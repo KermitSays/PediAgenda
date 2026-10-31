@@ -144,7 +144,7 @@ internal sealed record AgendaMedicoApi(int Id, string Nome, string Especialidade
     List<HorarioMedicoApi> Horarios);
 public sealed record HorarioMedicoApi(int Id, string Inicio, string Fim, string Situacao,
     ConsultaMedicoApi? Consulta);
-public sealed record ConsultaMedicoApi(int Id, string Status, string TipoAtendimento,
+public sealed record ConsultaMedicoApi(int Id, string Status,
     PacienteAgendaApi Paciente, ResponsavelAgendaApi Responsavel);
 public sealed record PacienteAgendaApi(int Id, string Nome, int Idade);
 public sealed record ResponsavelAgendaApi(string Nome, string Telefone);

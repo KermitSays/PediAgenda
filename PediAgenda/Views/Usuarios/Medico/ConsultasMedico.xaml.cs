@@ -118,8 +118,6 @@ public partial class ConsultasMedico : ContentPage
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object? sender, EventArgs e)
-        => await CarregarAgendaAsync(DataConsultaPicker.Date ?? DateTime.Today);
 
     private async Task CarregarAgendaAsync(DateTime data)
     {
@@ -168,7 +166,7 @@ public partial class ConsultasMedico : ContentPage
         catch (Exception ex)
         {
             if (sessao != SessaoUsuario.Versao) return;
-            EstadoAgendaLabel.Text = "Não foi possível carregar a agenda. Toque em Atualizar.";
+            EstadoAgendaLabel.Text = "Não foi possível carregar a agenda. Volte e abra esta tela novamente.";
             await DisplayAlertAsync("Agenda", ex is InvalidOperationException
                 ? ex.Message : "Não foi possível carregar a agenda. Tente novamente.", "OK");
         }
@@ -540,7 +538,12 @@ public partial class ConsultasMedico : ContentPage
             return;
         }
 
-        await Shell.Current.GoToAsync(nameof(BloquearHorario));
+        await Shell.Current.GoToAsync(
+            nameof(BloquearHorario),
+            new Dictionary<string, object>
+            {
+                ["DataSelecionada"] = (DataConsultaPicker.Date ?? DateTime.Today).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)
+            });
     }
 
     // ============================================

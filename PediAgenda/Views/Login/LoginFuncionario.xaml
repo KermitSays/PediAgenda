@@ -7,7 +7,8 @@
     x:Class="PediAgenda.Views.Login.LoginFuncionario"
     Title="Login"
     BackgroundColor="{StaticResource PageBlue}"
-    NavigationPage.HasNavigationBar="False">
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
 
     <ScrollView>
 
@@ -126,13 +127,6 @@
                 Style="{StaticResource PrimaryButton}"
                 Clicked="EntrarButton_Clicked" />
 
-            <!-- Provisorio - Recepcionista -->
-            <Button
-                x:Name="EntrarRecepcionistaButton"
-                Text="Entrar - Recepcionista"
-                Style="{StaticResource PrimaryButton}"
-                Clicked="EntrarRecepcionistaButton_Clicked"
-                Margin="0,8,0,8"/>
 
 
             <!-- Retorno para a tela de escolha de perfil -->

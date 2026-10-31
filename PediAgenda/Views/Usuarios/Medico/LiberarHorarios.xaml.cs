@@ -30,7 +30,6 @@ public partial class LiberarHorarios : ContentPage
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarBloqueiosAsync();
 
     public string IdMedico
     {
@@ -67,7 +66,6 @@ public partial class LiberarHorarios : ContentPage
         long sessao = SessaoUsuario.Versao;
         Bloqueios.Clear();
         BloqueiosCollectionView.IsVisible = false;
-        AtualizarButton.IsEnabled = false;
         EstadoLabel.Text = "Carregando bloqueios…";
         try
         {
@@ -111,19 +109,18 @@ public partial class LiberarHorarios : ContentPage
                 });
             }
             EstadoLabel.Text = Bloqueios.Count == 0 ? "Nenhum período bloqueado." : "Bloqueios da agenda";
-            BloqueiosCollectionView.IsVisible = Bloqueios.Count > 0;
+            BloqueiosCollectionView.IsVisible = true;
         }
         catch (Exception ex)
         {
             if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
             Bloqueios.Clear();
-            EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar bloqueios.";
+            EstadoLabel.Text = "Não foi possível carregar. Volte à agenda e abra esta tela novamente.";
             await DisplayAlertAsync("Não foi possível carregar os bloqueios", ex.Message, "OK");
         }
         finally
         {
             processando = false;
-            AtualizarButton.IsEnabled = true;
             if (ReferenceEquals(carregamento, atual)) carregamento = null;
         }
     }
@@ -152,7 +149,6 @@ public partial class LiberarHorarios : ContentPage
         if (!confirmar || sessao != SessaoUsuario.Versao) return;
 
         processando = true;
-        AtualizarButton.IsEnabled = false;
         try
         {
             string token = await ObterTokenAsync();
@@ -192,7 +188,6 @@ public partial class LiberarHorarios : ContentPage
         finally
         {
             processando = false;
-            AtualizarButton.IsEnabled = true;
         }
 
         await CarregarBloqueiosAsync();

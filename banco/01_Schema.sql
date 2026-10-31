@@ -16,7 +16,6 @@
 
 -- DROP TABLE IF EXISTS tentativa_login;
 -- DROP TABLE IF EXISTS relatorio_atendimento;
--- DROP TABLE IF EXISTS notificacao;
 -- DROP TABLE IF EXISTS prontuario;
 -- DROP TABLE IF EXISTS consulta;
 -- DROP TABLE IF EXISTS horario;
@@ -45,6 +44,10 @@ CREATE TABLE usuario (
     senha_salt           VARBINARY(16)    NULL,
     senha_iteracoes      INT UNSIGNED     NOT NULL DEFAULT 100000,
     ativo                BOOLEAN          NOT NULL DEFAULT FALSE,
+    email_verificado     BOOLEAN          NOT NULL DEFAULT FALSE,
+    email_verificado_em  DATETIME         NULL,
+    token_verificacao_hash VARBINARY(32) NULL,
+    token_verificacao_expira_em DATETIME NULL,
     tentativas_invalidas TINYINT UNSIGNED NOT NULL DEFAULT 0,
     bloqueado_ate        DATETIME         NULL,
     criado_em            DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -140,7 +143,6 @@ CREATE TABLE consulta (
     id_consulta      INT UNSIGNED NOT NULL AUTO_INCREMENT,
     status           ENUM('AGENDADA','CONFIRMADA','CANCELADA','REALIZADA')
                                   NOT NULL DEFAULT 'AGENDADA',
-    tipo_atendimento ENUM('CONVENIO','PARTICULAR') NOT NULL,
     id_paciente      INT UNSIGNED NOT NULL,
     id_horario       INT UNSIGNED NOT NULL,
     criada_em        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -165,20 +167,6 @@ CREATE TABLE prontuario (
     CONSTRAINT uq_prontuario_consulta UNIQUE (id_consulta),
     CONSTRAINT fk_prontuario_consulta FOREIGN KEY (id_consulta)
         REFERENCES consulta (id_consulta) ON DELETE RESTRICT
-) ENGINE = InnoDB;
-
--- ---------------------------------------------------------------------
--- NOTIFICACAO: confirmacoes e lembretes disparados por consulta (1:N).
--- ---------------------------------------------------------------------
-CREATE TABLE notificacao (
-    id_notificacao INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    canal          ENUM('EMAIL','SISTEMA') NOT NULL,
-    mensagem       VARCHAR(500) NOT NULL,
-    data_envio     DATETIME     NULL,
-    id_consulta    INT UNSIGNED NOT NULL,
-    CONSTRAINT pk_notificacao          PRIMARY KEY (id_notificacao),
-    CONSTRAINT fk_notificacao_consulta FOREIGN KEY (id_consulta)
-        REFERENCES consulta (id_consulta) ON DELETE CASCADE
 ) ENGINE = InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -212,6 +200,6 @@ CREATE TABLE tentativa_login (
 ) ENGINE = InnoDB;
 
 -- ---------------------------------------------------------------------
--- Conferencia: devem aparecer 12 tabelas
+-- Conferencia: devem aparecer 11 tabelas
 -- ---------------------------------------------------------------------
 SHOW TABLES;

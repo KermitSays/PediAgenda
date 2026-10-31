@@ -6,7 +6,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     Title="Agenda Médica"
-    BackgroundColor="{StaticResource PageBlue}">
+    BackgroundColor="{StaticResource PageBlue}"
+    Shell.NavBarIsVisible="False">
 
     <Grid
         RowDefinitions="Auto,Auto,Auto,*,Auto"
@@ -72,8 +73,7 @@
                 Text="Toque em uma consulta para registrar o atendimento."
                 FontSize="13"
                 TextColor="{StaticResource InputPlaceholder}" />
-            <Label x:Name="EstadoAgendaLabel" FontSize="12" TextColor="Black" />
-            <Button Text="Atualizar" Clicked="AtualizarButton_Clicked" />
+            <Label x:Name="EstadoAgendaLabel" FontSize="12" TextColor="Black" IsVisible="False" />
 
         </VerticalStackLayout>
 

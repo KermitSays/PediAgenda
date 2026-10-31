@@ -1,5 +1,6 @@
 using PediAgenda.Nucleo.Modelos;
 using PediAgenda.Nucleo.Seguranca;
+using System.Security.Cryptography;
 
 namespace PediAgenda.Nucleo.Repositorios;
 
@@ -53,7 +54,8 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
             SenhaIteracoes = iteracoes,
 
             // Os usuários semeados já representam contas completas.
-            Ativo = true
+            Ativo = true,
+            EmailVerificado = true
         });
     }
 
@@ -133,7 +135,7 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
    
     /// Completa o cadastro de acesso de um responsável
     /// que já havia sido pré-cadastrado.
-    public bool CompletarCadastroResponsavel(int usuarioId, string email, string senha)
+    public bool CompletarCadastroResponsavel(int usuarioId, string email, string senha, byte[] tokenHash, DateTime tokenExpiraEm)
     {
         lock (_usuarios)
         {
@@ -142,16 +144,41 @@ public class UsuarioRepositorioMemoria : IUsuarioRepositorio
             var usuario = _usuarios.FirstOrDefault(u => u.Id == usuarioId
                 && u.Perfil == Perfil.Responsavel
                 && string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase)
-                && u.SenhaHash is null && u.SenhaSalt is null);
+                && !u.Ativo && !u.EmailVerificado);
             if (usuario is null)
                 return false;
             var (hash, salt, iteracoes) = HashSenha.Gerar(senha);
             usuario.SenhaHash = hash;
             usuario.SenhaSalt = salt;
             usuario.SenhaIteracoes = iteracoes;
-            usuario.Ativo = true;
+            usuario.Ativo = false;
+            usuario.EmailVerificado = false;
+            usuario.EmailVerificadoEm = null;
+            usuario.TokenVerificacaoHash = tokenHash;
+            usuario.TokenVerificacaoExpiraEm = tokenExpiraEm;
             usuario.TentativasInvalidas = 0;
             usuario.BloqueadoAte = null;
+            return true;
+        }
+    }
+
+    public bool ConfirmarEmailResponsavel(byte[] tokenHash, DateTime confirmadoEm)
+    {
+        lock (_usuarios)
+        {
+            var u = _usuarios.FirstOrDefault(u => u.Perfil == Perfil.Responsavel
+                && !u.EmailVerificado && !u.Ativo
+                && u.TokenVerificacaoHash is { Length: 32 }
+                && u.TokenVerificacaoExpiraEm >= confirmadoEm
+                && CryptographicOperations.FixedTimeEquals(u.TokenVerificacaoHash, tokenHash));
+            if (u is null) return false;
+            u.EmailVerificado = true;
+            u.EmailVerificadoEm = confirmadoEm;
+            u.Ativo = true;
+            u.TokenVerificacaoHash = null;
+            u.TokenVerificacaoExpiraEm = null;
+            u.TentativasInvalidas = 0;
+            u.BloqueadoAte = null;
             return true;
         }
     }

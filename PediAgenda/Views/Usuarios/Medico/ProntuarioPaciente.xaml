@@ -5,7 +5,8 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="Prontuário"
-    BackgroundColor="{StaticResource PageBlue}">
+    BackgroundColor="{StaticResource PageBlue}"
+    Shell.NavBarIsVisible="False">
 
     <ScrollView>
 
@@ -21,8 +22,7 @@
                 TextColor="{StaticResource TextDark}" />
 
 
-            <Label x:Name="EstadoLabel" TextColor="Black" />
-            <Button Text="Atualizar" Clicked="AtualizarButton_Clicked" />
+            <Label x:Name="EstadoLabel" TextColor="Black" IsVisible="False" />
 
             <!-- DADOS DO PACIENTE -->
             <Border

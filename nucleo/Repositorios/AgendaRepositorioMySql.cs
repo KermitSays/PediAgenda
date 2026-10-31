@@ -84,7 +84,7 @@ public class AgendaRepositorioMySql(string stringDeConexao) : IAgendaRepositorio
         const string sql = """
             SELECT    h.id_horario, h.data_horario, h.hora_inicio, h.hora_fim, h.disponivel,
                       m.id_medico, um.nome AS nome_medico, m.especialidade,
-                      c.id_consulta, c.status, c.tipo_atendimento,
+                      c.id_consulta, c.status,
                       p.id_paciente, p.nome AS nome_paciente, p.data_nascimento,
                       ur.nome AS nome_responsavel, r.telefone
             FROM      horario       h
@@ -121,8 +121,6 @@ public class AgendaRepositorioMySql(string stringDeConexao) : IAgendaRepositorio
                 r.GetString("especialidade"),
                 livre ? null : r.GetInt32("id_consulta"),
                 livre ? null : r.GetString("status"),
-                livre ? null : (r.IsDBNull(r.GetOrdinal("tipo_atendimento"))
-                      ? string.Empty : r.GetString("tipo_atendimento")),
                 livre ? null : r.GetInt32("id_paciente"),
                 livre ? null : r.GetString("nome_paciente"),
                 livre ? null : r.GetDateOnly("data_nascimento"),

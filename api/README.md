@@ -17,7 +17,7 @@ Resposta 200: `id`, `nome`, `email`, `perfil`, `token` e `expiraEm`. Os perfis s
 
 Falhas têm `codigo` e `mensagem`; erros de validação incluem `campos`. Exemplos: 400 dados inválidos, 401 sessão ausente/vencida, 403 perfil sem acesso, 404 registro não encontrado, 409 conflito, 423 login bloqueado e 503 falha de acesso ao banco. JSON malformado e métodos incorretos também têm resposta JSON. Cinco senhas incorretas que atendam à política de formato bloqueiam a conta por 15 minutos. O contador é atômico, inclusive para chamadas simultâneas.
 
-## Cadastro sem confirmação
+## Cadastro com verificação de e-mail (Brevo)
 
 Apenas a recepção autenticada pode pré-cadastrar um responsável:
 
@@ -37,21 +37,24 @@ POST /api/cadastro/responsavel
 {"cpf":"12345678901","email":"maria@example.com","senha":"senhaSegura123","aceiteTermos":true}
 ```
 
-CPF e e-mail devem corresponder ao pré-cadastro. Senha de 8 a 1.024 caracteres. Retorna 201 com `mensagem` e `usuario: {id, nome, email}`. Não gera sessão: faça login depois. Uma conta com senha já definida retorna 409 e mantém sua senha, inclusive se estiver inativa. O aceite é gravado em `usuario.termos_aceitos_em`.
+CPF e e-mail devem corresponder ao pré-cadastro. Senha de 8 a 1.024 caracteres. Em caso de envio bem-sucedido do e-mail, retorna **202** com `mensagem` e `usuario: {id, nome, email}`. A conta permanece inativa até o link ser confirmado; **não gera sessão**. Uma conta com senha já definida retorna 409 e mantém sua senha, inclusive se estiver inativa. O aceite é gravado em `usuario.termos_aceitos_em`.
 
-Não há envio de e-mail, rota de confirmação, código de ativação, dependência Brevo ou variáveis de serviço de e-mail. O token JWT de login continua necessário para autenticação.
+A API envia um link via Brevo. A confirmação ocorre em `GET /api/cadastro/confirmar-email?token=...`; após a confirmação, a conta fica ativa e o login pode ser realizado. **Não há tela nem campo para digitar código de verificação.** Se o serviço de envio falhar, a API responde 502 e o responsável pode tentar o cadastro novamente.
 
-## Rotas (25 combinações de método e caminho)
+Variáveis do serviço: `PEDIAGENDA_EMAIL_API_KEY`, `PEDIAGENDA_EMAIL_REMETENTE`, `PEDIAGENDA_EMAIL_NOME` (opcional) e `RENDER_EXTERNAL_URL` (endereço público da API para o link). Nunca publicar chaves de API no repositório. O cadastro foi validado localmente; a implantação no Render requer configuração e teste próprios. O JWT de login permanece necessário para autenticação.
+
+## Rotas principais (a lista também inclui módulos de Recepção em arquivos de rotas separados)
 
 | Método | Rota | Perfil / comportamento |
 | --- | --- | --- |
 | GET | `/api/saude` | Público; aplicação em execução |
 | POST | `/api/auth/login` | Público; autenticar |
 | GET | `/api/auth/eu` | Autenticado; dados do usuário |
-| POST | `/api/cadastro/responsavel` | Público; concluir pré-cadastro |
-| POST | `/api/responsaveis` | Recepção; pré-cadastrar |
+| POST | `/api/cadastro/responsavel` | Público; iniciar ativação por e-mail (202) |
+| GET | `/api/cadastro/confirmar-email?token=...` | Público; confirmar e-mail pelo link |
+| POST | `/api/responsaveis` | Rota técnica mantida no backend; pré-cadastro não faz parte das telas finais da Recepção |
 | GET | `/api/pacientes` | Responsável; seus dependentes |
-| POST | `/api/pacientes` | Responsável; cadastrar dependente |
+| POST | `/api/pacientes` | Rota técnica legada; cadastro de dependente não faz parte do aplicativo final |
 | GET | `/api/horarios` | Autenticado; horários disponíveis |
 | POST | `/api/consultas` | Responsável; agendar |
 | GET | `/api/consultas` | Responsável; suas consultas |
@@ -77,7 +80,7 @@ Não há envio de e-mail, rota de confirmação, código de ativação, dependê
 
 `GET /api/horarios?data=2026-12-01&medico=2&especialidade=Pediatria`: `data` é obrigatória; os outros filtros são opcionais. Horários bloqueados, ocupados, passados ou de médicos inativos não aparecem.
 
-`POST /api/consultas`: `{"idPaciente":1,"idHorario":123,"tipoAtendimento":"PARTICULAR"}`. Os tipos são `PARTICULAR` e `CONVENIO`. O paciente precisa pertencer ao responsável autenticado. A mesma criança não pode ser reservada em agendas sobrepostas; um bloco não recebe duas consultas ativas. Cancelar mantém o histórico e devolve o bloco à lista de horários livres.
+`POST /api/consultas`: `{"idPaciente":1,"idHorario":123}`. O paciente precisa pertencer ao responsável autenticado. A mesma criança não pode ser reservada em agendas sobrepostas; um bloco não recebe duas consultas ativas. Cancelar mantém o histórico e devolve o bloco à lista de horários livres.
 
 ## Agenda e relatórios
 
@@ -95,6 +98,6 @@ Retorna 201 com `id`, `idConsulta`, `idPaciente`, `observacoes` e `dataRegistro`
 
 ## Limites desta entrega
 
-Não implementa recuperação de senha, reativação de contas ou envio de lembretes. A tabela de notificações permanece compatível com o modelo, mas não há serviço externo de envio. As telas MAUI não foram modificadas; as novas rotas precisam ser chamadas pelos respectivos fluxos do app.
+Não implementa envio de lembretes ou notificações no aplicativo. O modelo novo do banco não inclui a tabela `notificacao` nem o campo `consulta.tipo_atendimento`. O aplicativo .NET MAUI integra os três perfis e exporta relatórios médicos em Excel; as rotas de exportação CSV da API são um recurso distinto. A migração de coluna no Aiven e a implantação da API no Render devem ser coordenadas.
 
-[Validação executada](VALIDACAO.md) · [Reproduzir testes](../testes/README.md)
+[Validação histórica da API](VALIDACAO.md) · [Reproduzir testes](../testes/README.md)

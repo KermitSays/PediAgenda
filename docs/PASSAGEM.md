@@ -1,4 +1,6 @@
-# PediAgenda — passagem do back-end
+# PediAgenda — passagem histórica do back-end
+
+> **Documento arquivado (setembro/2026):** preservado como registro da passagem original. Não usar os comandos de recriação de banco, contas e rotas listados aqui para a entrega final. Consulte `README.md`, `api/README.md` e `banco/README.md` para o estado atual. A verificação de e-mail por Brevo integra o escopo final.
 
 Documento de passagem da API e do banco de dados, feito por Joab Antonio de
 Souza ao sair do grupo. Serve para quem for continuar o desenvolvimento e para

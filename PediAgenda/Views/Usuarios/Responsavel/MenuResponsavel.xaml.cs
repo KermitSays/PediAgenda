@@ -36,8 +36,6 @@ public partial class MenuResponsavel : ContentPage
 
         public string Status { get; set; } = string.Empty;
 
-        public string? TipoAtendimento { get; set; }
-
         public string Data { get; set; } = string.Empty;
 
         public string Inicio { get; set; } = string.Empty;
@@ -176,8 +174,7 @@ public partial class MenuResponsavel : ContentPage
                     Especialidade = item.Medico.Especialidade,
                     Data = data,
                     Horario = horario,
-                    Status = item.Status,
-                    Modalidade = item.TipoAtendimento ?? string.Empty
+                    Status = item.Status
                 });
             }
 

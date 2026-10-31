@@ -28,7 +28,6 @@ public partial class PacientesMedico : ContentPage
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarAsync();
 
     private async Task CarregarAsync()
     {
@@ -53,7 +52,7 @@ public partial class PacientesMedico : ContentPage
         catch (Exception ex)
         {
             if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
-            EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar.";
+            EstadoLabel.Text = "Não foi possível carregar. Volte à tela anterior e tente novamente.";
             await DisplayAlertAsync("Pacientes", ex is InvalidOperationException
                 ? ex.Message : "Falha ao carregar os pacientes. Tente novamente.", "OK");
         }

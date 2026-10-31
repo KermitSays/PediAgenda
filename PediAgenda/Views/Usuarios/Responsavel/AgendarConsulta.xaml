@@ -6,7 +6,8 @@
     x:Class="PediAgenda.Views.Usuarios.Responsavel.AgendarConsulta"
     Title="Agendar consulta"
     BackgroundColor="{StaticResource PageBlue}"
-    NavigationPage.HasNavigationBar="False">
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
 
     <ScrollView>
 

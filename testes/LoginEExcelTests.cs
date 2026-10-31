@@ -53,10 +53,10 @@ public class LoginEExcelTests
         var fim = new DateOnly(2026, 10, 31);
         var linhas = new List<LinhaRelatorioMedicoApi>
         {
-            new(inicio.AddDays(2), "15:30", "=Paciente", 5, "PARTICULAR", "REALIZADA"),
-            new(inicio, "10:00", "Agendada", 4, "CONVENIO", "AGENDADA"),
-            new(inicio, "11:00", "Cancelada", 4, "CONVENIO", "CANCELADA"),
-            new(inicio, "12:00", "Confirmada", 4, "CONVENIO", "CONFIRMADA")
+            new(inicio.AddDays(2), "15:30", "=Paciente", 5, "REALIZADA"),
+            new(inicio, "10:00", "Agendada", 4, "AGENDADA"),
+            new(inicio, "11:00", "Cancelada", 4, "CANCELADA"),
+            new(inicio, "12:00", "Confirmada", 4, "CONFIRMADA")
         };
         var documento = RelatorioMedicoDocumento.Criar(new(1, new(2, "Dra. Teste", "Pediatria"), inicio, fim, linhas), inicio, fim);
         linhas.Clear(); // O documento preserva o resultado mesmo que a fonte mude.

@@ -24,7 +24,6 @@ public static class PacientesRecepcaoDados
                     Horario = new TimeSpan(9, 0, 0),
                     Medico = "Dr. Carlos Mendes",
                     Especialidade = "Pediatria Geral",
-                    TipoAtendimento = "Particular",
                     Status = "Confirmado"
                 },
 
@@ -36,7 +35,6 @@ public static class PacientesRecepcaoDados
                     Horario = new TimeSpan(10, 0, 0),
                     Medico = "Dra. Fernanda Lima",
                     Especialidade = "Pediatria Geral",
-                    TipoAtendimento = "Convênio",
                     Status = "Realizado"
                 }
             }
@@ -62,7 +60,6 @@ public static class PacientesRecepcaoDados
                     Horario = new TimeSpan(8, 0, 0),
                     Medico = "Dra. Fernanda Lima",
                     Especialidade = "Pediatria Geral",
-                    TipoAtendimento = "Convênio",
                     Status = "Por Confirmar"
                 }
             }
@@ -88,7 +85,6 @@ public static class PacientesRecepcaoDados
                     Horario = new TimeSpan(14, 0, 0),
                     Medico = "Dr. Carlos Mendes",
                     Especialidade = "Pediatria Geral",
-                    TipoAtendimento = "Particular",
                     Status = "Confirmado"
                 }
             }
@@ -114,7 +110,6 @@ public static class PacientesRecepcaoDados
                     Horario = new TimeSpan(12, 0, 0),
                     Medico = "Dr. Carlos Mendes",
                     Especialidade = "Pediatria Geral",
-                    TipoAtendimento = "Particular",
                     Status = "Cancelado"
                 }
             }

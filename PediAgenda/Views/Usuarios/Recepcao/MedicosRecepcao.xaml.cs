@@ -520,7 +520,8 @@ public partial class MedicosRecepcao : ContentPage
             nameof(BloquearHorario),
             new Dictionary<string, object>
             {
-                ["IdMedico"] = idMedico.ToString()
+                ["IdMedico"] = idMedico.ToString(),
+                ["DataSelecionada"] = (DataPicker.Date ?? DateTime.Today).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)
             });
     }
 

@@ -437,28 +437,6 @@ public partial class EditarBloqueio : ContentPage
                     .LiberarHorario(
                         horario.IdHorario);
             }
-
-
-            NotificacoesDados.Notificacoes.Add(
-                new Notificacao
-                {
-                    Titulo =
-                        "Consulta cancelada",
-
-                    Mensagem =
-                        $"A consulta de {consulta.Paciente} " +
-                        $"do dia {consulta.Data:dd/MM/yyyy} às " +
-                        $"{consulta.Horario:hh\\:mm} " +
-                        $"foi cancelada após uma alteração " +
-                        $"no bloqueio da agenda." +
-                        $"\n\nMotivo: {motivo}",
-
-                    DataHora =
-                        DateTime.Now,
-
-                    Lida =
-                        false
-                });
         }
 
 

@@ -201,8 +201,7 @@ public partial class AgendarConfirmacao : ContentPage
             var dados = new
             {
                 idPaciente = PacienteId,
-                idHorario = HorarioId,
-                tipoAtendimento = (string?)null
+                idHorario = HorarioId
             };
 
             using var requisicao = new HttpRequestMessage(

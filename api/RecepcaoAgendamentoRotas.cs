@@ -31,9 +31,13 @@ public static class RecepcaoAgendamentoRotas
             // Reutiliza exatamente a reserva transacional do Responsável:
             // impede sobreposição, horário bloqueado, passado e dupla marcação.
             var agora = relogio.GetLocalNow().DateTime;
+
             var (resultado, idConsulta) = consultas.Reservar(
-                idResponsavel.Value, pedido.IdPaciente.Value, pedido.IdHorario.Value,
-                string.Empty, agora);
+                idResponsavel.Value,
+                pedido.IdPaciente.Value,
+                pedido.IdHorario.Value,
+                agora);
+
 
             IResult resposta = resultado switch
             {

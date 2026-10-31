@@ -24,10 +24,10 @@ public static class ExportadorCsv
         Linha(csv, "Gerado em", c.GeradoEm.ToString("dd/MM/yyyy HH:mm", Br));
         csv.AppendLine();
 
-        Linha(csv, "Data", "Hora", "Paciente", "Idade", "Tipo de atendimento", "Status");
+        Linha(csv, "Data", "Hora", "Paciente", "Idade", "Status");
         foreach (var consulta in relatorio.Consultas)
             Linha(csv, Data(consulta.Data), consulta.Inicio.ToString("HH:mm"), consulta.NomePaciente,
-                  consulta.IdadePaciente.ToString(), Tipo(consulta.TipoAtendimento), Status(consulta.Status));
+                  consulta.IdadePaciente.ToString(), Status(consulta.Status));
         csv.AppendLine();
 
         Linha(csv, "Resumo");
@@ -36,8 +36,6 @@ public static class ExportadorCsv
         Linha(csv, "Confirmadas", r.Confirmadas.ToString());
         Linha(csv, "Realizadas", r.Realizadas.ToString());
         Linha(csv, "Canceladas", r.Canceladas.ToString());
-        Linha(csv, "Convênio", r.Convenio.ToString());
-        Linha(csv, "Particular", r.Particular.ToString());
         Linha(csv, "Horários ofertados", r.HorariosOfertados.ToString());
         Linha(csv, "Horários bloqueados", r.HorariosBloqueados.ToString());
         Linha(csv, "Taxa de ocupação (%)", r.TaxaOcupacao?.ToString("0.0", Br) ?? "-");
@@ -66,8 +64,6 @@ public static class ExportadorCsv
     }
 
     private static string Data(DateOnly data) => data.ToString("dd/MM/yyyy", Br);
-
-    private static string Tipo(string tipo) => tipo == TipoAtendimento.Convenio ? "Convênio" : "Particular";
 
     private static string Status(string status) => status switch
     {

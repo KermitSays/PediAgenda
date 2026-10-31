@@ -132,6 +132,13 @@ public class AutenticacaoService(
                 MotivoFalha.ContaBloqueada);
         }
 
+        if (usuario.Perfil == Perfil.Responsavel && !usuario.EmailVerificado)
+        {
+            _repo.RegistrarTentativa(email, usuario.Id, false, "email nao confirmado");
+            return ResultadoLogin.Falha(
+                "Confirme seu e-mail pelo link enviado para ativar o acesso.", MotivoFalha.ContaInativa);
+        }
+
         // Conta inativa por qualquer outro motivo.
         if (!usuario.Ativo)
         {

@@ -28,7 +28,6 @@ public partial class ProntuarioPaciente : ContentPage, IQueryAttributable
         base.OnDisappearing();
     }
 
-    private async void AtualizarButton_Clicked(object? sender, EventArgs e) => await CarregarAsync();
 
     private async Task CarregarAsync()
     {
@@ -60,7 +59,7 @@ public partial class ProntuarioPaciente : ContentPage, IQueryAttributable
         catch (Exception ex)
         {
             if (atual.IsCancellationRequested || sessao != SessaoUsuario.Versao) return;
-            EstadoLabel.Text = "Não foi possível carregar. Toque em Atualizar.";
+            EstadoLabel.Text = "Não foi possível carregar. Volte à tela anterior e tente novamente.";
             await DisplayAlertAsync("Prontuário", ex is InvalidOperationException
                 ? ex.Message : "Falha ao carregar o prontuário. Tente novamente.", "OK");
         }

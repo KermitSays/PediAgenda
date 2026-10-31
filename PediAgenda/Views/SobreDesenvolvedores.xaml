@@ -4,7 +4,8 @@
              xmlns:controls="clr-namespace:PediAgenda.Controls"
              x:Class="PediAgenda.Views.SobreDesenvolvedores"
              Title="Sobre os desenvolvedores"
-             BackgroundColor="{StaticResource PageBlue}">
+             BackgroundColor="{StaticResource PageBlue}"
+    Shell.NavBarIsVisible="False">
     <ScrollView>
         <VerticalStackLayout Padding="24,32,24,32" Spacing="20">
             <VerticalStackLayout Spacing="8" HorizontalOptions="Center">

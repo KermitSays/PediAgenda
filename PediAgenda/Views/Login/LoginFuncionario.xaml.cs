@@ -59,20 +59,6 @@ public partial class LoginFuncionario : ContentPage
 
 
     // =============================================
-    // RECUPERAÇÃO DE SENHA
-    // =============================================
-
-    private async void EsqueciSenhaButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        await Shell.Current.GoToAsync(
-            nameof(
-                RecuperarSenha));
-    }
-
-
-    // =============================================
     // LOGIN
     // =============================================
 
@@ -417,27 +403,4 @@ public partial class LoginFuncionario : ContentPage
     }
 
 
-    // =============================================
-    // ACESSO RÁPIDO - RECEPÇÃO
-    // =============================================
-
-    private async void EntrarRecepcionistaButton_Clicked(
-        object sender,
-        EventArgs e)
-    {
-        SecureStorage.Default.Remove(
-            "pediagenda_token");
-
-
-        SessaoUsuario.Iniciar(
-            0,
-            "Recepção Teste",
-            string.Empty,
-            "RECEPCIONISTA");
-
-
-        await Shell.Current.GoToAsync(
-            nameof(
-                MenuRecepcao));
-    }
 }

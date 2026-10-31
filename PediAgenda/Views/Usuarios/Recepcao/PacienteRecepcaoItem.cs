@@ -111,13 +111,6 @@ public class ConsultaPacienteRecepcaoItem
     } = string.Empty;
 
 
-    public string TipoAtendimento
-    {
-        get;
-        set;
-    } = string.Empty;
-
-
     public string Status
     {
         get =>

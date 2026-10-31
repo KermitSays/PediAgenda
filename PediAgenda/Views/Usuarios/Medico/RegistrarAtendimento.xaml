@@ -5,9 +5,11 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="Registrar Atendimento"
-    BackgroundColor="{StaticResource PageBlue}">
+    BackgroundColor="{StaticResource PageBlue}"
+    Shell.NavBarIsVisible="False">
 
-    <ScrollView>
+    <RefreshView x:Name="ConsultaRefreshView" Refreshing="ConsultaRefreshView_Refreshing">
+        <ScrollView>
 
         <VerticalStackLayout
             Padding="24,30,24,30"
@@ -33,7 +35,7 @@
 
 
             <Label x:Name="EstadoLabel" TextColor="{StaticResource TextDark}" />
-            <Button x:Name="AtualizarButton" Text="Atualizar consulta" Clicked="AtualizarButton_Clicked" />
+
 
             <!-- DADOS DA CONSULTA -->
 
@@ -55,7 +57,7 @@
 
 
                     <Grid
-                        RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                        RowDefinitions="Auto,Auto,Auto,Auto"
                         ColumnDefinitions="Auto,*"
                         RowSpacing="10"
                         ColumnSpacing="10">
@@ -128,21 +130,6 @@
                             TextColor="{StaticResource TextDark}" />
 
 
-                        <!-- TIPO -->
-
-                        <Label
-                            Grid.Row="4"
-                            Grid.Column="0"
-                            Text="Tipo:"
-                            FontAttributes="Bold"
-                            TextColor="{StaticResource TextDark}" />
-
-                        <Label
-                            x:Name="TipoConsultaLabel"
-                            Grid.Row="4"
-                            Grid.Column="1"
-                            Text="-"
-                            TextColor="{StaticResource TextDark}" />
 
                     </Grid>
 
@@ -223,6 +210,7 @@
 
         </VerticalStackLayout>
 
-    </ScrollView>
+        </ScrollView>
+    </RefreshView>
 
 </ContentPage>

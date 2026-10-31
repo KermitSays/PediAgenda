@@ -5,7 +5,8 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="Liberar períodos"
-    BackgroundColor="{StaticResource PageBlue}">
+    BackgroundColor="{StaticResource PageBlue}"
+    Shell.NavBarIsVisible="False">
 
     <Grid
         Padding="24,30,24,20"
@@ -28,8 +29,7 @@
                 FontSize="14"
                 TextColor="{StaticResource InputPlaceholder}" />
 
-            <Label x:Name="EstadoLabel" TextColor="{StaticResource TextDark}" />
-            <Button x:Name="AtualizarButton" Text="Atualizar bloqueios" Clicked="AtualizarButton_Clicked" />
+            <Label x:Name="EstadoLabel" TextColor="{StaticResource TextDark}" IsVisible="False" />
 
         </VerticalStackLayout>
 

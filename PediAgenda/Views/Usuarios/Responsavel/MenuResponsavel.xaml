@@ -7,19 +7,20 @@
     x:Class="PediAgenda.Views.Usuarios.Responsavel.MenuResponsavel"
     Title="PediAgenda"
     BackgroundColor="{StaticResource PageBlue}"
-    NavigationPage.HasNavigationBar="False">
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
 
     <ScrollView>
 
         <VerticalStackLayout
-            Padding="24,30,24,24"
-            Spacing="22">
+            Padding="24,36,24,24"
+            Spacing="30">
 
 
             <!-- CABEÇALHO -->
 
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-    <VerticalStackLayout Grid.Column="0" Spacing="4">
+    <VerticalStackLayout Grid.Column="0" Spacing="8">
 
                 <Label
                     x:Name="SaudacaoLabel"
