@@ -1,4 +1,4 @@
-﻿
+
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -6,12 +6,12 @@ namespace PediAgenda.Views.Usuarios.Recepcao;
 
 public static class PacientesRecepcaoApi
 {
-    private const string EnderecoApi = "http://10.0.2.2:5000/";
+    private const string EnderecoApi = "https://pediagenda-api.onrender.com/";
 
     private static readonly HttpClient http = new()
     {
         BaseAddress = new Uri(EnderecoApi),
-        Timeout = TimeSpan.FromSeconds(90)
+        Timeout = TimeSpan.FromSeconds(120)
     };
 
     public static async Task<List<PacienteRecepcaoRespostaApi>>

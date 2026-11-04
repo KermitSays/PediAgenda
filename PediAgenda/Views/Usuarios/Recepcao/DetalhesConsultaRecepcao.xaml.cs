@@ -135,7 +135,7 @@ public partial class DetalhesConsultaRecepcao : ContentPage
         {
             await RecepcaoGestaoConsultasApi.CancelarAsync(_consulta.Id);
             await DisplayAlertAsync("Consulta cancelada",
-                "O cancelamento foi registrado no Aiven e o horário voltou a ficar disponível.", "OK");
+                "O cancelamento foi registrado e o horário voltou a ficar disponível.", "OK");
         }
         catch (Exception ex)
         {

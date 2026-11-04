@@ -16,7 +16,7 @@ public partial class CadastroCampo : ContentPage
         BaseAddress = new Uri(
     "https://pediagenda-api.onrender.com/"),
 
-        Timeout = TimeSpan.FromSeconds(90)
+        Timeout = TimeSpan.FromSeconds(120)
     };
 
     public CadastroCampo()
@@ -189,17 +189,10 @@ public partial class CadastroCampo : ContentPage
             SenhaEntry.Text = "";
             ConfirmarSenhaEntry.Text = "";
 
-            await DisplayAlertAsync(
-                "Verifique seu e-mail",
-                "Enviamos um link de confirmação para " +
-                email + ".\n\n" +
-                "Acesse sua caixa de entrada e clique " +
-                "no link para ativar sua conta.\n\n" +
-                "Depois da confirmação, você poderá " +
-                "entrar no PediAgenda.",
-                "OK");
 
-            await Shell.Current.GoToAsync("..");
+            await Shell.Current.GoToAsync(
+                nameof(CadastroConcluido));
+
         }
         catch (HttpRequestException ex)
         {

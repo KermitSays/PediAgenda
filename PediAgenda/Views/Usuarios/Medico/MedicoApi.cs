@@ -11,8 +11,8 @@ internal static class MedicoApi
 {
     private static readonly HttpClient http = new()
     {
-        BaseAddress = new Uri("http://10.0.2.2:5000/"),
-        Timeout = TimeSpan.FromSeconds(30)
+        BaseAddress = new Uri("https://pediagenda-api.onrender.com/"),
+        Timeout = TimeSpan.FromSeconds(120)
     };
 
     public static bool ModoTeste => SessaoUsuario.IdUsuario == 0

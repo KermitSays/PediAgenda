@@ -20,7 +20,7 @@ public partial class ConsultasMedico : ContentPage
         InitializeComponent();
 
         DateTime primeiraDataDisponivel =
-            MedicoApi.ModoTeste ? ProximoDiaUtil(DateTime.Today) : DateTime.Today;
+            ProximoDiaUtil(DateTime.Today);
 
         DataConsultaPicker.MinimumDate =
             primeiraDataDisponivel;
@@ -38,9 +38,11 @@ public partial class ConsultasMedico : ContentPage
     {
         base.OnAppearing();
 
+
         DateTime dataSelecionada =
             DataConsultaPicker.Date ??
-            (MedicoApi.ModoTeste ? ProximoDiaUtil(DateTime.Today) : DateTime.Today);
+            ProximoDiaUtil(DateTime.Today);
+
 
         await CarregarAgendaAsync(dataSelecionada);
     }
@@ -82,7 +84,9 @@ public partial class ConsultasMedico : ContentPage
         DateTime dataSelecionada =
             e.NewDate ?? DateTime.Today;
 
-        if (MedicoApi.ModoTeste && !EhDiaUtil(dataSelecionada))
+
+        if (!EhDiaUtil(dataSelecionada))
+
         {
             await DisplayAlertAsync(
                 "Data indisponível",

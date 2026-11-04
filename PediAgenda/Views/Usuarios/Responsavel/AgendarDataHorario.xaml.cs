@@ -291,12 +291,9 @@ public partial class AgendarDataHorario : ContentPage
 
             using HttpClient cliente = new HttpClient
             {
-                BaseAddress = new Uri(
-                    DeviceInfo.Platform == DevicePlatform.Android
-                        ? "http://10.0.2.2:5000/"
-                        : "http://localhost:5000/"),
+                BaseAddress = new Uri("https://pediagenda-api.onrender.com/"),
 
-                Timeout = TimeSpan.FromSeconds(20)
+                Timeout = TimeSpan.FromSeconds(120)
             };
 
             cliente.DefaultRequestHeaders.Authorization =

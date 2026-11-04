@@ -20,10 +20,10 @@ public partial class LoginResponsavel : ContentPage
         {
             BaseAddress =
     new Uri(
-        "http://10.0.2.2:5000/"),
+        "https://pediagenda-api.onrender.com/"),
 
             Timeout =
-                TimeSpan.FromSeconds(90)
+                TimeSpan.FromSeconds(120)
         };
 
 
