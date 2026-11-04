@@ -19,14 +19,10 @@ public partial class ConsultasMedico : ContentPage
     {
         InitializeComponent();
 
-        DateTime primeiraDataDisponivel =
-            ProximoDiaUtil(DateTime.Today);
-
-        DataConsultaPicker.MinimumDate =
-            primeiraDataDisponivel;
-
+        // Inicia a agenda no dia útil atual.
+        // Permite consultar datas anteriores.
         DataConsultaPicker.Date =
-            primeiraDataDisponivel;
+            ProximoDiaUtil(DateTime.Today);
 
         DataConsultaPicker.DateSelected +=
             DataConsultaPicker_DateSelected;
@@ -121,7 +117,6 @@ public partial class ConsultasMedico : ContentPage
         carregamento?.Cancel();
         base.OnDisappearing();
     }
-
 
     private async Task CarregarAgendaAsync(DateTime data)
     {
@@ -542,6 +537,16 @@ public partial class ConsultasMedico : ContentPage
             return;
         }
 
+        if ((DataConsultaPicker.Date ?? DateTime.Today).Date < DateTime.Today)
+        {
+            await DisplayAlertAsync(
+                "Data anterior",
+                "Não é possível bloquear horários de datas anteriores.",
+                "OK");
+
+            return;
+        }
+
         await Shell.Current.GoToAsync(
             nameof(BloquearHorario),
             new Dictionary<string, object>
@@ -564,6 +569,16 @@ public partial class ConsultasMedico : ContentPage
                 "Acesso de teste",
                 "Para liberar horários reais, entre com e-mail e senha de médico.",
                 "OK");
+            return;
+        }
+
+        if ((DataConsultaPicker.Date ?? DateTime.Today).Date < DateTime.Today)
+        {
+            await DisplayAlertAsync(
+                "Data anterior",
+                "Não é possível liberar horários de datas anteriores.",
+                "OK");
+
             return;
         }
 

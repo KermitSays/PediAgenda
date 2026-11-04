@@ -4,7 +4,6 @@
     x:Class="PediAgenda.Views.Usuarios.Medico.ConsultasMedico"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     Title="Agenda Médica"
     BackgroundColor="{StaticResource PageBlue}"
     Shell.NavBarIsVisible="False">
@@ -49,8 +48,7 @@
                     x:Name="DataConsultaPicker"
                     Format="dd/MM/yyyy"
                     FontSize="16"
-                    TextColor="{StaticResource TextDark}"
-                    MinimumDate="{x:Static sys:DateTime.Today}" />
+                    TextColor="{StaticResource TextDark}" />
 
             </Grid>
 
