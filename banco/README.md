@@ -9,7 +9,7 @@ A estrutura final destinada a um **banco novo e vazio** contém 11 tabelas: `usu
 | `01_Schema.sql` | Cria o schema em um banco NOVO e vazio; **não** é uma migração do Aiven atual. |
 | `02_popula_tabelas.sql` | Dados fictícios e credenciais para um banco de testes isolado; **não executar no Aiven em uso**. |
 | `03_migracao_confirmacao_brevo.sql` | Adiciona os quatro campos de verificação de e-mail a bancos antigos; **já executado no Aiven em 30/10/2026**, não repetir. |
-| `04_migracao_remocao_tipo_atendimento.sql` | Roteiro de conferência; `DROP COLUMN` fica comentado até a API do Render e todas as integrações estarem atualizadas. |
+| `04_migracao_remocao_tipo_atendimento.sql` | Roteiro de inspeção e migração manual, sujeito a backup e compatibilidade de todos os ambientes. O `DROP COLUMN` permanece comentado. |
 
 ## Verificação de e-mail
 

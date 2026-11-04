@@ -6,7 +6,7 @@
 --
 -- Use em um banco NOVO e vazio. Não apaga nem recria tabelas existentes.
 --
--- Para melhor vizualização do modelo físico, abra o arquivo Modelo_lógico_banco_de_dados.png, que é a representação gráfica.
+-- Para melhor vizualização do modelo físico, abra o arquivo Diagramas_Banco_de_Dados_Lógico.png, que é a representação gráfica.
 -- =====================================================================
 
 -- ---------------------------------------------------------------------

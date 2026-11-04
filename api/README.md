@@ -41,7 +41,7 @@ CPF e e-mail devem corresponder ao pré-cadastro. Senha de 8 a 1.024 caracteres.
 
 A API envia um link via Brevo. A confirmação ocorre em `GET /api/cadastro/confirmar-email?token=...`; após a confirmação, a conta fica ativa e o login pode ser realizado. **Não há tela nem campo para digitar código de verificação.** Se o serviço de envio falhar, a API responde 502 e o responsável pode tentar o cadastro novamente.
 
-Variáveis do serviço: `PEDIAGENDA_EMAIL_API_KEY`, `PEDIAGENDA_EMAIL_REMETENTE`, `PEDIAGENDA_EMAIL_NOME` (opcional) e `RENDER_EXTERNAL_URL` (endereço público da API para o link). Nunca publicar chaves de API no repositório. O cadastro foi validado localmente; a implantação no Render requer configuração e teste próprios. O JWT de login permanece necessário para autenticação.
+Variáveis do serviço: `PEDIAGENDA_EMAIL_API_KEY`, `PEDIAGENDA_EMAIL_REMETENTE`, `PEDIAGENDA_EMAIL_NOME` (opcional) e `RENDER_EXTERNAL_URL` (endereço público da API para o link). Nunca publicar chaves de API no repositório. O fluxo de cadastro, envio e confirmação de e-mail pela Brevo também foi validado na API hospedada no Render durante os testes finais. O JWT de login permanece necessário para autenticação.
 
 ## Rotas principais (a lista também inclui módulos de Recepção em arquivos de rotas separados)
 
@@ -98,6 +98,6 @@ Retorna 201 com `id`, `idConsulta`, `idPaciente`, `observacoes` e `dataRegistro`
 
 ## Limites desta entrega
 
-Não implementa envio de lembretes ou notificações no aplicativo. O modelo novo do banco não inclui a tabela `notificacao` nem o campo `consulta.tipo_atendimento`. O aplicativo .NET MAUI integra os três perfis e exporta relatórios médicos em Excel; as rotas de exportação CSV da API são um recurso distinto. A migração de coluna no Aiven e a implantação da API no Render devem ser coordenadas.
+Não implementa envio de lembretes ou notificações no aplicativo. O modelo novo do banco não inclui a tabela `notificacao` nem o campo `consulta.tipo_atendimento`. O aplicativo .NET MAUI integra os três perfis e exporta relatórios médicos em Excel; as rotas de exportação CSV da API são um recurso distinto. A API foi implantada no Render e utilizada nos testes finais. Uma eventual remoção de coluna legada no Aiven exige backup e confirmação de compatibilidade com todos os ambientes ativos.
 
-[Validação histórica da API](VALIDACAO.md) · [Reproduzir testes](../testes/README.md)
+[Validação histórica da API](VALIDACAO.md) · [Validação final](../docs/VALIDACAO_FINAL.md) · [Testes automatizados](../testes/)
