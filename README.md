@@ -1,25 +1,76 @@
 # PediAgenda
 
-Sistema de agendamento e atendimento pediátrico desenvolvido por Talita Barbara Cardanha Lopes, Sara Helena de Oliveira Nunes Ribeiro e Lara Vitoria Araujo Moreira.
+**Sistema de agendamento e acompanhamento de consultas pediátricas** desenvolvido como Trabalho de Conclusão de Curso (TCC) de Desenvolvimento de Sistemas.
 
-## Projetos
+O PediAgenda é um aplicativo com três perfis — **Responsável**, **Médico** e **Recepção** — integrado a uma API ASP.NET Core e a um banco de dados MySQL. O projeto organiza a agenda de uma clínica pediátrica fictícia, com regras de acesso específicas para cada perfil.
 
-| Pasta | Função |
+**Equipe:** Lara Vitoria Araujo Moreira, Sara Helena de Oliveira Nunes Ribeiro e Talita Barbara Cardanha Lopes.
+
+## Funcionalidades do aplicativo
+
+| Perfil | Funcionalidades |
 | --- | --- |
-| `PediAgenda/` | Aplicativo .NET MAUI; usa .NET 10 e os workloads da plataforma |
-| `api/` | API HTTP em .NET 9 com autenticação JWT |
-| `nucleo/` | Regras de negócio e repositórios MySQL, compartilhados pela API |
-| `banco/` | Schema MySQL 8, carga fictícia e migração de bancos existentes |
-| `login/` | Demonstração em console do login |
-| `testes/` | Testes HTTP com API e MySQL locais descartáveis |
+| **Responsável** | Habilitação da conta com CPF e e-mail previamente registrados na clínica; criação de senha e confirmação por link enviado pela Brevo; login; consulta de dependentes; agendamento, cancelamento, próximas consultas e histórico em **Minhas Consultas**. |
+| **Médico** | Agenda médica e consultas do dia; consulta de pacientes e prontuários; bloqueio e liberação de horários; registro de atendimento com observações; relatórios por período e exportação para Excel (`.xlsx`). |
+| **Recepção** | Consulta de pacientes e médicos; visualização de agendas e consultas do dia; agendamento e gestão de consultas; confirmação e cancelamento; bloqueio e liberação de horários. |
 
-## Executar a API
+Os cadastros de responsáveis e pacientes são considerados previamente realizados pela clínica. A interface final da Recepção **não inclui** o cadastro desses registros. Não foram incluídos módulos de notificações, reagendamento ou recuperação de senha.
 
-É necessário o SDK .NET 9 e um MySQL 8 acessível. O backend usa MySqlConnector diretamente; não usa Entity Framework nem `dotnet ef`.
+O histórico de consultas do Responsável fica em **Minhas Consultas**. Os calendários de agendamento evitam sábados e domingos, sem tratamento específico de feriados.
 
-- Banco novo e vazio: execute `banco/01_Schema.sql` (11 tabelas); a carga `02_popula_tabelas.sql` é opcional e EXCLUSIVA de bancos locais descartáveis, nunca no Aiven em uso.
+## Arquitetura e tecnologias
 
-No PowerShell, na raiz do repositório, configure a sessão atual:
+```text
+Aplicativo Android (.NET MAUI / C# / XAML)
+                  |
+             HTTPS + JWT
+                  |
+        API ASP.NET Core (.NET 9)
+             hospedada no Render
+              /         \
+      MySQL no Aiven    Brevo (verificação de e-mail)
+```
+
+- **Aplicativo:** .NET MAUI, .NET 10, C# e XAML.
+- **Back-end:** ASP.NET Core Web API (.NET 9), com regras de negócio na camada `nucleo/`.
+- **Banco de dados:** MySQL 8, com instância hospedada no Aiven.
+- **Hospedagem da API:** Render, com variáveis de ambiente para configuração.
+- **Confirmação de e-mail:** Brevo, por link de ativação.
+- **Autenticação:** JWT; senhas protegidas por hash PBKDF2-SHA256 com salt individual.
+- **Relatórios Excel no aplicativo:** ClosedXML.
+
+**Endpoint público de verificação da API:** [https://pediagenda-api.onrender.com/api/saude](https://pediagenda-api.onrender.com/api/saude). Essa rota verifica a resposta da aplicação; não substitui testes de banco, autenticação ou interface. A instância hospedada pode demorar mais na primeira requisição após um período de inatividade.
+
+## Estrutura do repositório
+
+| Caminho | Finalidade |
+| --- | --- |
+| [`PediAgenda/`](PediAgenda/) | Aplicativo e telas .NET MAUI. |
+| [`api/`](api/) | API HTTP e serviços de integração. Consulte o [guia da API](api/README.md). |
+| [`nucleo/`](nucleo/) | Regras de negócio, segurança e repositórios MySQL. |
+| [`banco/`](banco/) | Modelo físico para banco novo, dados fictícios e scripts de migração. Consulte o [guia do banco](banco/README.md). |
+| [`testes/`](testes/) | Testes automatizados HTTP, banco e recursos do aplicativo. |
+| [`docs/`](docs/) | Validação final e documentação histórica. Consulte o [índice](docs/README.md). |
+| [`login/`](login/) | Demonstração técnica histórica de autenticação em console; não é a tela de login do aplicativo. |
+
+O [diagrama lógico do banco de dados](banco/Diagramas_Banco_de_Dados_Lógico.png) está disponível na pasta `banco/`.
+
+## Como executar o aplicativo
+
+**Requisitos:** Visual Studio com suporte a .NET MAUI, SDK .NET 10, workload Android e emulador ou dispositivo Android compatível.
+
+1. Clone o repositório e abra `PediAgenda.slnx` no Visual Studio.
+2. Selecione o projeto `PediAgenda` como projeto de inicialização.
+3. Selecione um emulador Android e compile/execute o aplicativo.
+4. O aplicativo está configurado para utilizar a API HTTPS do Render. **Não é necessário iniciar uma API local apenas para testar essa configuração.**
+
+O aplicativo precisa de conectividade com a API e de contas autorizadas. **Credenciais reais, tokens, senhas e dados pessoais não são fornecidos neste repositório.** Em caso de indisponibilidade do serviço hospedado, as funcionalidades dependentes de rede podem não operar.
+
+### Executar a API em ambiente local (opcional)
+
+Para desenvolver o back-end localmente, são necessários o **SDK .NET 9** e um **MySQL 8 de testes**. O arquivo `banco/01_Schema.sql` cria a estrutura em um banco novo e vazio. A carga `banco/02_popula_tabelas.sql` é exclusivamente de demonstração e **não deve ser executada sobre o Aiven em utilização**.
+
+No PowerShell, dentro da raiz do repositório, configure as variáveis **apenas na sessão de desenvolvimento** (substitua os exemplos por valores do seu ambiente):
 
 ```powershell
 $env:PEDIAGENDA_CONEXAO = "Server=localhost;Port=3306;Database=pediagenda;User ID=SEU_USUARIO;Password=SUA_SENHA;"
@@ -29,25 +80,27 @@ $env:PEDIAGENDA_JWT_CHAVE = [Convert]::ToBase64String($b)
 dotnet run --project api/PediAgenda.Api.csproj --urls http://localhost:5000
 ```
 
-`GET http://localhost:5000/api/saude` deve retornar `{"status":"ok"}`. Essa rota verifica a aplicação; os testes de integração verificam também o banco.
+Nesse modo, `http://localhost:5000/api/saude` é o endpoint local. **Iniciar a API local não redireciona automaticamente o aplicativo:** os endereços usados no cliente foram configurados para o Render. Para testar alterações do back-end localmente, é necessário configurar o cliente para o ambiente desejado.
 
-Evite salvar segredos em texto simples. Prefira variáveis de ambiente de sessão ou um gerenciador seguro de segredos. No Render, configure a conexão MySQL e a chave JWT como variáveis de ambiente. Para o cadastro com verificação de e-mail, configure também `PEDIAGENDA_EMAIL_API_KEY`, `PEDIAGENDA_EMAIL_REMETENTE`, `PEDIAGENDA_EMAIL_NOME` (opcional) e `RENDER_EXTERNAL_URL` (URL HTTPS pública do serviço). Não versione chaves ou senhas. **A confirmação de e-mail foi testada com API local; a configuração e o fluxo no Render devem ser validados separadamente.**
+Para a funcionalidade de confirmação de e-mail, a API precisa também das variáveis `PEDIAGENDA_EMAIL_API_KEY`, `PEDIAGENDA_EMAIL_REMETENTE`, `PEDIAGENDA_EMAIL_NOME` (opcional) e de uma URL pública de retorno para o link de ativação. Consulte o [guia da API](api/README.md). **Nunca inclua chaves, strings de conexão ou senhas no Git.**
 
-## Cadastro e sessão
+## Banco de dados e regras de negócio
 
-Os dados do Responsável e de seus dependentes já são cadastrados pela clínica. Para habilitar a conta no aplicativo, o Responsável informa CPF/e-mail do pré-cadastro, define senha e aceita os termos em `POST /api/cadastro/responsavel`. A API envia pela Brevo um **link de verificação** e retorna **202** ao iniciar o processo. Após abrir o link de `GET /api/cadastro/confirmar-email?token=...`, o e-mail é confirmado, a conta é ativada e o login fica disponível. Não existe tela de digitar código de verificação. A rota técnica de pré-cadastro `POST /api/responsaveis` continua no backend legado, mas o cadastro pela Recepção no APP está fora do escopo final.
+O modelo para um banco novo contém **11 tabelas** e preserva os estados de consulta `AGENDADA`, `CONFIRMADA`, `CANCELADA` e `REALIZADA`.
 
-O JWT de **login** continua obrigatório nas rotas protegidas. Uma conta que já definiu senha não pode sobrescrevê-la pelo cadastro, inclusive quando está inativa. Reativação de contas pela clínica não é implementada por esta rota.
+- O cancelamento atualiza o status para `CANCELADA`, preservando o histórico (exclusão lógica).
+- A Recepção não tem acesso às observações clínicas dos prontuários.
+- O registro de prontuário é restrito ao médico autorizado, respeita o horário de início da consulta e evita registros duplicados.
+- A API usa o horário da clínica (`America/Sao_Paulo`) para regras de agendamento; tokens e registros técnicos utilizam UTC conforme a operação.
+- O escopo final não inclui a tabela `notificacao` nem a coluna `consulta.tipo_atendimento` em um **banco criado do zero**.
 
-Horários de consulta usam `America/Sao_Paulo`, inclusive no Render; vencimento de JWT, bloqueios de login e novos prontuários usam UTC.
+**Atenção:** o SQL versionado para banco novo não prova, por si só, que uma estrutura de banco já hospedada tenha recebido todas as migrações. Os scripts de `banco/` **não devem ser aplicados indiscriminadamente no Aiven**. Alterações estruturais exigem backup e análise de compatibilidade com todos os serviços ativos.
 
+## Validação e documentação
 
-As telas têm seus próprios fluxos de integração. Executar a API local não altera automaticamente o endereço usado pelo aplicativo.
+- [Registro dos testes finais do aplicativo e serviços](docs/VALIDACAO_FINAL.md), incluindo a limitação encontrada no teste de novo prontuário.
+- [Validação histórica da API](api/VALIDACAO.md), que documenta uma etapa anterior do projeto e **não** representa o estado final.
+- [Documentação de conclusão das integrações do Médico](docs/MEDICO_CONCLUSAO.md), referente à fase em que foi produzida.
+- [Índice da documentação e arquivos históricos](docs/README.md).
 
-## Escopo final e migrações
-
-O aplicativo tem os perfis Responsável, Médico e Recepção. O Responsável agenda, consulta suas consultas/histórico em **Minhas Consultas** e pode cancelar conforme as regras da aplicação. A Recepção não cadastra pacientes pelo app. Não há módulo de notificações ou reagendamento no aplicativo. O Médico consulta a agenda, registra atendimento/prontuário e exporta relatórios em Excel.
-
-O status `CONFIRMADA` permanece previsto no banco, assim como `AGENDADA`, `CANCELADA` e `REALIZADA`. O campo `consulta.tipo_atendimento` foi retirado do código e do schema para novos bancos. Para o **Aiven já existente**, use os scripts de `banco/` somente depois de verificar a situação atual e o deploy da API. `ALTER TABLE` é DDL e não pode ser desfeito com `ROLLBACK`.
-
-A API local e a publicação em Render são ambientes distintos: verificar a aplicação local **não** comprova que a versão online foi atualizada.
+Este é um projeto acadêmico desenvolvido para uma **clínica fictícia**. As contas e consultas de demonstração devem ser tratadas como dados de teste; nenhum documento disponibilizado aqui deve incluir dados reais de pacientes.

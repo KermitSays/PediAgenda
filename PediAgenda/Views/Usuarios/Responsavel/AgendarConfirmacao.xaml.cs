@@ -18,8 +18,8 @@ public partial class AgendarConfirmacao : ContentPage
 {
     private static readonly HttpClient http = new()
     {
-         BaseAddress = new Uri("http://10.0.2.2:5000/"),
-         Timeout = TimeSpan.FromSeconds(90)
+         BaseAddress = new Uri("https://pediagenda-api.onrender.com/"),
+         Timeout = TimeSpan.FromSeconds(120)
     };
     private int pacienteId;
 

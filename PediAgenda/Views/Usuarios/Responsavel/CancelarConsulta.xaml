@@ -143,10 +143,15 @@
                     </VerticalStackLayout>
                 </Border>
 
+
                 <Button
-                    Text="Voltar para minhas consultas"
-                    Clicked="MinhasConsultasButton_Clicked"
-                    Style="{StaticResource BotaoVoltarSimples}" />
+                    Text="VOLTAR PARA MINHAS CONSULTAS"
+                    HeightRequest="52"
+                    CornerRadius="14"
+                    BackgroundColor="{StaticResource PrimaryBlue}"
+                    TextColor="{StaticResource White}"
+                    FontAttributes="Bold"
+                    Clicked="MinhasConsultasButton_Clicked" />
 
                 <Button
                     Text="Voltar ao menu inicial"
